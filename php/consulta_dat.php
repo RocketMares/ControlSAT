@@ -148,7 +148,7 @@ if (isset($_POST['posision_predic'])) {
   $cons = new ConsultaInfoADR();
   $datos = $cons->Movimientos_del_personal($id_insumo);
   echo "
-  <table class='table table-striped table-responsive shadow-sm'>
+  <table class='table text-center table-striped table-responsive shadow-sm'>
   <thead>
     <tr>
       <th scope='col'>#</th>

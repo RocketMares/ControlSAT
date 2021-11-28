@@ -58,7 +58,7 @@ class vistas{
                       ,Estructura: '".$admins[$i]['nombre_admin']."' 
                       ,Nombre_encargado: '".$admins[$i]['nombre_empleado']."'
                       ,Nombre_puesto: '".$admins[$i]['nombre_puesto']."' 
-                      ,source: 'img/".$admins[$i]['no_empleado'].".jpg' },";
+                      ,source: 'img/fotos_empleados/".$admins[$i]['no_empleado'].".jpg' },";
                 }
                 // Aqui se depositan las Subadministraciones y el nombre de los Subadministradores con su puesto operativo
                   for ($i=0; $i <count($cade_admin) ; $i++) { 
