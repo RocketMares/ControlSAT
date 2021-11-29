@@ -390,12 +390,19 @@ class ConsultaInfoADR{
         include_once 'conexion.php';
         $BD = new ConexionSQL();
         $con = $BD->ObtenerConexionBD();
-        $query = "	SELECT 
-        admi.nombre_admin,
-		sub.nombre_sub_admin
-        FROM SubAdmin sub
-        INNER JOIN Administracion admi ON admi.id_admin =  sub.id_admin
-        WHERE  sub.nombre_sub_admin != 'Administración'";
+        $query = "SELECT distinct
+        nombre_admin,
+        nombre_sub_admin,
+        nombre_depto,
+        emp.no_empleado,
+        CONCAT(nombre_s,' ',apellido_p,' ',apellido_m) As nombre_empleado,
+        puest.nombre_puesto
+        FROM SubAdmin SUB
+        full JOIN Administracion admind ON admind.id_admin = SUB.id_admin
+        FULL JOIN Departamento dep ON SUB.id_sub_admin = dep.id_sub_admin	
+        FULL JOIN Empleado_insumo emp ON emp.id_depto = dep.id_depto
+        full JOIN Puesto_ADR puest ON puest.id_puesto = emp.id_puesto
+        WHERE nombre_depto = 'SUBADMINISTRACIÓN'";
         $respuesta = sqlsrv_query($con,$query);
         if($respuesta){
             while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){

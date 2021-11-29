@@ -65,9 +65,9 @@ class vistas{
                    echo" { key: '".$cade_admin[$i]['nombre_sub_admin']."'
                     , parent: '".$cade_admin[$i]['nombre_admin']."'
                     , Estructura: '".$cade_admin[$i]['nombre_sub_admin']."' 
-                    , Nombre_encargado:'".$cade_admin[$i]['nombre_sub_admin']."'
-                    , Nombre_puesto: '".$cade_admin[$i]['nombre_sub_admin']."'  
-                    ,source: 'img/LOGO11.png'  },";
+                    , Nombre_encargado:'".$cade_admin[$i]['nombre_empleado']."'
+                    , Nombre_puesto: '".$cade_admin[$i]['nombre_puesto']."'  
+                    ,source: 'img/fotos_empleados/".$cade_admin[$i]['no_empleado'].".jpg' },";
                   }
                  // Aqui se depositan los departamentos y el nombre de los jefes de departamento con su puesto operativo
                   for ($i=0; $i <count($cade_sub) ; $i++) { 
