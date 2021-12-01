@@ -1,7 +1,223 @@
 <?php
 
 class ConsultaInfoADR{
-
+    public function Consulta_datos_plaza($id_plaza){
+        include_once 'sesion.php';
+        include_once 'conexion.php';
+        $BD = new ConexionSQL();
+        $con = $BD->ObtenerConexionBD();
+        $query = "	   SELECT 
+    
+        busq.id_posision
+        ,busq.id_empleado
+        ,busq.[id_puesto_fump]
+        ,busq.[id_proc]
+        ,busq.nombre_proc
+        ,busq.[user_alta]
+        ,busq.[fecha_alta]
+        ,busq.[estatus]
+        ,busq.[posision_jefe]
+        ,busq.[nivel]
+        ,busq.[Codigo_pres]
+        ,busq.[sueldo_neto]
+        ,busq.Ocupante
+        ,busq.id_num_posision
+        ,busq.nombre_puesto
+        ,busq.estado_analista
+        ,busq.nombre_proc_analista
+        ,busq.clave_puesto
+      FROM( 
+        SELECT 
+        
+         pos.[id_posision]
+          , id_empleado
+          ,emp.id_proc as estado_analista
+          ,procc1.nombre_proc as nombre_proc_analista
+          ,pos.[id_puesto_fump]
+          ,[id_num_posision]
+          ,pos.[id_proc]
+          ,procc.nombre_proc
+          ,pos.[user_alta]
+          ,pos.[fecha_alta]
+          ,pos.[user_mod]
+          ,pos.[fecha_mod]
+          ,pos.[user_baja]
+          ,pos.[fecha_baja]
+          ,pos.[estatus]
+          ,pos.[posision_jefe]
+          ,pos.[nivel]
+          ,pos.[Codigo_pres]
+          ,pos.[sueldo_neto]
+          ,puest.nombre_puesto
+          ,puest.clave_puesto
+          ,Concat( emp.nombre_s,' ',emp.apellido_p,' ',emp.apellido_m) as Ocupante
+       from [Control_Ingresos].[dbo].[Posisiones] pos
+      FULL JOIN Empleado_insumo emp ON emp.id_empleado_plant = pos.id_empleado 
+      INNER JOIN Procesos procc ON procc.id_proc = pos.id_proc 
+      full JOIN Procesos procc1 ON procc1.id_proc = emp.id_proc 
+      inner JOIN Puesto_FUMP puest ON puest.id_puesto_fump = pos.id_puesto_fump ) busq
+      WHERE busq.id_posision = $id_plaza  ";
+        $respuesta = sqlsrv_query($con,$query);
+    if($respuesta){
+        while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
+            $fila[] = $row;
+        }
+        if (isset($fila)) {
+            return $fila;
+            $BD->CerrarConexion($con);
+        }else{
+            return null;
+            $BD->CerrarConexion($con);
+        }
+    }else{
+        return print_r(sqlsrv_errors(),true);
+        $BD->CerrarConexion($con); 
+    }  
+    }
+    public function Consulta_datos_Posisines_General(){
+        include_once 'sesion.php';
+        include_once 'conexion.php';
+        $BD = new ConexionSQL();
+        $con = $BD->ObtenerConexionBD();
+        $query = "	SELECT  COUNT(*) TOTAL
+        FROM [Control_Ingresos].[dbo].[Posisiones] pos
+        FULL JOIN Empleado_insumo emp ON emp.id_empleado_plant = pos.id_empleado 
+        INNER JOIN Procesos procc ON procc.id_proc = pos.id_proc 
+        INNER JOIN Puesto_FUMP puest ON puest.id_puesto_fump = pos.id_puesto_fump   ";
+        $respuesta = sqlsrv_query($con,$query);
+    if($respuesta){
+        while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
+            $fila[] = $row;
+        }
+        if (isset($fila)) {
+            return $fila;
+            $BD->CerrarConexion($con);
+        }else{
+            return null;
+            $BD->CerrarConexion($con);
+        }
+    }else{
+        return print_r(sqlsrv_errors(),true);
+        $BD->CerrarConexion($con); 
+    }  
+    }
+    public function Consulta_Puestos_Fun()
+    {
+        include_once 'conexion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $query = "SELECT * FROM Puesto_FUMP WHERE estatus = 'A'";
+        $prepare = sqlsrv_query($con,$query);
+        if($prepare){
+            while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+                $fila[] = $row;
+            }
+            if (isset($fila)) {
+                return $fila;
+                $conexion->CerrarConexion($con);
+            }else{
+                return null;
+                $conexion->CerrarConexion($con);
+            }
+        }else{
+            return print_r(sqlsrv_errors(),true);
+            $conexion->CerrarConexion($con); 
+        }    
+    }
+    public function ConsultaClave($id_fun){
+        include_once 'sesion.php';
+        include_once 'conexion.php';
+        $BD = new ConexionSQL();
+        $con = $BD->ObtenerConexionBD();
+        $query = "SELECT * FROM [Puesto_FUMP] WHERE [id_puesto_fump] = $id_fun ";
+        $respuesta = sqlsrv_query($con,$query);
+        if($respuesta){
+            while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
+                $fila = $row;
+            }
+            if (isset($fila)) {
+                return $fila;
+                $BD->CerrarConexion($con);
+            }else{
+                return null;
+                $BD->CerrarConexion($con);
+            }
+        }else{
+            return print_r(sqlsrv_errors(),true);
+            $BD->CerrarConexion($con); 
+        }  
+    }
+    public function datos_por_vissta_Consulta_datos_Posisines_General($num){
+        include_once 'sesion.php';
+        include_once 'conexion.php';
+        $BD = new ConexionSQL();
+        $con = $BD->ObtenerConexionBD();
+        $query = "    SELECT distinct TOP (50)
+        busq.seq
+       ,busq.id_posision
+       ,busq.id_empleado
+       ,busq.[id_puesto_fump]
+       ,busq.[id_proc]
+       ,busq.nombre_proc
+       ,busq.[user_alta]
+       ,busq.[fecha_alta]
+       ,busq.[estatus]
+       ,busq.[posision_jefe]
+       ,busq.[nivel]
+       ,busq.[Codigo_pres]
+       ,busq.[sueldo_neto]
+       ,busq.Ocupante
+       ,busq.id_num_posision
+       ,busq.nombre_puesto
+	   ,busq.estado_analista
+	   ,busq.nombre_proc_analista
+     FROM( 
+       SELECT 
+          ROW_NUMBER() OVER(ORDER BY (id_num_posision) ASC) AS seq
+        ,pos.[id_posision]
+         , id_empleado
+		 ,emp.id_proc as estado_analista
+		 ,procc1.nombre_proc as nombre_proc_analista
+         ,pos.[id_puesto_fump]
+         ,[id_num_posision]
+         ,pos.[id_proc]
+         ,procc.nombre_proc
+         ,pos.[user_alta]
+         ,pos.[fecha_alta]
+         ,pos.[user_mod]
+         ,pos.[fecha_mod]
+         ,pos.[user_baja]
+         ,pos.[fecha_baja]
+         ,pos.[estatus]
+         ,pos.[posision_jefe]
+         ,pos.[nivel]
+         ,pos.[Codigo_pres]
+         ,pos.[sueldo_neto]
+         ,puest.nombre_puesto
+         ,Concat( emp.nombre_s,' ',emp.apellido_p,' ',emp.apellido_m) as Ocupante
+      from [Control_Ingresos].[dbo].[Posisiones] pos
+     FULL JOIN Empleado_insumo emp ON emp.id_empleado_plant = pos.id_empleado 
+     INNER JOIN Procesos procc ON procc.id_proc = pos.id_proc 
+	 full JOIN Procesos procc1 ON procc1.id_proc = emp.id_proc 
+     inner JOIN Puesto_FUMP puest ON puest.id_puesto_fump = pos.id_puesto_fump ) busq
+     WHERE busq.seq >=  $num";
+        $respuesta = sqlsrv_query($con,$query);
+    if($respuesta){
+        while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
+            $fila[] = $row;
+        }
+        if (isset($fila)) {
+            return $fila;
+            $BD->CerrarConexion($con);
+        }else{
+            return null;
+            $BD->CerrarConexion($con);
+        }
+    }else{
+        return print_r(sqlsrv_errors(),true);
+        $BD->CerrarConexion($con); 
+    }  
+    }
     public function Movimientos_del_personal($id_insumo){
         include_once 'sesion.php';
         include_once 'conexion.php';
@@ -135,7 +351,8 @@ class ConsultaInfoADR{
         include_once 'conexion.php';
         $BD = new ConexionSQL();
         $con = $BD->ObtenerConexionBD();
-        $query = "SELECT TOP 1 [id_empleado_plant]
+        $query = "SELECT TOP 1
+         [id_empleado_plant]
         ,emp.[no_empleado]
         ,ad.nombre_admin
         ,emp.id_admin
@@ -177,6 +394,8 @@ class ConsultaInfoADR{
         ,emp.[Escolaridad]
         ,emp.[estatus_escolaridad]
         ,emp.[Carrera]
+        ,emp.[id_sindicato]
+        ,emp.[id_nivel_jer]
         ,emp.[Genero]
         ,emp.[Hijos]
         ,emp.[fecha_alta]
@@ -390,12 +609,19 @@ class ConsultaInfoADR{
         include_once 'conexion.php';
         $BD = new ConexionSQL();
         $con = $BD->ObtenerConexionBD();
-        $query = "	SELECT 
-        admi.nombre_admin,
-		sub.nombre_sub_admin
-        FROM SubAdmin sub
-        INNER JOIN Administracion admi ON admi.id_admin =  sub.id_admin
-        WHERE  sub.nombre_sub_admin != 'Administración'";
+        $query = "SELECT distinct
+        nombre_admin,
+        nombre_sub_admin,
+        nombre_depto,
+        emp.no_empleado,
+        CONCAT(nombre_s,' ',apellido_p,' ',apellido_m) As nombre_empleado,
+        puest.nombre_puesto
+        FROM SubAdmin SUB
+        FULL JOIN Administracion admind ON admind.id_admin = SUB.id_admin
+        FULL JOIN Departamento dep ON SUB.id_sub_admin = dep.id_sub_admin	
+        FULL JOIN Empleado_insumo emp ON emp.id_depto = dep.id_depto
+        FULL JOIN Puesto_ADR puest ON puest.id_puesto = emp.id_puesto
+        WHERE nombre_depto = 'SUBADMINISTRACIÓN'";
         $respuesta = sqlsrv_query($con,$query);
         if($respuesta){
             while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
@@ -425,7 +651,14 @@ class ConsultaInfoADR{
         FROM [Control_Ingresos].[dbo].[Departamento] dep
         INNER JOIN Administracion admi ON admi.id_admin =  dep.id_admin
         INNER JOIN SubAdmin sub ON sub.id_sub_admin =  dep.id_sub_admin
-        where (sub.nombre_sub_admin != 'Subadministración' AND dep.nombre_depto != 'Subadministración' and dep.estatus = 'A') AND  (sub.nombre_sub_admin != 'Administración' AND dep.nombre_depto != 'Administración' and dep.estatus = 'A') and sub.estatus = 'A' and dep.estatus = 'A'";
+        where 
+        (sub.nombre_sub_admin != 'Subadministración' 
+        AND dep.nombre_depto != 'Subadministración' 
+        and dep.estatus = 'A')
+         AND  (sub.nombre_sub_admin != 'Administración' 
+         AND dep.nombre_depto != 'Administración' 
+         and dep.estatus = 'A') 
+         and sub.estatus = 'A' and dep.estatus = 'A'";
         $respuesta = sqlsrv_query($con,$query);
         if($respuesta){
             while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
@@ -1012,10 +1245,131 @@ class ConsultaInfoADR{
             $conexion->CerrarConexion($con);
         }
         else{
-            return "Se actualizaron los datos basicos del empleado satisfactoriamente." ;
-            $conexion->CerrarConexion($con);
+            return self::Registra_historial($datos);
+           // $conexion->CerrarConexion($con);
+            
+             //return $datos_res;
         }
 
+    }
+    public function Registra_historial($datos){
+        include_once 'sesion.php';
+        include_once 'conexion.php';
+        $BD = new ConexionSQL();
+        $con = $BD->ObtenerConexionBD();
+        $user_alta = $_SESSION['ses_rfc_corto_ing'];
+        $No_Empleado = $datos->no_empleado;
+        $nombres =$datos->nombre_s;
+        $apellido_P = $datos->apellido_p;
+        $apellido_M = $datos->apellido_m;
+        $RFC_comp =$datos->rfc;
+        $CURP = $datos->curp;
+        $RFC_Corto = $datos->rfc_c;
+        $Correo_sat = $datos->correo;
+        $Correo_P = $datos->correo_p;
+        $telefono_1 = $datos->num_tel1;
+        $telefono_2 = $datos->num_tel2;
+        $ext_tele = $datos->ext;
+        $fecha_ingreso = ($datos->fec_ingres);
+        //$tipo_nom1 = $$datos->tipo_nom;
+        $proceso = $datos->estatus;
+        $id_user_insumo = $datos->id_emp;
+        if ($proceso == 9) {
+            $proceso =17;
+        }
+        $datos_us_faltantes = self::info_datos_us_2($id_user_insumo);
+        $num_plaza = $datos_us_faltantes['id_num_posision'];
+        $tipo_nom1 = $datos_us_faltantes['num_nombramiento'];
+        $admin = $datos_us_faltantes['id_admin'];
+        $sub = $datos_us_faltantes['id_sub_admin'];
+        $dep = $datos_us_faltantes['id_depto'];
+        $puesto_adr = $datos_us_faltantes['id_puesto'];
+        $Genero = $datos_us_faltantes['Genero'];
+        $Hijos = $datos_us_faltantes['Hijos'];
+        $Escolaridad = $datos_us_faltantes['Escolaridad'];
+        $est_escolar = $datos_us_faltantes['estatus_escolaridad'];
+        $carrera = $datos_us_faltantes['Carrera'];
+        $sindicatos = $datos_us_faltantes['id_sindicato'];
+        $nivel_jer = $datos_us_faltantes['id_nivel_jer'];
+        $estado_civil = $datos_us_faltantes['estado_civil'];
+        $sal_net = $datos_us_faltantes['sueldo_neto'];
+        $query = "INSERT INTO [mov_insumo](
+            [id_empleado_plant]
+                ,[no_empleado]
+                ,[admin]
+                ,[sub_admin]
+                ,[depto]
+                ,[id_num_posision]
+                ,[puesto]
+                ,[rfc_corto]
+                ,[nombre_s]
+                ,[apellido_p]
+                ,[apellido_m]
+                ,[correo_inst]
+                ,[correo_personal]
+                ,[numero_contacto_1]
+                ,[numero_contacto_2]
+                ,[ext_tel]
+                ,[estatus]
+                ,[user_alta]
+                ,[fecha_alta]
+                ,[id_proc]
+                ,[fec_ingreso]
+                ,[RFC]
+                ,[CURP]
+                ,[Genero]
+                ,[Hijos]
+                ,[Escolaridad]
+                ,[estatus_escolaridad]
+                ,[estado_civil]
+                ,[Carrera]
+                ,[tipo_nombramiento]
+                ,[sindicato]
+                ,[nivel_jer]
+                ,salario_neto
+            )
+                 SELECT 
+                 $id_user_insumo AS [id_empleado_plant]
+                ,$No_Empleado AS [no_empleado]
+                ,(SELECT nombre_admin FROM Administracion WHERE id_admin = $admin) AS [admin]
+                ,(SELECT nombre_sub_admin FROM SubAdmin WHERE id_sub_admin = $sub) AS [sub_admin]
+                ,(SELECT nombre_depto FROM Departamento WHERE id_depto = $dep) AS [depto]
+                ,$num_plaza as [id_num_posision]
+                ,(SELECT nombre_puesto FROM Puesto_ADR WHERE id_puesto = $puesto_adr) AS [puesto]
+                ,'$RFC_Corto' AS [rfc_corto]
+                ,'$nombres' AS [nombre_s]
+                ,'$apellido_P' AS [apellido_p]
+                ,'$apellido_M' AS [apellido_m]
+                ,'$Correo_sat' AS [correo_inst]
+                ,(Case '$Correo_P' when '' then NULL else '$Correo_P' end) AS [correo_personal]
+                ,(Case '$telefono_1' when '' then NULL else '$telefono_1' end) AS [numero_contacto_1]
+                ,(Case '$telefono_2' when '' then NULL else '$telefono_2' end) AS [numero_contacto_2]
+                ,(Case '$ext_tele' when '' then NULL else '$ext_tele' end) AS [ext_tel]
+                ,'A' AS [estatus]
+                ,'$user_alta' AS [user_alta]
+                ,GETDATE() AS [fecha_alta]
+                ,$proceso AS [id_proc]
+                ,'$fecha_ingreso' AS[fec_ingreso]
+                ,'$RFC_comp' AS [RFC]
+                ,'$CURP' AS [CURP]
+                ,'$Genero' AS [Genero]
+                ,'$Hijos' AS [Hijos]
+                ,(SELECT nombre_escolaridad from cat_escolaridad where id_escolaridad = $Escolaridad) AS [Escolaridad]
+                ,(SELECT nombre_estatus_escolaridad from cat_estatus_escolar where id_estatus_escolaridad =$est_escolar) AS [estatus_escolaridad]
+                ,(SELECT nombre_estado_civil from cat_estado_civil where id_estado_civil = $estado_civil) AS [estado_civil]
+                ,(Case '$carrera' when '$carrera' then NULL else '$carrera' end) AS [Carrera]
+                ,(SELECT nombre_nombramiento from cat_nombramiento where id_tipo_nombramiento = $tipo_nom1 ) AS [tipo_nombramiento]
+                ,(SELECT nombre_sindical from cat_sindical where id_sindicato =$sindicatos) AS [sindicato]
+                ,(SELECT nombre_nombramiento from cat_nivel_jerarquico where id_nivel_jer = $nivel_jer ) AS [nivel_jer]
+                ,'$sal_net' AS salario_neto";
+        $prepare = sqlsrv_query($con,$query);
+        if($prepare){
+            return "Se actualizaron los datos basicos del empleado satisfactoriamente." ;
+        }
+        else {
+            return print_r(sqlsrv_errors(),false);
+            
+        }
     }
     public function Actualiza_area_y_jefe_insumo($datos){
         include_once 'sesion.php';
@@ -1066,9 +1420,129 @@ class ConsultaInfoADR{
             $conexion->CerrarConexion($con);
         }
         else{
-            return "Se actualizaron los datos adicionales del empleado satisfactoriamente." ;
-            $conexion->CerrarConexion($con);
+             
+            //$conexion->CerrarConexion($con);
+            return $respuesta = self::Registra_historial_datos_adicionales($datos);
         }
+    }
+    public function Registra_historial_datos_adicionales($datos){
+        include_once 'sesion.php';
+        include_once 'conexion.php';
+        $BD = new ConexionSQL();
+        $user_alta = $_SESSION['ses_rfc_corto_ing'];
+        $con = $BD->ObtenerConexionBD();
+        //DATOS DEL SCRIPT 
+        $id_user_insumo = $datos->id_empleado;
+        $Genero =$datos->genero;
+        $Hijos = $datos->hijos;
+        $estado_civil = $datos->estado_civil;
+        $Escolaridad =  $datos->escolaridad;
+        $est_escolar = $datos->estatus_escolar;
+        $carrera = $datos->carrera;
+        //DATOS DE EL USUARIO INSUMO QUE FALTAN POR RELLENAR
+        $datos_us_faltantes = self::info_datos_us_2($id_user_insumo);
+        $RFC_comp = $datos_us_faltantes['rfc_comp'];
+        $RFC_Corto = $datos_us_faltantes['rfc_corto'];
+        $CURP = $datos_us_faltantes['curp_comp'];
+        $No_Empleado = $datos_us_faltantes['no_empleado'];
+        $nombres = $datos_us_faltantes['nombre_s'];
+        $apellido_P = $datos_us_faltantes['apellido_p'];
+        $apellido_M =$datos_us_faltantes['id_num_posision'];
+        $Correo_sat =  $datos_us_faltantes['correo_inst'];
+        $Correo_P = $datos_us_faltantes['correo_personal'];
+        $telefono_1 = $datos_us_faltantes['numero_contacto_1'];
+        $telefono_2 = $datos_us_faltantes['numero_contacto_2'];
+        $ext_tele = $datos_us_faltantes['ext_tel'];
+        $fecha_ingreso = $datos_us_faltantes['fec_ingreso']->format('Y-m-d');
+        $tipo_nom1 = $datos_us_faltantes['num_nombramiento'];
+        $num_plaza = $datos_us_faltantes['id_num_posision'];
+        $tipo_nom1 = $datos_us_faltantes['num_nombramiento'];
+        $admin = $datos_us_faltantes['id_admin'];
+        $sub = $datos_us_faltantes['id_sub_admin'];
+        $dep = $datos_us_faltantes['id_depto'];
+        $puesto_adr = $datos_us_faltantes['id_puesto'];    
+        $sindicatos = $datos_us_faltantes['id_sindicato'];
+        $nivel_jer = $datos_us_faltantes['id_nivel_jer'];
+        $sal_net = $datos_us_faltantes['sueldo_neto'];
+        $query = "INSERT INTO [mov_insumo](
+            [id_empleado_plant]
+                ,[no_empleado]
+                ,[admin]
+                ,[sub_admin]
+                ,[depto]
+                ,[id_num_posision]
+                ,[puesto]
+                ,[rfc_corto]
+                ,[nombre_s]
+                ,[apellido_p]
+                ,[apellido_m]
+                ,[correo_inst]
+                ,[correo_personal]
+                ,[numero_contacto_1]
+                ,[numero_contacto_2]
+                ,[ext_tel]
+                ,[estatus]
+                ,[user_alta]
+                ,[fecha_alta]
+                ,[id_proc]
+                ,[fec_ingreso]
+                ,[RFC]
+                ,[CURP]
+                ,[Genero]
+                ,[Hijos]
+                ,[Escolaridad]
+                ,[estatus_escolaridad]
+                ,[estado_civil]
+                ,[Carrera]
+                ,[tipo_nombramiento]
+                ,[sindicato]
+                ,[nivel_jer]
+                ,salario_neto
+            )
+                 SELECT 
+                 $id_user_insumo AS [id_empleado_plant]
+                ,$No_Empleado AS [no_empleado]
+                ,(SELECT nombre_admin FROM Administracion WHERE id_admin = $admin) AS [admin]
+                ,(SELECT nombre_sub_admin FROM SubAdmin WHERE id_sub_admin = $sub) AS [sub_admin]
+                ,(SELECT nombre_depto FROM Departamento WHERE id_depto = $dep) AS [depto]
+                ,$num_plaza as [id_num_posision]
+                ,(SELECT nombre_puesto FROM Puesto_ADR WHERE id_puesto = $puesto_adr) AS [puesto]
+                ,'$RFC_Corto' AS [rfc_corto]
+                ,'$nombres' AS [nombre_s]
+                ,'$apellido_P' AS [apellido_p]
+                ,'$apellido_M' AS [apellido_m]
+                ,'$Correo_sat' AS [correo_inst]
+                ,(Case '$Correo_P' when '' then NULL else '$Correo_P' end) AS [correo_personal]
+                ,(Case '$telefono_1' when '' then NULL else '$telefono_1' end) AS [numero_contacto_1]
+                ,(Case '$telefono_2' when '' then NULL else '$telefono_2' end) AS [numero_contacto_2]
+                ,(Case '$ext_tele' when '' then NULL else '$ext_tele' end) AS [ext_tel]
+                ,'A' AS [estatus]
+                ,'$user_alta' AS [user_alta]
+                ,GETDATE() AS [fecha_alta]
+                ,19 AS [id_proc]
+                ,'$fecha_ingreso' AS[fec_ingreso]
+                ,'$RFC_comp' AS [RFC]
+                ,'$CURP' AS [CURP]
+                ,'$Genero' AS [Genero]
+                ,'$Hijos' AS [Hijos]
+                ,(SELECT nombre_escolaridad from cat_escolaridad where id_escolaridad = $Escolaridad) AS [Escolaridad]
+                ,(SELECT nombre_estatus_escolaridad from cat_estatus_escolar where id_estatus_escolaridad =$est_escolar) AS [estatus_escolaridad]
+                ,(SELECT nombre_estado_civil from cat_estado_civil where id_estado_civil = $estado_civil) AS [estado_civil]
+                ,(Case '$carrera' when '$carrera' then NULL else '$carrera' end) AS [Carrera]
+                ,(SELECT nombre_nombramiento from cat_nombramiento where id_tipo_nombramiento = $tipo_nom1 ) AS [tipo_nombramiento]
+                ,(SELECT nombre_sindical from cat_sindical where id_sindicato =$sindicatos) AS [sindicato]
+                ,(SELECT nombre_nombramiento from cat_nivel_jerarquico where id_nivel_jer = $nivel_jer ) AS [nivel_jer]
+                ,'$sal_net' AS salario_neto";
+        $prepare = sqlsrv_query($con,$query);
+        if($prepare){
+            return "Se actualizaron los datos adicionales del empleado satisfactoriamente." ;
+            
+        }
+        else {
+            return print_r(sqlsrv_errors(),false);
+            
+        }
+
     }
     public function Actualiza_datos_posisiones($datos){
         include_once 'sesion.php';

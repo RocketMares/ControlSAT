@@ -130,12 +130,12 @@ class Menu
       echo "
       <!-- Footer inicio -->
  
-        <div class='w-100' style='padding: none;position:relative;'>
-        <footer class='container-fluid py-5 '  style='background-color:#2E2E2E;'>
+       
+        <footer class='container-fluid py-1 fixed-low'  style='background-color:#2E2E2E;' >
                 <p class='float-right'><a class='text-white' href='http://99.85.26.227:8181/Comunicados/login.html'>Comunicados</a></p>
                 <p>&copy; SAT. &middot; <a class='text-white' href='https://intrasat2.sat.gob.mx/'>Intrasat</a>&middot;</p>
         </footer>
-        </div>
+      
             
         <!-- Footer fin -->
         <script type='text/javascript' src='js/toastr.min.js'></script>
@@ -174,12 +174,12 @@ class Menu
       echo "
       <!-- Footer inicio -->
  
-        <div class='w-100' style='position:relative;'>
-        <footer class='container-fluid py-5  text-white'  style='background-color:#2E2E2E;'>
+   
+        <footer class='footer'>
                 <p class='float-right'><a class='text-white' href='http://99.85.26.227:8181/Comunicados/login.html'>Comunicados</a></p>
                 <p>&copy; SAT. &middot; <a class='text-white' href='https://intrasat2.sat.gob.mx/'>Intrasat</a>&middot;</p>
         </footer>
-        </div>
+ 
             
         <!-- Footer fin -->
         <script src='js/jquery-3.3.1.js'></script>
@@ -1128,7 +1128,7 @@ class Menu
                                   //  FIN DE DATOS GENERALES
                                   //  INICIO DE REGISTRO DE MOVIMIENTOS
                         ECHO"<div class='tab-pane fade' id='MOVIMIENTOS' role='tabpanel' aria-labelledby='nav-profile-tab'>
-                            <div id='caja_mov_personal_insumo'>
+                            <div id='caja_mov_personal_insumo' class='vh-25'>
                             
                             </div>
 
@@ -1603,6 +1603,217 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
 </div>";
    }
 
+   public function Modal_posisiones(){
+       include_once 'ConsultaADR.php';
+       $mu = new ConsultaInfoADR();
+       echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='Agregar_posisones_nuevas' role='dialog'
+       aria-hidden='true'>
+       <div class='modal-dialog modal-xl'>
+           <div class='modal-content'>
+               <div class='modal-header'>
+                   <h5 class='modal-title' id='exampleModalLabel'>Agregar Posisión</h5>
+                   <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+                       <span aria-hidden='true'>&times;</span>
+                   </button>
+               </div>
+               <div class='modal-body'>";
+              echo" <div class='row container-fluid '>
+               <div class='form-group col-sm-4'>
+                       <label for='estatus'>Posisión o plaza:<samp class='text-danger'>*</samp></label>
+                   
+                      <input  id='New_posision' class='form-control' maxlength='8'  name='New_posision' type='text' onkeypress='return numero(event)' placeholder='Ejem: 103XXXXX'>
+                   </div>
+                   <div class='form-group col-sm-4' id='asdas'>
+                   <label for='estatus'>Nivel:</label>
+                   <input type='text'  class='form-control' id='New_nivel_add' name='New_nivel_add'  maxlength='4'  placeholder='Ejem: P12' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                       required>
+               </div>
+               <div class='form-group col-sm-4' id='asdas'>
+                   <label for='estatus'>Clave Presupuestal:</label>
+                   <input type='text'  class='form-control' id='New_clave_pres_add' maxlength='10' name='New_clave_pres_add'  placeholder='Ejem: T12804' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                       required>
+               </div>
+               </div>
+               <div class='row container-fluid'>
+       
+               <div class='form-group col-sm-8'>
+                   <label for='estatus New_Puesto_fump_add' >Nombre de Puesto central:<samp class='text-danger'>*</samp></label>
+                   <select class='custom-select' id='New_Puesto_fump_add' name='New_Puesto_fump_add'>
+                   <option value='0' selected>Seleccionar Puesto</option>";
+                   
+               $rows_puestos = $mu->Consulta_Puestos_Fun();
+               for ($i = 0; $i < count($rows_puestos); $i++) {
+                   echo "<option value='" .  $rows_puestos[$i]["id_puesto_fump"] . "'>" .  $rows_puestos[$i]["nombre_puesto"] . "</option>";
+               }
+               echo"
+               </select>
+               </div>
+               <div class='form-group col-sm-4' id='asdas'>
+               <label for='estatus'>Clave Puesto:</label>
+               <input type='text' DISABLED class='form-control' id='New_clav_puesto_add' name='New_clav_puesto_add'  placeholder='Ejem:RE6025' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                   required>
+           </div>
+               
+          
+           
+           </div>
+           <div class='row container-fluid'>
+           <div class='col-md-4 '>
+           <label for='validationServer02'>Sueldo Neto: <samp class='text-danger'>*</samp></label>
+           <input class='form-control' name='New_sueldo_neto' id='New_sueldo_neto' value='$'
+           data-inputmask-alias='numeric' data-inputmask-groupSeparator=',' data-inputmask-digits=2
+           data-inputmask-digitsOptional=false data-inputmask-prefix='$ '
+           data-inputmask-placeholder='0' placeholder='$ 0.00 MXM' > 
 
+
+ 
+       </div>
+       <div class='form-group col-sm-4'>
+       <label for='estatus'>Posision Jefe:<samp class='text-danger'>*</samp></label>
+       <input type='text'  class='form-control' id='New_plaza_jefe' maxlength='8' name='New_plaza_jefe'  placeholder='Ejem: 103XXXXX' onkeypress='return numero(event)'
+       required>
+   </div>
+   </div>";
+                   echo"
+               </div>
+               <div class='modal-footer'>
+                   <button type='button' class='btn btn-secondary' data-dismiss='modal'
+                       id='cerrar_mod_agrega_pososion'>Close</button>
+                   <button type='button' class='btn btn-primary' id='registra_posison'>Send message</button>
+               </div>
+           </div>
+       </div>
+   
+   </div>";
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////MODAL DE INFORMACION DE LA POSISION//////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+   echo"
+   <div class='modal fade bd-example-modal-xl' id='modal_info_posision' tabindex='-1' role='dialog' aria-labelledby='exampleModalScrollableTitle' aria-hidden='true'>
+  <div class='modal-dialog modal-xl' role='document'>
+    <div class='modal-content'>
+    <div class='modal-header'>
+        <h5 class='modal-title' id='exampleModalScrollableTitle'>Informacion detalla da de la Posisión</h5>
+        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+          <span aria-hidden='true'>&times;</span>
+        </button>
+      </div>
+      <div class='modal-body'>";
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////MENU DE NAVEGACION INFO/HISTORIAL/COMENTARIOS//////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ 
+
+
+    echo"<ul class='nav nav-pills mb-3' id='pills-tab' role='tablist'>
+  <li class='nav-item'>
+    <a class='nav-link active' id='pills-home-tab' data-toggle='pill' href='#informes_plaz' role='tab' aria-controls='pills-home' aria-selected='true'>Información</a>
+  </li>
+  <li class='nav-item'>
+    <a class='nav-link' id='pills-profile-tab' data-toggle='pill' href='#Moviemientos_plaz' role='tab' aria-controls='pills-profile' aria-selected='false'>Movimientos</a>
+  </li>
+  <li class='nav-item'>
+    <a class='nav-link' id='pills-contact-tab' data-toggle='pill' href='#Comentarios_plaz' role='tab' aria-controls='pills-contact' aria-selected='false'>Comentarios</a>
+  </li>
+</ul>";
+
+
+      echo "
+
+
+      <div class='tab-content' id='pills-tabContent'>";
+//INFORMES PLAZA
+     echo" <div class='tab-pane fade show active' id='informes_plaz' role='tabpanel' aria-labelledby='pills-home-tab'>
+     <div class='row container-fluid '>
+     <div class='form-group col-sm-4'>
+         <label for='estatus'>Posisión o plaza:<samp class='text-danger'>*</samp></label>
+ 
+         <input id='pos_posision' class='form-control' maxlength='8' name='pos_posision' type='text'
+             onkeypress='return numero(event)' placeholder='Ejem: 103XXXXX'>
+     </div>
+     <div class='form-group col-sm-4' id='asdas'>
+         <label for='estatus'>Nivel:</label>
+         <input type='text' class='form-control' id='pos_nivel_add' name='pos_nivel_add' maxlength='4'
+             placeholder='Ejem: P12' onkeyup='javascript:this.value=this.value.toUpperCase();' required>
+     </div>
+     <div class='form-group col-sm-4' id='asdas'>
+         <label for='estatus'>Clave Presupuestal:</label>
+         <input type='text' class='form-control' id='pos_clave_pres_add' maxlength='10' name='pos_clave_pres_add'
+             placeholder='Ejem: T12804' onkeyup='javascript:this.value=this.value.toUpperCase();' required>
+     </div>
+ </div>
+ <div class='row container-fluid'>
+ 
+     <div class='form-group col-sm-8'>
+         <label for='estatus New_Puesto_fump_add'>Nombre de Puesto central:<samp class='text-danger'>*</samp></label>
+         <select class='custom-select' id='pos_Puesto_fump_add' name='pos_Puesto_fump_add'>
+             <option value='0' selected>Seleccionar Puesto</option>";
+ 
+             $rows_puestos = $mu->Consulta_Puestos_Fun();
+             for ($i = 0; $i < count($rows_puestos); $i++) { echo "<option value='" . $rows_puestos[$i]["id_puesto_fump"]
+                 . "'>" . $rows_puestos[$i]["nombre_puesto"] . "</option>" ; } echo" </select> </div> <div
+                 class='form-group col-sm-4' id='asdas'>
+                 <label for='estatus'>Clave Puesto:</label>
+                 <input type='text' DISABLED class='form-control' id='pos_clav_puesto_add' name='pos_clav_puesto_add'
+                     placeholder='Ejem:RE6025' onkeyup='javascript:this.value=this.value.toUpperCase();' required>
+     </div>
+ 
+ 
+ 
+ </div>
+ <div class='row container-fluid'>
+     <div class='col-md-4 '>
+         <label for='validationServer02'>Sueldo Neto: <samp class='text-danger'>*</samp></label>
+         <input class='form-control' name='pos_sueldo_neto' id='pos_sueldo_neto' value='$' data-inputmask-alias='numeric'
+             data-inputmask-groupSeparator=',' data-inputmask-digits=2 data-inputmask-digitsOptional=false
+             data-inputmask-prefix='$ ' data-inputmask-placeholder='0' placeholder='$ 0.00 MXM'>
+ 
+ 
+ 
+     </div>
+     <div class='form-group col-sm-4'>
+         <label for='estatus'>Posision Jefe:<samp class='text-danger'>*</samp></label>
+         <input type='text' class='form-control' id='pos_plaza_jefe' maxlength='8' name='pos_plaza_jefe'
+             placeholder='Ejem: 103XXXXX' onkeypress='return numero(event)' required>
+     </div>
+ </div>
+ <div class='modal-footer'>
+     <button type='button' class='btn btn-secondary' data-dismiss='modal'>Close</button>
+     <button type='button' id='agree_posision' class='btn btn-primary'>Save changes</button>
+ </div>
+      </div>";
+      
+      
+      //MOVIMIENTOS PLAZA
+      echo"<div class='tab-pane fade' id='Moviemientos_plaz' role='tabpanel' aria-labelledby='pills-profile-tab'>
+      hola1
+      
+      </div>";
+      
+      
+      
+      //COMENTARIOS PLAZA
+      echo"  <div class='tab-pane fade' id='Comentarios_plaz' role='tabpanel' aria-labelledby='pills-contact-tab'>
+      hola
+      
+      </div>
+    </div>";
+
+
+
+
+
+
+
+     echo"   </div>
+    </div>
+  </div>
+</div>
+   ";
+   }
    
 }

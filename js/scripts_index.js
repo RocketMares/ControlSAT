@@ -144,6 +144,14 @@ function modal_detalle_calendario(fecha) {
     });
 
 }
+function numero(evt) {
+    evt = (evt) ? evt : window.event;
+    var charCode = (evt.which) ? evt.which : evt.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+        return false;
+    }
+    return true;
+}
 
 $('.numeros').on('input', function () {
     this.value = this.value.replace(/[^0-9]/g, '');
@@ -794,5 +802,6 @@ function limpia_campos_form_agrega(){
     $("#clave_pres_add").val("");
     $("#clav_puesto_add").val("");
 }
+
 
 

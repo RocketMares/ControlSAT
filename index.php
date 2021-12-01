@@ -12,11 +12,6 @@
 
 
     ?>
-
-
-
-
-
     <br>
     <div class="mt-5 my-5">
         <h1 class="display-4 text-center">Sistema de Control de Ingresos SAT</h1>
@@ -37,14 +32,14 @@
                         <img src="img/Empleados_act.png" class="d-block " alt="..."   >
                         <div class="carousel-caption d-none d-md-block text-dark text-truncate" >
                             <h4>Empleados Activos</h4>
-                            <p>Nulla vitae elit libero, a pharetra augue mollis interdum.</p>
+                            <p>Visualiza a detalle la plantilla de empleados activos o licencia.</p>
                         </div>
                     </div>
                     <div class="carousel-item" id="pag_inactivos" >
                         <img src="img/Empleados_baja.png" class="d-block " alt="..." >
                         <div class="carousel-caption d-none d-md-block text-dark">
                             <h5>Empleados en estado de baja, comisión o suspendidos de labores</h5>
-                            <p>Visualiza la estructura general de manera mas detallada.</p>
+                            <p>Visualiza a detalle la plantilla de empleados en estado de baja, comisión o suspendidos de labore</p>
                         </div>
                     </div>
                     <div class="carousel-item" id="pag_estructura">

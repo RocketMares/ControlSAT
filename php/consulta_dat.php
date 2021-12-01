@@ -157,7 +157,10 @@ if (isset($_POST['posision_predic'])) {
       <th scope='col'>Usuario Captura</th>
       <th scope='col'>Sub.</th>
       <th scope='col'>Dep.</th>
-      <th scope='col'>Plaza.</th>
+      <th scope='col'>Posisión.</th>
+      <th scope='col'>Nombramiento.</th>
+      <th scope='col'>Jefe directo</th>
+      <th scope='col'>Puesto ADR.</th>
     </tr>
   </thead>
   <tbody>";
@@ -172,6 +175,9 @@ if (isset($_POST['posision_predic'])) {
       <td>".$datos[$i]['sub_admin']."</td>
       <td>".$datos[$i]['depto']."</td>
       <td>".$datos[$i]['id_num_posision']."</td>
+      <td>".$datos[$i]['tipo_nombramiento']."</td>
+      <td>".$datos[$i]['jefe_directo']."</td>
+      <td>".$datos[$i]['puesto']."</td>
     </tr>";
     }
   }
@@ -186,6 +192,23 @@ if (isset($_POST['posision_predic'])) {
   ";
 
  }
+ if (isset($_POST['consulta_clav'])) {
+    $consulta = $_POST['consulta_clav'];
+    include_once 'ConsultaADR.php';
+    $cons = new ConsultaInfoADR();
+    $clave = $cons->ConsultaClave($consulta);
+    echo $clave['clave_puesto'];
+ }
 
+ if (isset($_POST['posision_info'])) {
+
+  include_once "ConsultaADR.php";
+  $id =$_POST['posision_info'];
+  $cons = new ConsultaInfoADR();
+  $datos = $cons->Consulta_datos_plaza($id) ;
+  header('Content-type: application/json; charset=utf-8');
+  echo json_encode($datos);
+
+}
 ?>
 

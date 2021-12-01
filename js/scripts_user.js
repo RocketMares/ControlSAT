@@ -214,6 +214,32 @@ function Actualiza_datos_posision(id_user_in) {
     
 
 }
+function numero(evt) {
+  evt = (evt) ? evt : window.event;
+  var charCode = (evt.which) ? evt.which : evt.keyCode;
+  if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+      return false;
+  }
+  return true;
+}
+
+function Revisa_info_plaza(id_posision){
+  $('#modal_info_posision').modal();
+  $.post("php/consulta_dat.php",{posision_info:id_posision},function(data){
+ 
+    $('#pos_posision').val(data[0]['id_num_posision'])
+    $('#pos_nivel_add').val(data[0]['nivel'])
+    $('#pos_clave_pres_add').val(data[0]['Codigo_pres'])
+    $('#pos_Puesto_fump_add').val(data[0]['id_puesto_fump'])
+    $('#pos_clav_puesto_add').val(data[0]['clave_puesto'])
+    $('#pos_sueldo_neto').val(data[0]['sueldo_neto'])
+    $('#pos_plaza_jefe').val(data[0]['posision_jefe'])
+
+  })
+
+}
+
+
 
 
 function Actualiza_dat_basic(id_user_in) {
@@ -252,7 +278,7 @@ function Actualiza_dat_basic(id_user_in) {
   }
 
   var dato_json = JSON.stringify(datos);
-
+//console.log(dato_json)
   $.ajax({
       url: 'php/consulta_dat.php',
       type: 'POST',
@@ -262,10 +288,12 @@ function Actualiza_dat_basic(id_user_in) {
       },
     })
     .done(function (respuesta) {
+      console.log(respuesta)
       toastr.info(respuesta, "Notificacion", {
         "progressBar": true
       })
       Revisa_info_det_us(id_user_in)
+
     })
     .fail(function () {
       console.log("error");

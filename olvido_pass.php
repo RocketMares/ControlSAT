@@ -40,7 +40,7 @@ $menu->cabecera_principal_log();
           <div class="form-row">
               <div class="form-group">
                 <label for="Password">Numero de empleado:<samp class="text-danger">*</samp></label>
-                <input type="number" class="form-control numeros" id="no_empleado" name="no_empleado"  maxlength="6"  required>
+                <input type="text"  class="form-control numeros" id="no_empleado" name="no_empleado"  maxlength="6"  required onkeypress='return numero(event)'>
               </div>
             </div>
             <div class="form-row">

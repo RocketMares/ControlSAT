@@ -20,6 +20,13 @@
   font-size: 1.33333em;
   line-height: 0.75em;
   vertical-align: -.0667em; }
+  .footer {
+    position: fixed;
+    height: 70px;
+    bottom: 0;
+    width: 100%;
+    background-color:#2E2E2E;
+ }
 
 .fa-xs {
   font-size: .75em; }

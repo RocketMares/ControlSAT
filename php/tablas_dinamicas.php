@@ -8,7 +8,7 @@ class Manda_tabla{
         $consultaADR = new ConsultaInfoADR();
         $datos = $consultaADR->Consulta_usuarios_activos();
         echo "
-    <table class='table table-sm  table-striped table-bordered shadow-sm bg-white rounded table-hover'>
+    <table class='table table-sm text-center  table-striped table-bordered shadow-sm bg-white rounded table-hover'>
         <thead class='thead-dark'>
           <tr>
             <th scope='col'>#</th>
