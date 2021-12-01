@@ -101,6 +101,55 @@ class ConsultaInfoADR{
         $BD->CerrarConexion($con); 
     }  
     }
+    public function inserta_historial_plazas($datos){
+        include_once 'sesion.php';
+        include_once 'conexion.php';
+        $BD = new ConexionSQL();
+        $con = $BD->ObtenerConexionBD();
+        $posision = $datos->num_posision;
+
+        $posision_jefe = $datos->jefe_posision;
+        $nivel = $datos->nivel;
+        $Codigo_pres = $datos->clave_pres;
+        $sueldo_neto = $datos->sueldo;
+        
+        $user_alta = $_SESSION['ses_rfc_corto_ing'];
+
+        $query = "  INSERT INTO [mov_Posisiones](
+            [id_posision]
+                ,[nombre_empleado]
+                ,[puesto_fump]
+                ,[id_num_posision]
+                ,[posision_jefe]
+                ,[nivel]
+                ,[Codigo_pres]
+                ,[sueldo_neto]
+                ,[id_proc]
+                ,[user_alta]
+                ,[fecha_alta]
+                ,[estatus]
+            )
+          SELECT
+                (select id_posision from Posisiones where id_num_posision = $posision)  AS [id_posision]
+                ,(SELECT CONCAT(nombre_s,' ',apellido_p,' ',apellido_m) as nombre_empleado FROM Empleado_insumo WHERE id_empleado_plant = $empleado) AS [nombre_empleado]
+                ,(SELECT nombre_puesto FROM Puesto_FUMP where id_puesto_fump=$puesto_fump)  AS [puesto_fump]
+                ,$posision AS [id_num_posision]
+                ,$posision_jefe AS [posision_jefe]
+                ,'$nivel' AS [nivel]
+                ,'$Codigo_pres' AS [Codigo_pres]
+                ,CASE '$sueldo_neto' WHEN '' THEN NULL else '$sueldo_neto'END AS [sueldo_neto]
+                ,$proc AS [id_proc]
+                ,$user_alta AS [user_alta]
+                ,GETDATE() AS [fecha_alta]
+                ,'A' AS [estatus]";
+        $resultado = sqlsrv_query($con,$query);
+        if ($resultado) {
+            return true;
+        }
+        else{
+            return print_r(sqlsrv_errors(),false);
+        }
+    }
     public function Consulta_Puestos_Fun()
     {
         include_once 'conexion.php';
@@ -1211,6 +1260,68 @@ class ConsultaInfoADR{
             print_r(sqlsrv_errors(), true);
         }
     }
+    public function Consulta_usuarios_baja_comision_suspenndidos_laudos()
+    {
+        include_once "conexion.php";
+        $conexion = new ConexionSQL(); // SE INSTANCIA LA CLASE CONEXI?N
+        //SE MANDA A LLAMAR LA CONEXI?N Y SE ABRE
+        $con = $conexion->ObtenerConexionBD();
+        //SE CREA UN QUERY
+        $query = "  SELECT [id_empleado_plant]
+        ,emp.[no_empleado]
+        ,ad.nombre_admin
+        ,sub.nombre_sub_admin
+        ,dep.nombre_depto
+        ,emp.[jefe_directo]
+        ,pos.id_num_posision
+        ,emp.[tipo_nombramiento]
+        ,puest_adr.nombre_puesto
+        ,emp.[id_perfil]
+        ,emp.[RFC]
+        ,emp.[CURP]
+        ,emp.[rfc_corto]
+        ,Concat([nombre_s],' ',[apellido_p],' ' ,[apellido_m]) as nombre_empleado
+        ,emp.[correo_inst]
+        ,emp.[correo_personal]
+        ,emp.[numero_contacto_1]
+        ,emp.[numero_contacto_2]
+        ,emp.[ext_tel]
+        ,emp.[estatus]
+        ,emp.[user_alta]
+        ,emp.[fecha_alta]
+        ,emp.[user_mod]
+        ,emp.[fecha_mod]
+        ,emp.[user_baja]
+        ,emp.[fecha_baja]
+        ,emp.[id_proc]
+        ,procs.nombre_proc
+        ,emp.[fec_ingreso]
+         FROM [Control_Ingresos].[dbo].[Empleado_insumo] emp
+        INNER JOIN Administracion ad ON emp.id_admin = ad.id_admin
+      INNER JOIN SubAdmin sub ON emp.id_sub_admin = sub.id_sub_admin
+      INNER JOIN Departamento dep ON emp.id_depto = dep.id_depto
+      INNER JOIN Posisiones pos ON emp.id_posision = pos.id_posision
+      INNER JOIN Procesos procs ON emp.id_proc = procs.id_proc
+      INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
+      INNER JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump
+       WHERE emp.estatus = 'A' and (emp.id_proc = 7 or emp.id_proc = 6 or emp.id_proc = 11) ORDER BY sub.nombre_sub_admin asc,dep.nombre_depto desc";
+        //SE VALIDA EL QUERY CON FORME A LA CONEXI?N
+        $prepare = sqlsrv_query($con, $query);
+        if ($prepare) {
+            while ($rows = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)) {
+                $filas[] = $rows;
+            }
+            sqlsrv_close($con);
+
+            if (isset($filas)) {
+                return $filas;
+            } else {
+                return null;
+            }
+        } else {
+            print_r(sqlsrv_errors(), true);
+        }
+    }
 
     public function Actualiza_datos_basicos_acti($datos){
         include_once "conexion.php";
@@ -1232,6 +1343,7 @@ class ConsultaInfoADR{
         [numero_contacto_2] = '".$datos->num_tel2."',
         [ext_tel] = '".$datos->ext."',
         [fec_ingreso] = '".$datos->fec_ingres."',
+        [fec_fin_rel_laboral] = CASE '".$datos->fec_ingres."' WHEN '' THEN NULL ELSE '".$datos->fec_ingres."' END ,
         [id_proc] = ".$datos->estatus.",
         [rfc_corto] = '".$datos->rfc_c."',
         [tipo_nombramiento] = '".$datos->tipo_nom."',
@@ -1271,6 +1383,7 @@ class ConsultaInfoADR{
         $telefono_2 = $datos->num_tel2;
         $ext_tele = $datos->ext;
         $fecha_ingreso = ($datos->fec_ingres);
+        $fecha_fin_laboral = ($datos->fec_baja);
         //$tipo_nom1 = $$datos->tipo_nom;
         $proceso = $datos->estatus;
         $id_user_insumo = $datos->id_emp;
@@ -1310,6 +1423,7 @@ class ConsultaInfoADR{
                 ,[numero_contacto_1]
                 ,[numero_contacto_2]
                 ,[ext_tel]
+                ,fec_fin_rel_laboral
                 ,[estatus]
                 ,[user_alta]
                 ,[fecha_alta]
@@ -1345,6 +1459,7 @@ class ConsultaInfoADR{
                 ,(Case '$telefono_1' when '' then NULL else '$telefono_1' end) AS [numero_contacto_1]
                 ,(Case '$telefono_2' when '' then NULL else '$telefono_2' end) AS [numero_contacto_2]
                 ,(Case '$ext_tele' when '' then NULL else '$ext_tele' end) AS [ext_tel]
+                ,(Case '$fecha_fin_laboral' when '' then NULL else '$fecha_fin_laboral' end) AS  [fec_fin_rel_laboral]
                 ,'A' AS [estatus]
                 ,'$user_alta' AS [user_alta]
                 ,GETDATE() AS [fecha_alta]

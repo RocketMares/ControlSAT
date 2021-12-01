@@ -57,8 +57,14 @@ $muesta = $vista_gen->Tabla_posisiones();
             $('#vista_posisiones').load("php/tablas_dinamicas_posisiones.php?pagina=" + num);
         })
         $('#registra_posison').on('click', function () {
-            $('#vista_posisiones').load('php/tablas_dinamicas_posisiones.php?pagina=1');
+            var num = <?php echo $num = $_GET['pagina']; ?> ;
+            $('#vista_posisiones').load("php/tablas_dinamicas_posisiones.php?pagina=" + num);
         })
+        $('#agree_posision_change').on('click', function () {
+            var num = <?php echo $num = $_GET['pagina']; ?> ;
+            $('#vista_posisiones').load("php/tablas_dinamicas_posisiones.php?pagina=" + num);
+        })
+  
         $('#posision_more').on('click', function () {
             $('#Agregar_posisones_nuevas').modal();
         })

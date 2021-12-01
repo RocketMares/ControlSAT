@@ -45,6 +45,9 @@ $(document).ready(function () {
   $('#actualiza_dat_adicionales_bot').on('click', function () {
     $('#tabla_activa').load("php/tabla_actualizada.php");
   })
+  $('#actualiza_dat_adicionales_bot_baja').on('click', function () {
+    $('#tabla_activa').load("php/tabla_bajas_actualiza.php");
+  })
   $('#cerrar_mod_actualiza_plazas').on('click', function () {
     $('#tabla_activa').load("php/tabla_actualizada.php");
     limpia_campos_2()
@@ -234,12 +237,43 @@ function Revisa_info_plaza(id_posision){
     $('#pos_clav_puesto_add').val(data[0]['clave_puesto'])
     $('#pos_sueldo_neto').val(data[0]['sueldo_neto'])
     $('#pos_plaza_jefe').val(data[0]['posision_jefe'])
-
+    $('#agree_posision_change').attr('onclick','Actualiza_posision_info_mante(' + data[0]['id_posision'] + ')');
   })
 
 }
 
+function Actualiza_posision_info_mante(id_posision){
+  var num_posision =  $('#pos_posision').val();
+  var nivel =  $('#pos_nivel_add').val();
+  var clave_pres =  $('#pos_clave_pres_add').val();
+  var id_puesto =  $('#pos_Puesto_fump_add').val();
+  var clave_puesto =  $('#pos_clav_puesto_add').val();
+  var sueldo =  $('#pos_sueldo_neto').val();
+  var jefe_posision =  $('#pos_plaza_jefe').val();
 
+  var datos = {
+    id_posision:id_posision,
+    num_posision:num_posision,
+    nivel:nivel,
+    clave_pres:clave_pres,
+    id_puesto:id_puesto,
+    clave_puesto:clave_puesto,
+    sueldo:sueldo,
+    jefe_posision:jefe_posision
+  }
+  
+  var json = JSON.stringify(datos);
+
+  $.post("php/consulta_dat.php",{actualiza_mante_posision:json},function(){
+  }).done(function(data){
+    toastr.info(data,"Notificación",{
+      "progressBar":true
+    })
+  })
+
+
+
+}
 
 
 function Actualiza_dat_basic(id_user_in) {
@@ -255,6 +289,7 @@ function Actualiza_dat_basic(id_user_in) {
   var num_tel2 = $("#num_2").val();
   var ext = $("#ext_tel").val();
   var fec_ingres = $("#fecha_ingreso").val();
+  var fec_baja = $("#fecha_baja").val();
   var estatus = $("#estatus").val();
   var no_empleado = $("#NO_EMPLEADO").val();
   var tipo_nom = $("#tipo_nombramiento12").val();
@@ -271,33 +306,44 @@ function Actualiza_dat_basic(id_user_in) {
     num_tel2: num_tel2,
     ext: ext,
     fec_ingres: fec_ingres,
+    fec_baja: fec_baja,
     estatus: estatus,
     no_empleado: no_empleado,
     id_emp: id_user_in,
     tipo_nom: tipo_nom
   }
-
-  var dato_json = JSON.stringify(datos);
-//console.log(dato_json)
-  $.ajax({
-      url: 'php/consulta_dat.php',
-      type: 'POST',
-      dataType: 'html',
-      data: {
-        act_datos_basic_ins: dato_json
-      },
+if (estatus == 11 ||estatus == 7 || estatus == 6) {
+  if (fec_baja == '') {
+    toastr.error("No puedes dejar sin seleccionar la fecha de la baja","Notificación",{
+      "progressBar":true
     })
-    .done(function (respuesta) {
-      console.log(respuesta)
-      toastr.info(respuesta, "Notificacion", {
-        "progressBar": true
-      })
-      Revisa_info_det_us(id_user_in)
+  }
+  else{
+    var dato_json = JSON.stringify(datos);
+    //console.log(dato_json)
+      $.ajax({
+          url: 'php/consulta_dat.php',
+          type: 'POST',
+          dataType: 'html',
+          data: {
+            act_datos_basic_ins: dato_json
+          },
+        })
+        .done(function (respuesta) {
+          console.log(respuesta)
+          toastr.info(respuesta, "Notificacion", {
+            "progressBar": true
+          })
+          Revisa_info_det_us(id_user_in)
+    
+        })
+        .fail(function () {
+          console.log("error");
+        });
+  }
 
-    })
-    .fail(function () {
-      console.log("error");
-    });
+}
+ 
 
 }
 
@@ -332,6 +378,147 @@ function trae_movimientos_x_personal(id_insumo){
   })
 }
 function Revisa_info_det_us(id_user_in) {
+  // createCookie('users',id_user_in);
+  var id_us = id_user_in;
+  $("#Modal_detalle_usuario_insumo").modal();
+  $.post("php/consulta_dat.php", {
+    datos: id_us
+  }, function (data) {
+    $('#datos_princip_us').html(data);
+  })
+  $.post("php/consulta_dat.php", {
+    busca_info_us: id_us
+  }, function (data) {
+    // var id_usuario = [];
+
+    var id_user_in = [];
+    var rfc_c = [];
+    var rfc = [];
+    var curp = [];
+    var nombre = [];
+    var apellido_p = [];
+    var apellido_m = [];
+    var no_empleado = [];
+    var id_puesto = [];
+    var correo = [];
+    var correo_p = [];
+    var local = [];
+    var area = [];
+    var depa = [];
+    var estatus = [];
+    var num_tel1 = [];
+    var num_tel2 = [];
+    var ext = [];
+    var fec_ingres = [];
+    var Escolaridad = [];
+    var estat_escolar = [];
+    var Carrera = [];
+    var sex = [];
+    var hijos = [];
+    var estado_civ = [];
+    var puesto_fump = [];
+    var clav_puesto = [];
+    var posision = [];
+    var posision_jefe_ = [];
+    var clave_jefe_ = [];
+    var nom_jefe = [];
+    var nivel_ = [];
+    var clave_pres_ = [];
+    var jefe_directo_ = [];
+    var suel_net = [];
+    var num_nombraMIEN = [];
+
+    for (var i in data) {
+      id_user_in.push(data.id_empleado_plant);
+      rfc.push(data.rfc_comp);
+      rfc_c.push(data.rfc_corto);
+      curp.push(data.curp_comp);
+      nombre.push(data.nombre_s);
+      apellido_p.push(data.apellido_p);
+      apellido_m.push(data.apellido_m);
+      no_empleado.push(data.no_empleado);
+      id_puesto.push(data.id_puesto);
+      correo.push(data.correo_inst);
+      num_tel1.push(data.numero_contacto_1);
+      num_tel2.push(data.numero_contacto_2);
+      ext.push(data.ext_tel);
+      correo_p.push(data.correo_personal);
+      local.push(data.id_admin);
+      area.push(data.id_sub_admin);
+      depa.push(data.id_depto);
+      fec_ingres.push(data.fec_ingreso);
+      estatus.push(data.id_proc);
+      Escolaridad.push(data.Escolaridad);
+      estat_escolar.push(data.estatus_escolaridad);
+      Carrera.push(data.Carrera);
+      sex.push(data.Genero);
+      hijos.push(data.Hijos);
+      estado_civ.push(data.estado_civil);
+      puesto_fump.push(data.nombre_puesto_fun);
+      clav_puesto.push(data.clave_puesto);
+      posision.push(data.id_num_posision);
+      posision_jefe_.push(data.posision_jefe);
+      clave_jefe_.push(data.clave_jefe);
+      nom_jefe.push(data.nombre_jefe);
+      nivel_.push(data.nivel);
+      clave_pres_.push(data.Codigo_pres);
+      jefe_directo_.push(data.jefe_directo);
+      suel_net.push(data.sueldo_neto);
+      num_nombraMIEN.push(data.num_nombramiento)
+
+    }
+    var userDate = fec_ingres[0]['date'];
+    var date_string = moment(userDate).format("YYYY/MM/DD");
+ 
+//console.log(data)
+    if (rfc != null) {
+      $("#RFC_COMP").val(rfc[0]);
+      $("#RFC_CORTO").val(rfc_c[0]);
+      $("#CURP2").val(curp[0]);
+      $("#NOMBRE").val(nombre[0]);
+      $("#APELLIDO_P").val(apellido_p[0]);
+      $("#APELLIDO_M").val(apellido_m[0]);
+      $("#NO_EMPLEADO").val(no_empleado[0]);
+      $("#CORREO").val(correo[0]);
+      $("#CORREO_P").val(correo_p[0]);
+      $("#num_1").val(num_tel1[0]);
+      $("#num_2").val(num_tel2[0]);
+      $("#Puesto_fump").val(puesto_fump[0]);
+      $("#clav_puesto").val(clav_puesto[0]);
+      $("#ext_tel").val(ext[0]);
+      $("#clave_pres2").val(clave_pres_[0]);
+      $("#nivel").val(nivel_[0]);
+      $("#plaza_jefe").val(posision_jefe_[0]);
+      $("#clav_puesto_jefe").val(clave_jefe_[0]);
+      $("#nombre_jefe").val(nom_jefe[0]);
+      $("#sueldo_neto").val(suel_net[0]);
+      $("#fecha_ingreso").val(date_string);
+      $("#RFC_JEFE option[value='" + jefe_directo_[0] + "']").attr("selected", true);
+      $("#posision").val(posision[0]);
+      $("#estado_civ option[value='" + estado_civ[0] + "']").attr("selected", true);
+      $("#id_admin option[value='" + local[0] + "']").attr("selected", true);
+      $("#id_sub_admin option[value='" + area[0] + "']").attr("selected", true);
+      $("#ID_DEPA option[value='" + depa[0] + "']").attr("selected", true);
+      $("#ID_PUESTO option[value='" + id_puesto[0] + "']").attr("selected", true);
+      $("#estatus option[value='" + estatus[0] + "']").attr("selected", true);
+      $("#sex option[value='" + sex[0] + "']").attr("selected", true);
+      $("#Hijos option[value='" + hijos[0] + "']").attr("selected", true);
+      $("#Escolaridad option[value='" + Escolaridad[0] + "']").attr("selected", true);
+      $("#tipo_nombramiento12 option[value='" + num_nombraMIEN[0] + "']").attr("selected", true);
+      $("#estatus_esco option[value='" + estat_escolar[0] + "']").attr("selected", true);
+      $("#carrera").val(Carrera[0]);
+      $("#act_us_in_datos_basicos").attr("onclick", 'Actualiza_dat_basic(' + id_user_in[0] + ')');
+      $("#actualiza_dat_adicionales_bot").attr("onclick", 'Actualiza_datos_adicionales(' + id_user_in[0] + ')');
+      $("#actualiza_plazas").attr("onclick", 'Actualiza_datos_posision(' + id_user_in[0] + ')');
+      $("#actualiza_area_asig").attr("onclick", 'Actualiza_area_asign_y_jefe(' + id_user_in[0] + ')');
+      $('#nav-profile-tab').attr('onclick','trae_movimientos_x_personal(' + id_user_in[0] + ')');
+    } else {
+      alert('Los datos del usuario no estan disponibles.')
+    }
+  })
+
+}
+function Revisa_info_det_us2(id_user_in) {
   // createCookie('users',id_user_in);
   var id_us = id_user_in;
   $("#Modal_detalle_usuario_insumo").modal();
@@ -1277,7 +1464,7 @@ $(document).ready(function () {
     autoclose: true,
     todayHighlight: true,
      //daysOfWeekDisabled: [0, 6],
-    format: "dd/mm/yyyy",
+     format: "yyyy/mm/dd",
     toggleActive: true,
     language: "es"
   });

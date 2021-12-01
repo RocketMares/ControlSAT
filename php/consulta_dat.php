@@ -210,5 +210,18 @@ if (isset($_POST['posision_predic'])) {
   echo json_encode($datos);
 
 }
+if (isset($_POST['actualiza_mante_posision'])) {
+
+  include_once "ConsultaADR.php";
+  $datos =$_POST['actualiza_mante_posision'];
+  $cons = new ConsultaInfoADR();
+
+
+  $data = json_decode($datos);
+  
+  //$datos = $cons->Consulta_datos_plaza($data);
+
+}
+
 ?>
 

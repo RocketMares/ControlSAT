@@ -773,7 +773,7 @@ class Menu
                                     <label for='NO_EMPLEADO'>Fecha de baja: <samp
                                     class='text-danger'>*</samp></label>
                                      <input type='text' class='form-control' id='fecha_baja' name='fecha_baja'
-                                     placeholder='dd/mm/yyyy'
+                                     placeholder='yyyy/mm/dd'
                                      onkeyup='javascript:this.value=this.value.toUpperCase();' required>
                                 </div>
                                 <div class='form-group col-sm-4'>
@@ -1782,8 +1782,8 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
      </div>
  </div>
  <div class='modal-footer'>
-     <button type='button' class='btn btn-secondary' data-dismiss='modal'>Close</button>
-     <button type='button' id='agree_posision' class='btn btn-primary'>Save changes</button>
+     <button type='button' class='btn btn-secondary' data-dismiss='modal'>Cerrar</button>
+     <button type='button' id='agree_posision_change' class='btn btn-primary'>Guardar cambios</button>
  </div>
       </div>";
       
@@ -1814,6 +1814,609 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
   </div>
 </div>
    ";
+   }
+   public function Modals_bajas_laudos(){
+    include_once 'vistas_Plantilla.php';
+    include_once 'MetodosUsuarios.php';
+    include_once "ConsultaADR.php";
+    include_once 'sesion.php';
+    $consulta = new VistasPlantilla();
+    $mu = new MetodosUsuarios();
+    $cons = new ConsultaInfoADR();
+    $datos_procesos_act = $cons->vista_procesos_fijos();
+    $datos_procesos_act_plaz = $mu->estados_plaza();
+    
+    $datos_escolaridad = $mu->cat_escolar();
+    $datos_estatus_escolar = $mu->cat_estatus_escolar();
+    $datos_estados_civil = $mu->cat_estatus_civil();
+    $datos_tipos_nombramiento = $mu->cat_nombramientos();
+    $datos_sindicatos = $mu->cat_sindicatos();
+    $datos_nivel_jerar = $mu->cat_jerarquia();
+
+    $datos_plaza = $cons->vista_Posisiones_fijos();
+    $rows_sub = $consulta->Consulta_Sub($_SESSION["ses_id_admin_ing"]);
+    $rows_sub = $mu->Consulta_Subadmin($_SESSION["ses_id_admin_ing"]);
+    $rows_depto = $mu->Consulta_Depto($_SESSION["ses_id_admin_ing"]);
+    $rows_jefes = $mu->Consulta_Cat_Jefes_insumo();
+    $rows_perfil = $mu->Consulta_Perfiles();
+    $rows_administracion = $consulta->Consulta_Local();
+    $rows_local = $consulta->Consulta_Local();
+    $rows_perfil = $mu->Consulta_Perfiles();
+    // Modal de información del usuario detalles de movimientos
+    echo"<div class='modal fade bd-example-modal-xl' id='Modal_detalle_usuario_insumo' tabindex='-1' role='dialog'
+    aria-labelledby='myExtraLargeModalLabel' aria-hidden='true'>
+    <div class='modal-dialog modal-xl'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h5 class='modal-title' id='exampleModalCenterTitle'>DETALLE Y MOVIMIENTOS DEL USUARIO</h5>
+                <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+                    <span aria-hidden='true'>&times;</span>
+                </button>
+            </div>
+            <div class='modal-body '>
+
+                <div id='datos_princip_us'> </div>
+                <div id='entrada_princ'>";
+                // AQUI INICA EL MENU DE INFORMACION DEL USUARIO
+                    ECHO"<nav>
+                            <div class='nav nav-tabs' id='nav-tab' role='tablist'>
+                                <a class='nav-item nav-link active' id='nav-home-tab' data-toggle='tab' href='#DATOS_GEN'
+                                    role='tab' aria-controls='nav-home' aria-selected='true'>Datos del usuario</a>
+                                <a class='nav-item nav-link' id='nav-profile-tab' data-toggle='tab' href='#MOVIMIENTOS'
+                                    role='tab' aria-controls='nav-profile' aria-selected='false'  >Movimientos</a>
+                                <a class='nav-item nav-link' id='nav-profile-tab' data-toggle='tab' href='#SISTEMAS'
+                                    role='tab' aria-controls='nav-profile' aria-selected='false'>Acceso a sistemas</a>
+                                <a class='nav-item nav-link' id='nav-contact-tab' data-toggle='tab' href='#RESPONSIVAS'
+                                    role='tab' aria-controls='nav-contact' aria-selected='false'>Documentos firmados o por
+                                    firmar</a>
+                            </div>
+                        </nav>";
+              // FIN DE EL MENU
+                         ECHO" <div class='tab-content' id='nav-tabContent'>
+                
+                        <div class='tab-pane fade show active' id='DATOS_GEN' role='tabpanel'
+                            aria-labelledby='nav-home-tab'>";
+                            // INTERIOR DE DATOS GENERALES 
+                            // AQUI INICA EL MENU DE LOS DATOS GENERALES
+                            ECHO"
+                            <ul class='nav nav-pills mb-3' id='pills-tab' role='tablist'>
+                                <li class='nav-item'>
+                                    <a class='nav-link active' id='pills-home-tab' data-toggle='pill' href='#datos_basc'
+                                        role='tab' aria-controls='pills-home' aria-selected='true'>Datos Basicos</a>
+                                </li>
+                                <li class='nav-item'>
+                                    <a class='nav-link' id='pills-home-tab' data-toggle='pill' href='#datos_basc_adic'
+                                        role='tab' aria-controls='pills-home' aria-selected='true'>Datos adicionales</a>
+                                </li>
+                                <li class='nav-item'>
+                                    <a class='nav-link' id='pills-profile-tab' data-toggle='pill' href='#datos_op'
+                                        role='tab' aria-controls='pills-profile' aria-selected='false'>Area asignada</a>
+                                </li>
+                                <li class='nav-item'>
+                                    <a class='nav-link' id='pills-contact-tab' data-toggle='pill' href='#datos_fun'
+                                        role='tab' aria-controls='pills-contact' aria-selected='false'>Estructura Central</a>
+                                </li>
+                            </ul>";
+                            // FIN DE EL MENU
+                            ECHO "<div class='tab-content' id='pills-tabContent'>";
+                            
+                            // INICIO DE DATOS BASICOS
+                             echo"   <div class='tab-pane fade show active' id='datos_basc' role='tabpanel'
+                                    aria-labelledby='pills-home-tab'>
+
+                                    <div class='form-row'>
+                                        <div class='form-group col-md-3'>
+
+                                            <label for='RFC_CORTO'>CURP:<samp class='text-danger'>*</samp></label>
+                                            <input type='text' class='form-control' id='CURP2' name='CURP2'
+                                                placeholder='XXXX4548' maxlength='18' min='18' required
+                                                onkeyup='javascript:this.value=this.value.toUpperCase();'>
+                                        </div>
+                                        <div class='form-group col-md-3'>
+
+                                            <label for='RFC_CORTO'>RFC con Homoclave:<samp
+                                                    class='text-danger'>*</samp></label>
+                                            <input type='text' class='form-control' id='RFC_COMP' name='RFC_COMP'
+                                                placeholder='XXXX4548' maxlength='13' min='13' required
+                                                onkeyup='javascript:this.value=this.value.toUpperCase();'>
+                                        </div>
+                                        <div class='form-group col-md-3'>
+
+                                            <label for='RFC_CORTO'>RFC Corto:<samp class='text-danger'>*</samp></label>
+                                            <input type='text' class='form-control' id='RFC_CORTO' name='RFC_CORTO'
+                                                placeholder='XXXX4548' maxlength='9' min='8' required
+                                                onkeyup='javascript:this.value=this.value.toUpperCase();'>
+                                        </div>
+                                        <div class='form-group col-md-3'>
+                                            <label for='NO_EMPLEADO'>No. de Empleado:<samp
+                                                    class='text-danger'>*</samp></label>
+                                            <input type='text' class='form-control' id='NO_EMPLEADO' name='NO_EMPLEADO'
+                                                placeholder='123265' maxlength='6' onkeypress='return numero(event)'>
+                                        </div>
+                                    </div>
+                                    <div class='form-row'>
+                                        <div class='form-group col-md-4'>
+                                            <label for='NOMBRE'>Nombre(s):<samp class='text-danger'>*</samp></label>
+                                            <input type=' text' class='form-control letras' id='NOMBRE' name='NOMBRE'
+                                                placeholder='Juan Pérez' required
+                                                onkeyup='javascript:this.value=this.value.toUpperCase();'>
+                                        </div>
+                                        <div class='form-group col-md-4'>
+                                            <label for='NO_EMPLEADO'>Apellido Paterno:<samp
+                                                    class='text-danger'>*</samp></label>
+                                            <input type='text' class='form-control' id='APELLIDO_P' name='APELLIDO_P'
+                                                placeholder='López'
+                                                onkeyup='javascript:this.value=this.value.toUpperCase();' required>
+                                        </div>
+                                        <div class='form-group col-md-4'>
+                                            <label for='NO_EMPLEADO'>Apellido Materno:<samp
+                                                    class='text-danger'>*</samp></label>
+                                            <input type='text' class='form-control' id='APELLIDO_M' name='APELLIDO_M'
+                                                placeholder='Mares'
+                                                onkeyup='javascript:this.value=this.value.toUpperCase();' required>
+                                        </div>
+                                    </div>
+                                    <div class='form-row'>
+                                        <div class='form-group col-md-6'>
+                                            <label for='CORREO'>Correo Institucional:<samp
+                                                    class='text-danger'>*</samp></label>
+                                            <input type='email' class='form-control' id='CORREO' name='CORREO'
+                                                placeholder='xxxx@dssat.sat.gob.mx'>
+                                        </div>
+                                        <div class='form-group col-md-6'>
+                                            <label for='CORREO'>Correo Personal:<samp
+                                                    class='text-danger'>*</samp></label>
+                                            <input type='email' class='form-control' id='CORREO_P' name='CORREO_P'
+                                                placeholder='xxxx@gmail.com'>
+                                        </div>
+                                    </div>
+                                    <div class='form-row'>
+                                        <div class='form-group col-md-4'>
+                                            <label for='CORREO'>Número personal:<samp
+                                                    class='text-danger'>*</samp></label>
+                                            <input type='text' class='form-control' id='num_1' name='num_1'
+                                                placeholder='55XXXXXX73' maxlength='10' minlength='10'
+                                                onkeypress='return numero(event)'>
+                                        </div>
+                                        <div class='form-group col-md-4'>
+                                            <label for='CORREO'>Número adicional:<samp
+                                                    class='text-danger'>*</samp></label>
+                                            <input type='text' class='form-control' id='num_2' name='num_2'
+                                                placeholder='55XXXXXX73' maxlength='10' minlength='10'
+                                                onkeypress='return numero(event)'>
+                                        </div>
+                                        <div class='form-group col-md-4'>
+                                            <label for='CORREO'>Ext.Tel.:<samp class='text-danger'></samp></label>
+                                            <input type='email' class='form-control' id='ext_tel' name='ext_tel'
+                                                placeholder='42726' maxlength='5' minlength='5'
+                                                onkeypress='return numero(event)'>
+                                        </div>
+                                    </div>
+                                    <div class='form-row'>
+                                        <div class='form-group col-md-4'>
+                                            <label for='estatus'>estatus de actividad:<samp
+                                                    class='text-danger'>*</samp></label>
+                                            <select class='custom-select' id='estatus' name='estatus'>
+                                                <option value='0'>Seleccionar estatus</option>";
+                                                for ($i=0; $i <count($datos_procesos_act) ; $i++) { 
+                                                    echo "<option value='".$datos_procesos_act[$i]['id_proc']."'>".$datos_procesos_act[$i]['nombre_proc']."</option>";
+                                                }
+                                               
+                                            
+                                            echo "</select>
+                                        </div>
+                                        <div class='form-group col-md-4'>
+                                        <label for='NO_EMPLEADO'>Fecha de ingreso<samp
+                                                    class='text-danger'>*</samp></label>
+                                    <input type='text' class='form-control datepicker-inline' id='fecha_ingreso' name='fecha_ingreso'
+                                                placeholder='yyyy/mm/dd' 
+                                                required>
+                                    </div>
+                                  
+                                <div class='form-group col-md-4' style='display:none;' id='fec_baja_reg'>
+                                    <label for='NO_EMPLEADO'>Fecha de baja: <samp
+                                    class='text-danger'>*</samp></label>
+                                     <input type='text' class='form-control' id='fecha_baja' name='fecha_baja'
+                                     placeholder='dd/mm/yyyy'
+                                     onkeyup='javascript:this.value=this.value.toUpperCase();' required>
+                                </div>
+                                <div class='form-group col-sm-4'>
+                                <label for='estatus'>Tipo de nombramiento:<samp class='text-danger'>*</samp></label>
+                                <select class='custom-select' id='tipo_nombramiento12' name='tipo_nombramiento12'>
+                                    <option value='0'>Seleccionar estatus</option>";
+                                    for ($i=0; $i <count($datos_tipos_nombramiento) ; $i++) { 
+                                        echo "<option value='".$datos_tipos_nombramiento[$i]['id_tipo_nombramiento']."'>".$datos_tipos_nombramiento[$i]['nombre_nombramiento']."</option>";
+                                    }
+                                echo"</select>
+                            </div>
+                               <div class='form-group col-sm-10' style='display:none;' id='opcion_sindical'>
+                                <label for='estatus'>Nombre del sindicato:<samp class='text-danger'>*</samp></label>
+                                <select class='custom-select' id='sindicato' name='sindicato'>
+                                    <option value='0'>Seleccionar estatus</option>";
+                                   for ($i=0; $i <count($datos_sindicatos) ; $i++) { 
+                                        echo "<option value='".$datos_sindicatos[$i]['id_sindicato']."'>".$datos_sindicatos[$i]['nombre_sindical']."</option>";
+                                   }
+
+                                echo"</select>
+                            </div>
+                            </div>
+                            <div class='modal-footer'>
+                            <button type='button' class='btn btn-secondary' id='act_tabla_inicio' data-dismiss='modal'>Cerrar</button>
+                            <button type='button'  class='btn btn-success' id='act_us_in_datos_basicos' >Actualizar datos Basicos</button>
+                        </div>
+                             </div>";
+                                // FIN DE DATOS BASICOS
+                                // INICIO DE DATOS ADICIONALES
+                                ECHO"<div class='tab-pane fade' id='datos_basc_adic' role='tabpanel'
+                                aria-labelledby='pills-home-tab'>
+                                <div class='row container-fluid'> 
+                                <div class='form-group col-sm-4'>
+                                <label for='estatus'>Genero:<samp class='text-danger'>*</samp></label>
+                                <select class='custom-select' id='sex' name='sex'>
+                                    <option value='0'>Seleccionar Opción</option>
+                                    <option value='H'>Hombre</option>
+                                    <option value='M'>Mujer</option>
+                                    <option value='O'>Omitir</option>
+                                </select>
+                            </div>
+                            <div class='form-group col-sm-4'>
+                                <label for='estatus'>Hijos:<samp class='text-danger'>*</samp></label>
+                                <select class='custom-select' id='Hijos' name='Hijos'>
+                                    <option value='0'>Seleccionar Opción</option>
+                                    <option value='S'>Sí</option>
+                                    <option value='N'>No</option>
+                                </select>
+                            </div>
+                            <div class='form-group col-sm-4'>
+                            <label for='estatus'>Estado civil:<samp class='text-danger'>*</samp></label>
+                            <select class='custom-select' id='estado_civ' name='estado_civ'>
+                                <option value='0'>Seleccionar estado</option>";
+                                for ($i=0; $i <count($datos_estados_civil) ; $i++) { 
+                                    echo "<option value='".$datos_estados_civil[$i]['id_estado_civil']."'>".$datos_estados_civil[$i]['nombre_estado_civil']."</option>";
+                               }
+                           echo "</select>
+                        </div>
+                            </div>
+                            <div class='row container-fluid'>
+                            
+                                <div class='form-group col-sm-4'>
+                                    <label for='estatus'>Escolaridad:<samp class='text-danger'>*</samp></label>
+                                    <select class='custom-select' id='Escolaridad' name='Escolaridad'>
+                                        <option value='0'>Seleccionar Escolaridad</option>";
+                                        for ($i=0; $i <count($datos_escolaridad) ; $i++) { 
+                                            echo "<option value='".$datos_escolaridad[$i]['id_escolaridad']."'>".$datos_escolaridad[$i]['nombre_escolaridad']."</option>";
+                                       }
+                                    echo"</select>
+                                </div>
+                                <div class='form-group col-sm-4'>
+                                    <label for='estatus'>Estatus de estudios:<samp class='text-danger'>*</samp></label>
+                                    <select class='custom-select' id='estatus_esco' name='estatus_esco'>
+                                        <option value='0'>Seleccionar estatus</option>";
+                                        for ($i=0; $i <count($datos_estatus_escolar) ; $i++) { 
+                                            echo "<option value='".$datos_estatus_escolar[$i]['id_estatus_escolaridad']."'>".$datos_estatus_escolar[$i]['nombre_estatus_escolaridad']."</option>";
+                                       }
+                                    echo"</select>
+                                </div>
+                                <div class='form-group col-sm-4' id='asdas'>
+                                    <label for='estatus'>Carrera:</label>
+                                    <input type='text' class='form-control' id='carrera' name='carrera'
+                                        placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                        required>
+                                </div>
+                            
+                            </div>
+
+                    
+
+                            <div class='modal-footer'>
+                            <button type='button' class='btn btn-secondary' data-dismiss='modal' id='cerrar_modal_dat_adicio'>Cerrar</button>
+                            <button type='button' class='btn btn-success' id='actualiza_dat_adicionales_bot_baja' >Actualizar datos Adicionales</button>
+                        </div>
+
+                                </div>";
+                                 // FIN DE DATOS ADICIONALES
+                                //  INICIO DE AREA ASIGNADA
+                               ECHO" <div class='tab-pane fade' id='datos_op' role='tabpanel'
+                                    aria-labelledby='pills-profile-tab'>
+                               
+                                <!-- Aqui va la segunda parte -->
+                                <div class='form-row'>
+                                <div class='form-group col-md-6'>
+                                    <div class='input-group-prepend'>
+                                        <label for='id_admin'>Administración:<samp class='text-danger'>*</samp></label>
+                                    </div>
+                                    <select class='custom-select' id='id_admin' name='id_admin'>
+                                        <option value='0'>Seleccionar Local</option>";
+                                        
+                                    for ($i = 0; $i < count($rows_local); $i++) {
+                                        if ($rows_local[$i]["estatus"] == "A") {
+                                            echo "<option value='" . $rows_local[$i]["id_admin"] . "'>" . $rows_local[$i]["nombre_admin"] . "</option>";
+                                        }
+                                    }
+                                 echo"
+                                    </select>
+                                </div>
+                                <div class='form-group col-md-6'>
+                                    <label for='id_sub_admin'>Subadministración:<samp class='text-danger'>*</samp></label>
+                                    <select class='custom-select' id='id_sub_admin' name='id_sub_admin'>
+                                        <option value='0'>Seleccionar Subadministración</option>";
+                                       
+                  
+                                    for ($i = 0; $i < count($rows_sub); $i++) {
+                                        echo "<option value='" .  $rows_sub[$i]["id_sub_admin"] . "'>" .  $rows_sub[$i]["nombre_sub_admin"] . "</option>";
+                                    }
+                                    echo"
+                                    </select>
+                                </div>
+                            </div>
+                  
+                            <div class='form-row'>
+                  
+                                <div class='form-group col-md-6'>
+                                    <label for='ID_DEPA'>Departamento:<samp class='text-danger'>*</samp></label>
+                                    <select class='custom-select' id='ID_DEPA' name='ID_DEPA'>
+                                        <option value='0'>Seleccionar Departamento</option>";
+                                       
+                               
+                                    for ($i = 0; $i < count($rows_depto); $i++) {
+                                        echo "<option value='" .  $rows_depto[$i]["id_depto"] . "'>" .  $rows_depto[$i]["nombre_depto"] . "</option>";
+                                    }
+                                    echo"
+                                    </select>
+                                </div>
+                                <div class='form-group col-md-6'>
+                                    <label for='RFC_JEFE'>Jefe Directo:<samp class='text-danger'>*</samp></label>
+                                    <select class='custom-select' id='RFC_JEFE' name='RFC_JEFE'>
+                                        <option value='0'>Seleccionar Jefe directo</option>";
+                                        
+                   
+                                    for ($i = 0; $i < count($rows_jefes); $i++) {
+                                        if ($rows_jefes[$i]["estatus"] == "A") {
+                                            echo "<option value='" .  $rows_jefes[$i]["id_empleado_plant"] . "'>" .  $rows_jefes[$i]["nombre_empleado"] . "</option>";
+                                        }
+                                    }
+                                    echo"
+                                    </select>
+                                </div>
+                            </div>
+                           
+                            <div class='form-row'>
+                                <div class='form-group col-md-6'>
+                                    <div class='input-group-prepend'>
+                                        <label for='ID_PUESTO'>Puesto ADR:<samp class='text-danger'>*</samp></label>
+                                    </div>
+                                    <select class='custom-select' id='ID_PUESTO' name='ID_PUESTO'>
+                                        <option value='0'>Seleccionar Puesto</option>";
+                                        
+                                    $rows_puestos = $mu->Consulta_Puestos_us_insu();
+                                    for ($i = 0; $i < count($rows_puestos); $i++) {
+                                        echo "<option value='" .  $rows_puestos[$i]["id_puesto"] . "'>" .  $rows_puestos[$i]["nombre_puesto"] . "</option>";
+                                    }
+                                    echo"
+                                    </select>
+                                </div>
+                            </div>
+                            <div class='modal-footer'>
+                            <button type='button' class='btn btn-secondary' data-dismiss='modal' id='cerrar_modal_dat_area'>Cerrar</button>
+                            <button type='button' class='btn btn-success' id='actualiza_area_asig'>Actualizar Area asignada</button>
+                        </div>
+                                </div>";
+                                //  FIN DE AREA ASIGNADA
+                                       //  INICIO DE ESTRUCTURA FUNCIONAL
+                               ECHO" <div class='tab-pane fade' id='datos_fun' role='tabpanel'
+                                    aria-labelledby='pills-contact-tab'>
+                        
+                                   
+                                    <div class='container-fluid'>
+                                    <div class='container-fluid' >
+                                    <div class='row container-fluid' >
+                                    <div class = col-md-6>
+                                    <h3>
+                                    Datos de Plaza actual
+                                    </h3>
+                                    </div>
+                                    <div class = col-md-6>
+                                    <label for='estatus'>Proceso a realizar:<samp
+                                                    class='text-danger'>*</samp></label>
+                                            <select class='custom-select' id='estatus_plazas_act' name='estatus_plazas_act'>
+                                                <option value='0'>Seleccionar estatus</option>";
+                                                for ($i=0; $i <count($datos_procesos_act_plaz) ; $i++) { 
+                                                    echo "<option value='".$datos_procesos_act_plaz[$i]['id_proc']."'>".$datos_procesos_act_plaz[$i]['nombre_proc']."</option>";
+                                                }
+                                               
+                                            
+                                            echo "</select>
+                                    </div>
+                                    </div>
+                                    </div>
+                                    <div class='row container-fluid '>
+                                    <div class='form-group col-sm-4'>
+                                            <label for='estatus'>Posisión o plaza asignada:<samp class='text-danger'>*</samp></label>
+                                            <input type='text' disabled class='form-control' id='posision' name='posision'  placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                            required>
+                                        </div>
+                                        <div class='form-group col-sm-4' id='asdas'>
+                                        <label for='estatus'>Nivel:</label>
+                                        <input type='text' disabled class='form-control' id='nivel' name='nivel'  placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                            required>
+                                    </div>
+                                    <div class='form-group col-sm-4' id='asdas'>
+                                        <label for='estatus'>Clave Presupuestal:</label>
+                                        <input type='text' disabled class='form-control' id='clave_pres2' name='clave_pres2'  placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                            required>
+                                    </div>
+                                    </div>
+                                    <div class='row container-fluid'>
+                            
+                                    <div class='form-group col-sm-8'>
+                                        <label for='estatus'>Nombre de Puesto central:<samp class='text-danger'>*</samp></label>
+                                        <input type='text' disabled class='form-control' id='Puesto_fump' name='Puesto_fump'  placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                        required>
+                                    </div>
+                                    <div class='form-group col-sm-4' id='asdas'>
+                                    <label for='estatus'>Clave Puesto:</label>
+                                    <input type='text' disabled class='form-control' id='clav_puesto' name='clav_puesto'  placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                        required>
+                                </div>
+                                    
+                               
+                                
+                                </div>
+                                <div class='row container-fluid'>
+                              
+                                <div class='col-md-4 '>
+                                <label for='validationServer02'>Sueldo Neto: <samp class='text-danger'>*</samp></label>
+                                <input class='form-control' name='sueldo_neto' id='sueldo_neto' value='$'
+                                data-inputmask-alias='numeric' data-inputmask-groupSeparator=',' data-inputmask-digits=2
+                                data-inputmask-digitsOptional=false data-inputmask-prefix='$ '
+                                data-inputmask-placeholder='0' placeholder='$ 0.00 MXM' > 
+                            </div>
+                            
+                            </div>
+                                <div class='row container-fluid'>
+                            
+                                <div class='form-group col-sm-4'>
+                                    <label for='estatus'>Posision Jefe:<samp class='text-danger'>*</samp></label>
+                                    <input type='text' disabled class='form-control' id='plaza_jefe' name='plaza_jefe'  placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                    required>
+                                </div>
+                                <div class='form-group col-sm-4' id='asdas'>
+                                <label for='estatus'>Clave Puesto Jefe:</label>
+                                <input type='text' disabled class='form-control' id='clav_puesto_jefe' name='clav_puesto_jefe'  placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                    required>
+                            </div>
+                            <div class='form-group col-sm-4' id='asdas'>
+                                <label for='estatus'>Nombre de Jefe directo:</label>
+                                <input type='text' disabled class='form-control' id='nombre_jefe' name='nombre_jefe'  placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                    required>
+                            </div>
+                                                            
+                            </div>
+                            
+                            </div>
+                            <div class='container-fluid' id='democion_promocion' style='display:none;' >
+                            <div class='container-fluid' >
+                            <h3>
+                            Datos de Plaza tentativa
+                            </h3>
+                            </div>
+                                    <div class='row container-fluid '>
+                                    <div class='form-group col-sm-4'>
+                                            <label for='estatus'>Posisión o plaza asignada:<samp class='text-danger'>*</samp></label>
+                                            <select class='custom-select' id='posision_ten' name='posision_ten'>
+                                                <option value='0'>Seleccionar Posisión</option>";
+                                            for ($i=0; $i < count($datos_plaza) ; $i++) { 
+                                                echo"<option value='".$datos_plaza[$i]['id_posision']."'>".$datos_plaza[$i]['id_num_posision']."</option>";
+                                            }
+                                               
+                                                
+                                           echo" </select>
+                                        </div>
+                                        <div class='form-group col-sm-4' id='asdas'>
+                                        <label for='estatus'>Nivel:</label>
+                                        <input type='text' disabled class='form-control' id='nivel_ten' name='nivel_ten'  placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                            required>
+                                    </div>
+                                    <div class='form-group col-sm-4' id='asdas'>
+                                        <label for='estatus'>Clave Presupuestal:</label>
+                                        <input type='text' disabled class='form-control' id='clave_pres2_ten' name='clave_pres2_ten'  placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                            required>
+                                    </div>
+                                    </div>
+                                    <div class='row container-fluid'>
+                            
+                                    <div class='form-group col-sm-8'>
+                                        <label for='estatus'>Nombre de Puesto central:<samp class='text-danger'>*</samp></label>
+                                        <input type='text' disabled class='form-control' id='Puesto_fump_ten' name='Puesto_fump_ten'  placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                        required>
+                                    </div>
+                                    <div class='form-group col-sm-4' id='asdas'>
+                                    <label for='estatus'>Clave Puesto:</label>
+                                    <input type='text' disabled class='form-control' id='clav_puesto_ten' name='clav_puesto_ten'  placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                        required>
+                                </div>
+                                    
+                               
+                                
+                                </div>
+                                <div class='row container-fluid'>
+                            
+                                <div class='form-group col-sm-4'>
+                                    <label for='estatus'>Posision Jefe:<samp class='text-danger'>*</samp></label>
+                                    <input type='text' disabled class='form-control' id='plaza_jefe_ten' name='plaza_jefe_ten'  placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                    required>
+                                </div>
+                                <div class='form-group col-sm-4' id='asdas'>
+                                <label for='estatus'>Clave Puesto Jefe:</label>
+                                <input type='text' disabled class='form-control' id='clav_puesto_jefe_ten' name='clav_puesto_jefe_ten'  placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                    required>
+                            </div>
+                            <div class='form-group col-sm-4' id='asdas'>
+                                <label for='estatus'>Nombre de Jefe directo:</label>
+                                <input type='text' disabled class='form-control' id='nombre_jefe_ten' name='nombre_jefe_ten'  placeholder='Ejem: Administración de Empresas' onkeyup='javascript:this.value=this.value.toUpperCase();'
+                                    required>
+                            </div>
+                                                            
+                            </div>
+                            </div>
+
+                                    <div class='modal-footer'>
+                                    <button type='button' class='btn btn-secondary' id='cerrar_mod_actualiza_plazas' data-dismiss='modal'>Cerrar</button>
+                                    <button type='button' class='btn btn-success' id='actualiza_plazas'>Actualizar estructura Central</button>
+                                </div>
+                                </div>
+                                ";
+                                 //  FIN DE ESTRUCTURA FUNCIONAL
+                          ECHO"  </div>
+                             </div>";
+                                  //  FIN DE DATOS GENERALES
+                                  //  INICIO DE REGISTRO DE MOVIMIENTOS
+                        ECHO"<div class='tab-pane fade' id='MOVIMIENTOS' role='tabpanel' aria-labelledby='nav-profile-tab'>
+                            <div id='caja_mov_personal_insumo' class='vh-25'>
+                            
+                            </div>
+
+                        </div>";
+                         //  FIN DE REGISTRO DE MOVIMIENTOS
+                         //  INICIO DE ACCESO A SISTEMAS
+                         ECHO" <div class='tab-pane fade' id='SISTEMAS' role='tabpanel' aria-labelledby='nav-contact-tab'>
+                            .3.
+
+
+
+
+                            <div class='modal-footer'>
+                            <button type='button' class='btn btn-secondary' data-dismiss='modal'>Cerrar</button>
+                            <button type='button' class='btn btn-success'>Actualizar</button>
+                        </div>
+                        </div>";
+                        //  FIN DE ACCESO A SISTEMAS
+                        //  INICIO DE REGISTRO DE DOCUMENTOS FIRMADOS/RESPONSIVAS/CAMBIOS DE NOMBRAMIENTOS
+                        ECHO" <div class='tab-pane fade' id='RESPONSIVAS' role='tabpanel' aria-labelledby='nav-contact-tab'>
+
+                            .4.
+
+
+
+
+
+                            <div class='modal-footer'>
+                            <button type='button' class='btn btn-secondary' data-dismiss='modal'>Close</button>
+                            <button type='button' class='btn btn-primary'>Save changes</button>
+                        </div>
+                        </div>";
+                          //  FIN DE ACCESO A SISTEMAS
+                    ECHO"</div>
+
+                </div>
+
+
+
+            </div>
+         
+        </div>
+    </div>
+</div>";
    }
    
 }
