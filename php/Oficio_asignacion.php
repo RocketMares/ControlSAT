@@ -144,7 +144,7 @@ switch ($est_esco_admin) {
     $pdf->Text(42, 43, utf8_decode("Designación"));
     $pdf->Text(101, 58, utf8_decode('Ciudad de México, '.$Fecha_hoy.'.'));
     $pdf->SetFont('Montserrat-Bold', '', 10);
-    $pdf->Text(25, 77, utf8_decode("C.$nombre $apellidoP $apellidoM"));
+    $pdf->Text(25, 77, utf8_decode("C. $nombre $apellidoP $apellidoM"));
     $pdf->SetFont('Montserrat-Light', '', 10);
     $pdf->Text(25, 85, utf8_decode("P r e s e n t e"));
     if ($genero == 'M') {
