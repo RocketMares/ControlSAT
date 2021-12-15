@@ -184,4 +184,10 @@
   .shadow, .shadow-sm {
     border-collapse: separate;
 }
-  
+.Arreglos
+{
+	background: url('../img/Modulo_en_proceso.jpg');
+    height: 50vh; /*detecta el dispositivo*/
+    background-position: center; /*Centrado*/
+    /* background-size: cover; tamaño adecuado conforme se detectye con el vh */
+}

@@ -131,7 +131,7 @@ class Menu
       <!-- Footer inicio -->
  
        
-        <footer class='container-fluid py-1 fixed-low'  style='background-color:#2E2E2E;' >
+        <footer class='container-fluid py-5 fixed-low'  style='background-color:#2E2E2E;' >
                 <p class='float-right'><a class='text-white' href='http://99.85.26.227:8181/Comunicados/login.html'>Comunicados</a></p>
                 <p>&copy; SAT. &middot; <a class='text-white' href='https://intrasat2.sat.gob.mx/'>Intrasat</a>&middot;</p>
         </footer>
@@ -278,14 +278,22 @@ class Menu
                     <div class='modal-body'>
                         <!-- Contenido del modal aqui-->
                         <div class='form-row'>
-                            <div class='form-group col-md-6'>
+                        <div class='form-group col-md-4'>
+
+                        <label for='RFC_CORTO_A'>RFC:<samp class='text-danger'>*</samp></label>
+                        <input type='text' class='form-control' id='RFC_COMP_A' name='RFC_COMP_A'
+                            placeholder='XXXX4548' maxlength='8' min='8' required
+                            onkeyup='javascript:this.value=this.value.toUpperCase();'>
+                    </div>
+                            <div class='form-group col-md-4'>
 
                                 <label for='RFC_CORTO_A'>RFC Corto:<samp class='text-danger'>*</samp></label>
                                 <input type='text' class='form-control' id='RFC_CORTO_A' name='RFC_CORTO_A'
                                     placeholder='XXXX4548' maxlength='8' min='8' required
                                     onkeyup='javascript:this.value=this.value.toUpperCase();'>
                             </div>
-                            <div class='form-group col-md-6'>
+                       
+                            <div class='form-group col-md-4'>
                                 <label for='NO_EMPLEADO_A'>No. de Empleado:<samp class='text-danger'>*</samp></label>
                                 <input type='text' class='form-control' id='NO_EMPLEADO_A' name='NO_EMPLEADO_A'
                                     placeholder='123265' maxlength='6'>
@@ -437,12 +445,18 @@ class Menu
 
 
                 <div class='form-row'>
-                    <div class='form-group col-md-6'>
+                <div class='form-group col-md-6'>
+
+                <label for='RFC_CORTO'>RFC completo:<samp class='text-danger'>*</samp></label>
+                <input type='text' class='form-control' id='RFC_COMPLE' name='RFC_COMPLE' placeholder='MASA950519E48' maxlength='13' min='8' required onkeyup='javascript:this.value=this.value.toUpperCase();'>
+            </div>
+                    <div class='form-group col-md-3'>
 
                         <label for='RFC_CORTO'>RFC Corto:<samp class='text-danger'>*</samp></label>
-                        <input type='text' class='form-control' id='RFC_CORTO' name='RFC_CORTO' placeholder='XXXX4548' maxlength='8' min='8' required onkeyup='javascript:this.value=this.value.toUpperCase();'>
+                        <input type='text' class='form-control' id='RFC_CORTO' name='RFC_CORTO' placeholder='XXXX4548' maxlength='9' min='8' required onkeyup='javascript:this.value=this.value.toUpperCase();'>
                     </div>
-                    <div class='form-group col-md-6'>
+
+                    <div class='form-group col-md-3'>
                         <label for='NO_EMPLEADO'>No. de Empleado:<samp class='text-danger'>*</samp></label>
                         <input type='text' class='form-control' id='NO_EMPLEADO' name='NO_EMPLEADO' placeholder='123265' maxlength='6'>
                     </div>
@@ -599,7 +613,15 @@ class Menu
     $rows_local = $consulta->Consulta_Local();
     $rows_perfil = $mu->Consulta_Perfiles();
     // Modal de información del usuario detalles de movimientos
-    echo"<div class='modal fade bd-example-modal-xl' id='Modal_detalle_usuario_insumo' tabindex='-1' role='dialog'
+    
+
+    
+    echo"
+    
+    
+    
+    
+    <div class='modal fade bd-example-modal-xl' id='Modal_detalle_usuario_insumo' tabindex='-1' role='dialog'
     aria-labelledby='myExtraLargeModalLabel' aria-hidden='true'>
     <div class='modal-dialog modal-xl'>
         <div class='modal-content'>
@@ -700,7 +722,7 @@ class Menu
                                         <div class='form-group col-md-4'>
                                             <label for='NO_EMPLEADO'>Apellido Paterno:<samp
                                                     class='text-danger'>*</samp></label>
-                                            <input type='text' class='form-control' id='APELLIDO_P' name='APELLIDO_P'
+                                            <input type='text' class='form-control' id='APELLIDO_P1' name='APELLIDO_P1'
                                                 placeholder='López'
                                                 onkeyup='javascript:this.value=this.value.toUpperCase();' required>
                                         </div>
@@ -785,7 +807,7 @@ class Menu
                                     }
                                 echo"</select>
                             </div>
-                               <div class='form-group col-sm-10' style='display:none;' id='opcion_sindical'>
+                               <div class='form-group col-sm-10' id='opcion_sindical'>
                                 <label for='estatus'>Nombre del sindicato:<samp class='text-danger'>*</samp></label>
                                 <select class='custom-select' id='sindicato' name='sindicato'>
                                     <option value='0'>Seleccionar estatus</option>";
@@ -951,6 +973,17 @@ class Menu
                                     echo"
                                     </select>
                                 </div>
+                                <div class='form-group col-md-6'>
+                                <div class='input-group-prepend'>
+                                    <label for='confirma_gen_ofi'>Generar Oficio?:<samp class='text-danger'>*</samp></label>
+                                </div>
+                                <select class='custom-select' id='sda' name='sda'>
+                                    <option value='0'>Seleccionar Puesto</option>
+                                    <option value='1'>Sí</option>
+                                    <option value='2'>No</option>";
+                                echo"
+                                </select>
+                            </div>
                             </div>
                             <div class='modal-footer'>
                             <button type='button' class='btn btn-secondary' data-dismiss='modal' id='cerrar_modal_dat_area'>Cerrar</button>
@@ -1128,7 +1161,7 @@ class Menu
                                   //  FIN DE DATOS GENERALES
                                   //  INICIO DE REGISTRO DE MOVIMIENTOS
                         ECHO"<div class='tab-pane fade' id='MOVIMIENTOS' role='tabpanel' aria-labelledby='nav-profile-tab'>
-                            <div id='caja_mov_personal_insumo' class='vh-25'>
+                            <div id='caja_mov_personal_insumo' class='vh-50'>
                             
                             </div>
 
@@ -1330,9 +1363,10 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
                                     placeholder='dd/mm/yyyy'
                                     onkeyup='javascript:this.value=this.value.toUpperCase();' required>
                                 </div>
+
                                 <div class='form-group col-md-4'>
                                 <label for='archvioID' class='custom-file-label'>Foto del empleado:<samp class='text-danger'>*</samp></label>
-                                <input type='file' class='custom-file-input' id='archvioID' name='archvioID' accept='image/jpg'>                        
+                                <input type='file' class='custom-file-input' id='archvioID' name='archvioID' accept='image/jpg' placeholder='No.empleado.jpg'>                        
                                 </div>
                             </div>
                         </form>
@@ -1587,8 +1621,8 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
                           </div>
 
                               <div class='modal-footer'>
-                              <button type='button' class='btn btn-secondary' data-dismiss='modal'>Close</button>
-                              <button type='button' class='btn btn-primary' id='registrar_us_ins'>Send message</button>
+                              <button type='button' class='btn btn-secondary' data-dismiss='modal'>Cancelar</button>
+                              <button type='button' class='btn btn-primary' id='registrar_us_ins'>Agregar Empleado</button>
                             </div>
                               </div>
                               ";
@@ -1605,7 +1639,10 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
 
    public function Modal_posisiones(){
        include_once 'ConsultaADR.php';
+       include_once 'MetodosUsuarios.php';
        $mu = new ConsultaInfoADR();
+       $mu = new MetodosUsuarios();
+       $datos_procesos_act_plaz = $mu->estados_plaza_mante();
        echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='Agregar_posisones_nuevas' role='dialog'
        aria-hidden='true'>
        <div class='modal-dialog modal-xl'>
@@ -1678,8 +1715,8 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
                </div>
                <div class='modal-footer'>
                    <button type='button' class='btn btn-secondary' data-dismiss='modal'
-                       id='cerrar_mod_agrega_pososion'>Close</button>
-                   <button type='button' class='btn btn-primary' id='registra_posison'>Send message</button>
+                       id='cerrar_mod_agrega_pososion'>Cerrar</button>
+                   <button type='button' class='btn btn-primary' id='registra_posison'>Registrar Posissión</button>
                </div>
            </div>
        </div>
@@ -1711,13 +1748,13 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
 
     echo"<ul class='nav nav-pills mb-3' id='pills-tab' role='tablist'>
   <li class='nav-item'>
-    <a class='nav-link active' id='pills-home-tab' data-toggle='pill' href='#informes_plaz' role='tab' aria-controls='pills-home' aria-selected='true'>Información</a>
+    <a class='nav-link active' id='Nav_posision_info' data-toggle='pill' href='#informes_plaz' role='tab' aria-controls='pills-home' aria-selected='true'>Información</a>
   </li>
   <li class='nav-item'>
-    <a class='nav-link' id='pills-profile-tab' data-toggle='pill' href='#Moviemientos_plaz' role='tab' aria-controls='pills-profile' aria-selected='false'>Movimientos</a>
+    <a class='nav-link' id='Nav_posision_mov' data-toggle='pill' href='#Moviemientos_plaz' role='tab' aria-controls='pills-profile' aria-selected='false'>Movimientos</a>
   </li>
   <li class='nav-item'>
-    <a class='nav-link' id='pills-contact-tab' data-toggle='pill' href='#Comentarios_plaz' role='tab' aria-controls='pills-contact' aria-selected='false'>Comentarios</a>
+    <a class='nav-link' id='Nav_posision_com' data-toggle='pill' href='#Comentarios_plaz' role='tab' aria-controls='pills-contact' aria-selected='false'>Comentarios</a>
   </li>
 </ul>";
 
@@ -1755,15 +1792,14 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
  
              $rows_puestos = $mu->Consulta_Puestos_Fun();
              for ($i = 0; $i < count($rows_puestos); $i++) { echo "<option value='" . $rows_puestos[$i]["id_puesto_fump"]
-                 . "'>" . $rows_puestos[$i]["nombre_puesto"] . "</option>" ; } echo" </select> </div> <div
-                 class='form-group col-sm-4' id='asdas'>
+                 . "'>" . $rows_puestos[$i]["nombre_puesto"] . "</option>" ; } echo" 
+                 </select> 
+                 </div> 
+                 <div class='form-group col-sm-4' id='asdas'>
                  <label for='estatus'>Clave Puesto:</label>
                  <input type='text' DISABLED class='form-control' id='pos_clav_puesto_add' name='pos_clav_puesto_add'
                      placeholder='Ejem:RE6025' onkeyup='javascript:this.value=this.value.toUpperCase();' required>
-     </div>
- 
- 
- 
+                 </div>
  </div>
  <div class='row container-fluid'>
      <div class='col-md-4 '>
@@ -1781,8 +1817,20 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
              placeholder='Ejem: 103XXXXX' onkeypress='return numero(event)' required>
      </div>
  </div>
+ <div class = col-md-6>
+ <label for='estatus'>Proceso a realizar:<samp
+                 class='text-danger'>*</samp></label>
+         <select class='custom-select' id='estatus_plazas_act_mante' name='estatus_plazas_act_mante'>
+             <option value='0'>Seleccionar estatus</option>";
+             for ($i=0; $i <count($datos_procesos_act_plaz) ; $i++) { 
+                 echo "<option value='".$datos_procesos_act_plaz[$i]['id_proc']."'>".$datos_procesos_act_plaz[$i]['nombre_proc']."</option>";
+             }
+            
+         
+         echo "</select>
+ </div>
  <div class='modal-footer'>
-     <button type='button' class='btn btn-secondary' data-dismiss='modal'>Cerrar</button>
+     <button type='button' class='btn btn-secondary' id='cerrar_mod_change_posis' data-dismiss='modal'>Cerrar</button>
      <button type='button' id='agree_posision_change' class='btn btn-primary'>Guardar cambios</button>
  </div>
       </div>";
@@ -1790,7 +1838,9 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
       
       //MOVIMIENTOS PLAZA
       echo"<div class='tab-pane fade' id='Moviemientos_plaz' role='tabpanel' aria-labelledby='pills-profile-tab'>
-      hola1
+      <div class='container-fluid' id= 'Caja_mov_plazas'>
+      
+      </div>
       
       </div>";
       
@@ -2029,10 +2079,10 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
                                     }
                                 echo"</select>
                             </div>
-                               <div class='form-group col-sm-10' style='display:none;' id='opcion_sindical'>
+                               <div class='form-group col-sm-10' id='opcion_sindical'>
                                 <label for='estatus'>Nombre del sindicato:<samp class='text-danger'>*</samp></label>
-                                <select class='custom-select' id='sindicato' name='sindicato'>
-                                    <option value='0'>Seleccionar estatus</option>";
+                                <select class='custom-select' id='sindicato1' name='sindicato1'>
+                                    <option value='0'selected>Seleccionar estatus</option>";
                                    for ($i=0; $i <count($datos_sindicatos) ; $i++) { 
                                         echo "<option value='".$datos_sindicatos[$i]['id_sindicato']."'>".$datos_sindicatos[$i]['nombre_sindical']."</option>";
                                    }
@@ -2041,8 +2091,8 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
                             </div>
                             </div>
                             <div class='modal-footer'>
-                            <button type='button' class='btn btn-secondary' id='act_tabla_inicio' data-dismiss='modal'>Cerrar</button>
-                            <button type='button'  class='btn btn-success' id='act_us_in_datos_basicos' >Actualizar datos Basicos</button>
+                            <button type='button' class='btn btn-secondary' id='act_tabla_inicio_baja' data-dismiss='modal'>Cerrar</button>
+                            <button type='button'  class='btn btn-success' id='act_us_in_datos_basicos_baja' >Actualizar datos Basicos</button>
                         </div>
                              </div>";
                                 // FIN DE DATOS BASICOS
@@ -2109,7 +2159,7 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
                     
 
                             <div class='modal-footer'>
-                            <button type='button' class='btn btn-secondary' data-dismiss='modal' id='cerrar_modal_dat_adicio'>Cerrar</button>
+                            <button type='button' class='btn btn-secondary' data-dismiss='modal' id='cerrar_modal_dat_adicio_baja'>Cerrar</button>
                             <button type='button' class='btn btn-success' id='actualiza_dat_adicionales_bot_baja' >Actualizar datos Adicionales</button>
                         </div>
 
@@ -2372,7 +2422,7 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
                                   //  FIN DE DATOS GENERALES
                                   //  INICIO DE REGISTRO DE MOVIMIENTOS
                         ECHO"<div class='tab-pane fade' id='MOVIMIENTOS' role='tabpanel' aria-labelledby='nav-profile-tab'>
-                            <div id='caja_mov_personal_insumo' class='vh-25'>
+                            <div id='caja_mov_personal_insumo' class='overflow-auto'>
                             
                             </div>
 

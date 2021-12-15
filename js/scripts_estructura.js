@@ -327,4 +327,106 @@ $(document).ready(function () {
             })
         })
     })
+
+    $('#registra_posison').on('click',function(){
+        var posision_new = $('#New_posision').val();
+        var nivel_new = $('#New_nivel_add').val();
+        var clave_presupuestal = $('#New_clave_pres_add').val();
+        var id_puesto_fun = $('#New_Puesto_fump_add').val();
+        var clave_puesto = $('#New_clav_puesto_add').val();
+        var sueldo_neto = $('#New_sueldo_neto').val();
+        var jefe_plaza = $('#New_plaza_jefe').val();
+
+        var json = {
+            posision_new:posision_new,
+            nivel_new:nivel_new,
+            clave_presupuestal:clave_presupuestal,
+            id_puesto_fun:id_puesto_fun,
+            clave_puesto:clave_puesto,
+            sueldo_neto:sueldo_neto,
+            jefe_plaza:jefe_plaza
+        }
+        var datos = JSON.stringify(json);
+
+        if (posision_new.length < 8) {
+            toastr.error("No puedes agregar un número de posision menor a 8 caracteres","Notificiación",{
+                "progressBar":true
+            })
+        }else{
+            if (nivel_new = '') {
+                toastr.error("No puedes dejar la posision sin asignarle un nivel o que el nivel tenga menos de 3 caracteres","Notificiación",{
+                    "progressBar":true
+                })
+            }else{
+                if (clave_presupuestal=='') {
+                    toastr.error("No puedes dejar en blanco la clave presupuestal","Notificiación",{
+                        "progressBar":true
+                    })
+                }
+                else{
+                    if (id_puesto_fun==0) {
+                        toastr.error("Tienes que asignarle un puesto","Notificiación",{
+                            "progressBar":true
+                        })
+                    }
+                    else{
+
+                            $.post("php/Ac_estructrutas.php",{registra_posision:datos},function(data){
+                            }).done(function(data){
+                                toastr.success(data,"Notificiación",{
+                                    "progressBar":true
+                                })
+                            })
+                        
+                    }
+                }
+            }
+        }
+
+
+    })
+
 })
+
+
+function Registrar_puesto_ADR() {
+
+    var nombre_puesto = $("#nombre_puesto_adr_reg").val();
+    data = {nombre_puesto:nombre_puesto}
+    var json = JSON.stringify(data)
+     $.post("php/Ac_estructrutas.php", {
+         reg_puesto_adr: json
+     }, function (data) {
+         toastr.info(data,"Notificación",{
+             "progressBar":true
+         })
+    });
+
+
+}
+function Actualiza_puesto_ADR() {
+    var id_puesto = $("#id_puesto_adr").val();
+    var nombre_puesto = $("#nombre_puesto_adr").val();
+    var estatus = $('input:radio[name=Estatus_activo_adr]:checked').val();
+    data = {id_puesto:id_puesto,
+        nombre_puesto:nombre_puesto,
+        estatus:estatus}
+
+    if (nombre_puesto != '') {
+        var json = JSON.stringify(data)
+     $.post("php/Ac_estructrutas.php", {
+         act_puesto_adr: json
+     }, function (data) {
+         toastr.info(data,"Notificación",{
+             "progressBar":true
+         })
+    });
+    } else {
+        toastr.error('No puedes dejar en blanco el nombre del puesto seleccionado',"Notificación",{
+            "progressBar":true
+        })
+    }
+    
+
+
+}

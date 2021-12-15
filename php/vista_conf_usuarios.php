@@ -53,7 +53,7 @@ class Conf_Users
                                 <td>" . $valores[$i]["rfc_corto"] . "</td>
                                 <td>" . $valores[$i]["no_empleado"] . "</td>
                                 <td>" . $valores[$i]["nombre_empleado"] . "</td>
-                                <td>" . $valores[$i]["no_empleado"] . "</td>
+                                <td>" . $valores[$i]["nombre_perfil"] . "</td>
                                 <td>" . $valores[$i]["nombre_admin"] . "</td>
                                 <td>" . $valores[$i]["nombre_sub_admin"] . "</td>
                                 <td>" . $valores[$i]["nombre_depto"] . "</td>
@@ -83,7 +83,7 @@ class Conf_Users
 
         echo "
                 <div class='table-responsive'>
-                <table class='table table-striped table-sm'>
+                <table class='table table-striped table-sm text-center'>
                 <thead>
                     <tr>
                         <th scope='col'>#</th>
@@ -92,7 +92,7 @@ class Conf_Users
                         <th scope='col'>Nombre</th>
                         <th scope='col' >Perfil</th>
                         <th scope='col'>Administración</th>
-                        <th scope='col'>Sub administración</th>
+                        <th scope='col'>Subadministración</th>
                         <th scope='col'>Departamento</th>
                         <th scope='col'>estatus</th>
                         <th scope='col'>Editar</th>
@@ -194,16 +194,16 @@ class Conf_Users
 
         echo "
                 <div class='table-responsive'>
-                <table class='table table-striped table-sm'>
+                <table class='table table-striped table-sm text-center'>
                 <thead>
                     <tr>
                         <th scope='col'>#</th>
                         <th scope='col'>RFC Corto</th>
                         <th scope='col'>No. Empleado</th>
                         <th scope='col'>Nombre</th>
-                        <th scope='col' >Perfil</th>
+                        <th scope='col'>Perfil</th>
                         <th scope='col'>Administración</th>
-                        <th scope='col'>Sub administración</th>
+                        <th scope='col'>Subadministración</th>
                         <th scope='col'>Departamento</th>
                         <th scope='col'>estatus</th>
                         <th scope='col'>Editar</th>
@@ -301,7 +301,7 @@ class Conf_Users
         }
 
         echo "<div class='table-responsive'>
-              <table class='table table-striped table-sm'>
+              <table class='table table-striped table-sm text-center'>
                 <thead>
                     <tr>
                         <th scope='col'>#</th>
@@ -310,7 +310,7 @@ class Conf_Users
                         <th scope='col'>Nombre</th>
                         <th scope='col' >Perfil</th>
                         <th scope='col'>Administración</th>
-                        <th scope='col'>Sub administración</th>
+                        <th scope='col'>Subadministración</th>
                         <th scope='col'>Departamento</th>
                         <th scope='col'>estatus</th>
                         <th scope='col'>Editar</th>
@@ -408,7 +408,7 @@ class Conf_Users
         }
 
         echo "<div class='table-responsive'>
-              <table class='table table-striped table-sm'>
+              <table class='table table-striped table-sm text-center'>
                 <thead>
                     <tr>
                         <th scope='col'>#</th>
@@ -417,7 +417,7 @@ class Conf_Users
                         <th scope='col'>Nombre</th>
                         <th scope='col' >Perfil</th>
                         <th scope='col'>Administración</th>
-                        <th scope='col'>Sub administración</th>
+                        <th scope='col'>Subadministración</th>
                         <th scope='col'>Departamento</th>
                         <th scope='col'>Estatus</th>
                         <th scope='col'>Editar</th>
@@ -515,7 +515,7 @@ class Conf_Users
         }
 
         echo "<div class='table-responsive'>
-              <table class='table table-striped table-sm'>
+              <table class='table table-striped table-sm text-center'>
                     <thead>
                         <tr>
                             <th scope='col'>#</th>
@@ -524,7 +524,7 @@ class Conf_Users
                             <th scope='col'>Nombre</th>
                             <th scope='col' >Perfil</th>
                             <th scope='col'>Administración</th>
-                            <th scope='col'>Sub administración</th>
+                            <th scope='col'>Subadministración</th>
                             <th scope='col'>Departamento</th>
                             <th scope='col'>Estatus</th>
                             <th scope='col'>Editar</th>
@@ -619,7 +619,7 @@ class Conf_Users
         }
 
         echo "<table class='table'>
-                <thead class='thead-dark'>
+                <thead class='thead-dark  text-center'>
                     <tr>
                         <th scope='col'>#</th>
                         <th scope='col'>RFC Corto</th>
@@ -627,7 +627,7 @@ class Conf_Users
                         <th scope='col'>Nombre</th>
                         <th scope='col' >Perfil</th>
                         <th scope='col'>Administración</th>
-                        <th scope='col'>Sub administración</th>
+                        <th scope='col'>Subadministración</th>
                         <th scope='col'>Departamento</th>
                         <th scope='col'>Estatus</th>
                         <th scope='col'>Editar</th>
@@ -724,7 +724,7 @@ class Conf_Users
         }
 
         echo "<div class='table-responsive'>
-                <table class='table table-striped table-sm'>
+                <table class='table table-striped table-sm text-center'>
                   <thead>
                     <tr>
                         <th scope='col'>#</th>
@@ -733,7 +733,7 @@ class Conf_Users
                         <th scope='col'>Nombre</th>
                         <th scope='col' >Perfil</th>
                         <th scope='col'>Administración</th>
-                        <th scope='col'>Sub administración</th>
+                        <th scope='col'>Subadministración</th>
                         <th scope='col'>Departamento</th>
                         <th scope='col'>Estatus</th>
                         <th scope='col'>Editar</th>
@@ -829,7 +829,7 @@ class Conf_Users
         }
 
         echo "<div class='table-responsive'>
-                <table class='table table-striped table-sm'>
+                <table class='table table-striped table-sm text-center'>
                   <thead>
                     <tr>
                         <th scope='col'>#</th>
@@ -838,7 +838,7 @@ class Conf_Users
                         <th scope='col'>Nombre</th>
                         <th scope='col' >Perfil</th>
                         <th scope='col'>Administración</th>
-                        <th scope='col'>Sub administración</th>
+                        <th scope='col'>Subadministración</th>
                         <th scope='col'>Departamento</th>
                         <th scope='col'>Estatus</th>
                         <th scope='col'>Editar</th>
@@ -935,7 +935,7 @@ class Conf_Users
         }
 
         echo "<div class='table-responsive'>
-                <table class='table table-striped table-sm'>
+                <table class='table table-striped table-sm text-center'>
                 <thead>
                     <tr>
                         <th scope='col'>#</th>
@@ -944,7 +944,7 @@ class Conf_Users
                         <th scope='col'>Nombre</th>
                         <th scope='col' >Perfil</th>
                         <th scope='col'>Administración</th>
-                        <th scope='col'>Sub administración</th>
+                        <th scope='col'>Subadministración</th>
                         <th scope='col'>Departamento</th>
                         <th scope='col'>Estatus</th>
                         <th scope='col'>Editar</th>

@@ -91,3 +91,28 @@ $metodos = new MetodosUsuarios();
 $datos_admin= $metodos->Actualizar_datos_Admin($datros);
 echo $datos_admin;
 }
+if (isset($_POST['registra_posision'])) {
+$admin_act = $_POST['registra_posision'];
+$datros =   json_decode($admin_act);
+include_once 'MetodosUsuarios.php';
+$metodos = new MetodosUsuarios();
+$datos_admin= $metodos->Registra_psosion($datros);
+echo $datos_admin;
+}
+
+if (isset($_POST['reg_puesto_adr'])) {
+$admin_act = $_POST['reg_puesto_adr'];
+$datros =   json_decode($admin_act);
+include_once 'MetodosUsuarios.php';
+$metodos = new MetodosUsuarios();
+$datos_admin= $metodos->Registra_puesto_ADR($datros);
+echo $datos_admin;
+}
+if (isset($_POST['act_puesto_adr'])) {
+    $admin_act = $_POST['act_puesto_adr'];
+    $datros =   json_decode($admin_act);
+    include_once 'MetodosUsuarios.php';
+    $metodos = new MetodosUsuarios();
+    $datos_admin= $metodos->Actualiza_puesto_ADR($datros);
+    echo $datos_admin;
+    }

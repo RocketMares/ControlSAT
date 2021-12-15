@@ -12,7 +12,7 @@ class MetodosUsuarios
     ,[fecha_alta]
     ,[user_alta]
     FROM [Control_Ingresos].[dbo].[Procesos] where
-    [id_proc] in ( 4,5,13 )";
+    [id_proc] in ( 4,5,13)";
      $prepare = sqlsrv_query($con,$query);
      if($prepare){
          while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
@@ -29,6 +29,205 @@ class MetodosUsuarios
          return print_r(sqlsrv_errors(),true);
          $conexion->CerrarConexion($con); 
      }        
+  }
+  public function estados_plaza_mante(){
+    include_once 'sesion.php';
+    include_once 'conexion.php';
+    $BD = new ConexionSQL();
+    $con = $BD->ObtenerConexionBD();
+    $query = "	 SELECT  [id_proc]
+    ,[nombre_proc]
+    ,[fecha_alta]
+    ,[user_alta]
+    FROM [Control_Ingresos].[dbo].[Procesos] where
+    [id_proc] in (13,9,11,7)";
+     $prepare = sqlsrv_query($con,$query);
+     if($prepare){
+         while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+             $fila[] = $row;
+         }
+         if (isset($fila)) {
+             return $fila;
+             $conexion->CerrarConexion($con);
+         }else{
+             return null;
+             $conexion->CerrarConexion($con);
+         }
+     }else{
+         return print_r(sqlsrv_errors(),true);
+         $conexion->CerrarConexion($con); 
+     }        
+  }
+  public function Revisa_plaza_registradas($plaza_new){
+    include_once 'sesion.php';
+    include_once 'conexion.php';
+    $BD = new ConexionSQL();
+    $con = $BD->ObtenerConexionBD();
+    $user_alta = $_SESSION['ses_rfc_corto_ing'];
+    $query = "SELECT * FROM Posisiones WHERE id_num_posision= $plaza_new";
+    $prepare = sqlsrv_query($con,$query);
+    if($prepare){
+      while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+          $fila[] = $row;
+      }
+      if (isset($fila)) {
+          return true;
+         
+      }else{
+          return null;
+        
+      }
+  }else{
+      return print_r(sqlsrv_errors(),true);
+     
+  }        
+  }
+  public function Revisa_plaza_jefe_exist($plaza_jefe){
+    include_once 'sesion.php';
+    include_once 'conexion.php';
+    $BD = new ConexionSQL();
+    $con = $BD->ObtenerConexionBD();
+    $user_alta = $_SESSION['ses_rfc_corto_ing'];
+    $query = "SELECT * FROM Posisiones WHERE id_num_posision= $plaza_jefe";
+    $prepare = sqlsrv_query($con,$query);
+    if($prepare){
+      while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+          $fila[] = $row;
+      }
+      if (isset($fila)) {
+          return true;
+         
+      }else{
+          return null;
+        
+      }
+  }else{
+      return print_r(sqlsrv_errors(),true);
+     
+  }        
+  }
+  public function Registra_psosion($datos){
+    include_once 'sesion.php';
+    include_once 'conexion.php';
+    $BD = new ConexionSQL();
+    $con = $BD->ObtenerConexionBD();
+    $user_alta = $_SESSION['ses_rfc_corto_ing'];
+    $filtro1 = self::Revisa_plaza_registradas($datos->posision_new);
+
+    if ($filtro1 == true) {
+      return "La plaza ya fue agregada recientemente";
+    }
+    else {
+      $query = "INSERT INTO [Posisiones] (
+        [id_puesto_fump]
+            ,[id_num_posision]
+            ,[id_proc]
+            ,[user_alta]
+            ,[fecha_alta]
+            ,[estatus]
+            ,[posision_jefe]
+            ,[nivel]
+            ,[Codigo_pres]
+            ,[sueldo_neto]
+        )
+        SELECT 
+            ".$datos->id_puesto_fun." AS [id_puesto_fump]
+            ,'".$datos->posision_new."' AS [id_num_posision]
+            ,9 AS [id_proc]
+            , '$user_alta' AS [user_alta]
+            ,GETDATE() [fecha_alta]
+            ,'A' AS [estatus]
+            , CASE '".$datos->jefe_plaza."'WHEN '' THEN NULL ELSE '".$datos->jefe_plaza."' END  AS [posision_jefe]
+            ,'".$datos->nivel_new."' AS [nivel]
+            ,'".$datos->clave_presupuestal."' AS [Codigo_pres]
+            ,CASE '".$datos->sueldo_neto."'WHEN '' THEN NULL ELSE '".$datos->sueldo_neto."' END AS [sueldo_neto]
+            INSERT INTO [mov_Posisiones] 
+            (
+              [id_posision]
+                ,[nombre_empleado]
+                ,[puesto_fump]
+                ,[id_num_posision]
+                ,[posision_jefe]
+                ,[nivel]
+                ,[Codigo_pres]
+                ,[sueldo_neto]
+                ,[id_proc]
+                ,[user_alta]
+                ,[fecha_alta]
+              ,[estatus]
+            )
+            SELECT
+             (select TOP 1 CAST (SCOPE_IDENTITY() AS INT) AS id_posision from Posisiones) AS [id_posision]
+                ,(select Concat( emp.nombre_s,' ',emp.apellido_p,' ',emp.apellido_m) from Posisiones pos 
+               FULL JOIN Empleado_insumo emp ON emp.id_empleado_plant = pos.id_empleado 
+               where pos.[id_num_posision] = '".$datos->posision_new."'
+              ) AS [nombre_empleado]
+                ,(SELECT nombre_puesto FROM Puesto_FUMP WHERE id_puesto_fump = ".$datos->id_puesto_fun." ) AS [puesto_fump]
+                ,".$datos->posision_new." AS [id_num_posision]
+                , CASE '".$datos->jefe_plaza."'WHEN '' THEN NULL ELSE '".$datos->jefe_plaza."' END  AS [posision_jefe]
+                ,'".$datos->nivel_new."' AS [nivel]
+                ,'".$datos->clave_presupuestal."'  AS [Codigo_pres]
+                ,CASE '".$datos->sueldo_neto."'WHEN '' THEN NULL ELSE '".$datos->sueldo_neto."' END AS [sueldo_neto]
+                ,16 AS [id_proc]
+                ,'$user_alta' AS [user_alta]
+                ,GETDATE() AS [fecha_alta]
+              ,'A' AS [estatus]
+            ";
+      $prepare = sqlsrv_query($con, $query);
+      if ($prepare == true) {
+          return 'Se registro Exitosamente';
+          $conexion->CerrarConexion($con);
+      } else {
+          return "Algo no salbio bien (".print_r(sqlsrv_errors(),false).")";
+          $conexion->CerrarConexion($con);
+      }
+    }
+   
+  
+  }
+  public function Registra_puesto_ADR($datos){
+    include_once 'sesion.php';
+    include_once 'conexion.php';
+    $BD = new ConexionSQL();
+    $con = $BD->ObtenerConexionBD();
+    $user_alta = $_SESSION['ses_rfc_corto_ing'];
+    $nombre_puesto_adr = $datos->nombre_puesto;
+
+    $query ="IF NOT EXISTS (SELECT * FROM Puesto_ADR where nombre_puesto = '$nombre_puesto_adr') BEGIN  
+    INSERT INTO [Puesto_ADR](
+      [nombre_puesto]
+          ,[user_alta]
+          ,[fecha_alta]
+        ,[Estatus])
+        VALUES('$nombre_puesto_adr','$user_alta',GETDATE(),'A')
+        END";
+    $prepare = sqlsrv_query($con, $query);
+    if ($prepare == true) {
+        return 'Se registro Exitosamente';
+        $conexion->CerrarConexion($con);
+    } else {
+        return "Algo no salbio bien (".print_r(sqlsrv_errors(),false).")";
+        $conexion->CerrarConexion($con);
+    }
+  }
+  public function Actualiza_puesto_ADR($datos){
+    include_once 'sesion.php';
+    include_once 'conexion.php';
+    $BD = new ConexionSQL();
+    $con = $BD->ObtenerConexionBD();
+    $user_alta = $_SESSION['ses_rfc_corto_ing'];
+    $id_puesto_adr = $datos->id_puesto;
+    $nombre_puesto_adr = $datos->nombre_puesto;
+    $estats = $datos->estatus;
+    $query ="UPDATE Puesto_ADR SET user_mod = '$user_alta',fecha_mod=GETDATE(), nombre_puesto = '$nombre_puesto_adr',estatus = '$estats' where id_puesto = $id_puesto_adr";
+    $prepare = sqlsrv_query($con, $query);
+    if ($prepare == true) {
+        return 'Se Actualizo Exitosamente';
+        $conexion->CerrarConexion($con);
+    } else {
+        return "Algo no salbio bien (".print_r(sqlsrv_errors(),false).")";
+        $conexion->CerrarConexion($con);
+    }
   }
   public function cat_escolar(){
     include_once 'sesion.php';
@@ -807,7 +1006,7 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
           30,
           31,
           32,
-          34) 
+          34,37) 
         AND estatus = 'A'";
         $prepare = sqlsrv_query($con,$query);
         if($prepare){
@@ -1025,6 +1224,29 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
         $conexion = new ConexionSQL();
         $con = $conexion->ObtenerConexionBD();
         $query = "SELECT * FROM [Puesto_ADR]  WHERE estatus = 'A'";
+        $prepare = sqlsrv_query($con,$query);
+        if($prepare){
+            while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+                $fila[] = $row;
+            }
+            if (isset($fila)) {
+                return $fila;
+                $conexion->CerrarConexion($con);
+            }else{
+                return null;
+                $conexion->CerrarConexion($con);
+            }
+        }else{
+            return print_r(sqlsrv_errors(),true);
+            $conexion->CerrarConexion($con); 
+        }    
+    }
+    public function Consulta_Puestos_us_insu_filtro($id_puesto)
+    {
+        include_once 'conexion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $query = "SELECT * FROM [Puesto_ADR]  WHERE id_puesto = $id_puesto and  estatus = 'A'";
         $prepare = sqlsrv_query($con,$query);
         if($prepare){
             while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
@@ -2103,11 +2325,12 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
                  ,nombre_empleado
                  ,correo
                  ,passwd
-                 ,jefe_directo
+                 --,jefe_directo
                  ,estatus
                  ,user_alta
                  ,fecha_alta
-                 ,responsiva)
+                 ,responsiva
+                 ,RFC)
                  SELECT 
                          ".$datos->id_admin." as id_admin
                         ,".$datos->id_sub_admin." as id_sub_admin
@@ -2119,11 +2342,12 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
                         ,'".$datos->nombre_u."' as nombre_empleado
                         ,'".$datos->correo."' as correo
                         ,'e10adc3949ba59abbe56e057f20f883e' as passwd
-                        ,".$datos->jefe." as jefe_directo
+                        --,".$datos->jefe." as jefe_directo
                         ,'".$datos->estatus."' as estatus
                         ,'$user' as rfc_corto
                         ,GETDATE() AS fecha_alta
-                        ,0 as responsiva";
+                        ,0 as responsiva
+                        ,'".$datos->rfc_comp."' as RFC";
         $prepare = sqlsrv_query($con,$query);
         if ($prepare === false) {
             return "Error al intentar registrar el usuario: ".print_r(sqlsrv_errors(),true);
@@ -2139,10 +2363,6 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
         $conexion = new ConexionSQL();
         $con = $conexion->ObtenerConexionBD();
         $user = $_SESSION["ses_rfc_corto_ing"];
-        $referencias_historial = self::Consulta_Datos_Usere($datos->id_empleado);
-        if ($referencias_historial[0]['puesto']) {
-          
-        }
         $query = "UPDATE Empleados_usuario
                 SET  id_admin = ".$datos->id_admin."
                     ,id_sub_admin =  ".$datos->id_sub_admin."
@@ -2156,8 +2376,9 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
                     ,jefe_directo = ".$datos->jefe."
                     ,estatus = '".$datos->estatus."'
                     ,user_mod = '$user'
+                    ,RFC  = '".$datos->rfc_comp."'
                     ,fecha_mod = GETDATE()
-                    WHERE id_empleado_us = ".$datos->id_empleado;
+                    WHERE id_empleado_us = ".$datos->id_emp."";
         $prepare = sqlsrv_query($con,$query);
         if ($prepare === false) {
             return "Error al intentar actualizar el usuario: ".print_r(sqlsrv_errors(),true);

@@ -62,21 +62,28 @@ class vistas{
                 }
                 // Aqui se depositan las Subadministraciones y el nombre de los Subadministradores con su puesto operativo
                   for ($i=0; $i <count($cade_admin) ; $i++) { 
+                    $num_empleado =$cade_admin[$i]['no_empleado'] == NULL ? "LOGO11": $cade_admin[$i]['no_empleado'];
                    echo" { key: '".$cade_admin[$i]['nombre_sub_admin']."'
                     , parent: '".$cade_admin[$i]['nombre_admin']."'
                     , Estructura: '".$cade_admin[$i]['nombre_sub_admin']."' 
                     , Nombre_encargado:'".$cade_admin[$i]['nombre_empleado']."'
                     , Nombre_puesto: '".$cade_admin[$i]['nombre_puesto']."'  
-                    ,source: 'img/fotos_empleados/".$cade_admin[$i]['no_empleado'].".jpg' },";
+                    ,source: 'img/fotos_empleados/".$num_empleado.".jpg' },";
                   }
                  // Aqui se depositan los departamentos y el nombre de los jefes de departamento con su puesto operativo
                   for ($i=0; $i <count($cade_sub) ; $i++) { 
+                    if ($cade_sub[$i]['nombre_puesto'] == 'ANALISTA DESCONCENTRADO') {
+                      continue;
+                    }
+                    $num_empleado =$cade_sub[$i]['no_empleado'] == NULL ? "LOGO11": $cade_sub[$i]['no_empleado'];
+                    $nombre_encargado =$cade_sub[$i]['nombre_empleado'] == '  ' ? "VACANTE": $cade_sub[$i]['nombre_empleado'];
+                    $nombre_puesto =$cade_sub[$i]['nombre_puesto'] == NULL ? "VACANTE": $cade_sub[$i]['nombre_puesto'];
                     echo" { key: '".$cade_sub[$i]['nombre_depto']."'
                     ,parent: '".$cade_sub[$i]['nombre_sub_admin']."'
                     ,Estructura: '".$cade_sub[$i]['nombre_depto']."'
-                    ,Nombre_encargado: '".$cade_sub[$i]['nombre_depto']."'
-                    ,Nombre_puesto: '".$cade_sub[$i]['nombre_depto']."'
-                    ,source: 'img/LOGO11.png' },";
+                    ,Nombre_encargado: '".$nombre_encargado."'
+                    ,Nombre_puesto: '".$nombre_puesto."'
+                    ,source: 'img/fotos_empleados/".$num_empleado.".jpg' },";
                    }
                 echo"]);
             </script>";

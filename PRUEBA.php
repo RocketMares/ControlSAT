@@ -11,28 +11,28 @@
     <title>PRUEBA RFC CORTO</title>
   </head>
   <body>
+<div class="container-fluid">
+<button class="btn btn-danger" id="descarga" type="submit" >Descarga</button>
+<button class="btn btn-danger" id="manda_responsiva" type="submit" >resp</button>
+</div>
+<?php
+switch (ISSET($_GET['caso'])) {
+    case 1:
+        
+    echo"<script>
+ alert('no hay nada')
+    </script>
+<!--     <div class='alert alert-danger' role='alert'>
+    No tiene documento
+   </div>-->";
+    break;
+    
+    default:
+    echo"";
+        break;
+}
 
-
-  <nav class='navbar navbar-expand-lg   fixed-top' style='background-color:#1c4b7e; '>
-             <a class='navbar-brand text-white' style='font-size:25px;' style='cursor:pointer; ' id='ver' href='index.php' >Control de ingresos <img src='img\LOGO11.png' width='50' height='50' class=d-inline-block align-top alt=''></a>
-             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-              <div class='collapse navbar-collapse' id='navbarSupportedContent'>
-              <ul class='navbar-nav ml-auto'>
-                    <li class='nav-item dropdown'>
-                      <a class='nav-link-sat dropdown-toggle text-white'id='cerrar' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
-                         jolsoed
-                      </a>
-                      <div class='dropdown-menu' aria-labelledby='cerrar'>
-                      <a class='dropdown-item-sat' href='#' id='CerrarSesion' >Cerrar sesión</a>
-                      </div>
-                    </li>
-                </ul>
-              </div>
-            </nav>
-
-
+?>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -51,7 +51,17 @@
             }).done(function(respuesta){
                 $('#RFC_CORTO').html(respuesta);
             })
-        });
+        })
+        $('#descarga').on('click',function(){
+           
+                location.href ="Prueba_boton_descarga.php";
+               
+        })
+        $('#manda_responsiva').on('click',function(){
+           
+           url='php/Resp.php?id_usuario=2';
+           window.open(url);
+        })
     });
 
 </script>
