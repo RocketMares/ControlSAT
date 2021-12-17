@@ -19,7 +19,7 @@ class vistas{
                 {
                   'undoManager.isEnabled': true,
                   layout: $(go.TreeLayout, // specify a Diagram.layout that arranges trees
-                            { angle: 90, layerSpacing: 90 })
+                            { angle: 90, layerSpacing: 50 })
                 });
                 // Aqui se definen los datos a ingresar, imagenes, texto, tipos de texto, estilos
                 myDiagram.nodeTemplate =
@@ -31,8 +31,9 @@ class vistas{
                   new go.Binding('source')),
 
                   $(go.TextBlock, 'Default Text',
-                  { margin: 12, stroke: 'white', font: 'bold 16px sans-serif' },
+                  { margin: 12, stroke: 'white', font: 'bold 16px sans-serif'},
                   new go.Binding('text', 'Estructura')),
+
 
                   $(go.TextBlock, 'Default Text',
                   { margin: 12, stroke: 'white', font: ' 12px sans-serif' },
@@ -44,11 +45,11 @@ class vistas{
               );
                   myDiagram.linkTemplate =
                   $(go.Link,
-                    { routing: go.Link.Orthogonal, corner: 5 },
+                    { routing: go.Link.Orthogonal, selectable: false, corner: 8 ,},
                     $(go.Shape, // the link's path shape
-                      { strokeWidth: 3, stroke: '#EABE3F' })
+                      { strokeWidth: 8, stroke: '#EABE3F' })
                     );
-
+             
               myDiagram.model = new go.TreeModel(
                
                 [";
@@ -68,7 +69,7 @@ class vistas{
                     , Estructura: '".$cade_admin[$i]['nombre_sub_admin']."' 
                     , Nombre_encargado:'".$cade_admin[$i]['nombre_empleado']."'
                     , Nombre_puesto: '".$cade_admin[$i]['nombre_puesto']."'  
-                    ,source: 'img/fotos_empleados/".$num_empleado.".jpg' },";
+                    ,source: 'img/fotos_empleados/".$num_empleado.".jpg'},";
                   }
                  // Aqui se depositan los departamentos y el nombre de los jefes de departamento con su puesto operativo
                   for ($i=0; $i <count($cade_sub) ; $i++) { 
@@ -79,13 +80,15 @@ class vistas{
                     $nombre_encargado =$cade_sub[$i]['nombre_empleado'] == '  ' ? "VACANTE": $cade_sub[$i]['nombre_empleado'];
                     $nombre_puesto =$cade_sub[$i]['nombre_puesto'] == NULL ? "VACANTE": $cade_sub[$i]['nombre_puesto'];
                     echo" { key: '".$cade_sub[$i]['nombre_depto']."'
-                    ,parent: '".$cade_sub[$i]['nombre_sub_admin']."'
-                    ,Estructura: '".$cade_sub[$i]['nombre_depto']."'
-                    ,Nombre_encargado: '".$nombre_encargado."'
-                    ,Nombre_puesto: '".$nombre_puesto."'
-                    ,source: 'img/fotos_empleados/".$num_empleado.".jpg' },";
+                          ,parent: '".$cade_sub[$i]['nombre_sub_admin']."'
+                          ,Estructura: '".$cade_sub[$i]['nombre_depto']."'
+                          ,Nombre_encargado: '".$nombre_encargado."'
+                          ,Nombre_puesto: '".$nombre_puesto."'
+                          ,source: 'img/fotos_empleados/".$num_empleado.".jpg' },";
                    }
                 echo"]);
+
+              
             </script>";
 
           }
@@ -242,7 +245,7 @@ class vistas{
                <li class='page-item $condicion1'><a class='page-link' href='Posisiones.php?$nombre_get=".$paginas_por_vista."'>Final</a></li>
               </ul>
             </nav>";
-                
+                //\\99.85.24.95\fotos Subadministración de Control y Análisis
             }
           
 }
