@@ -51,3 +51,14 @@ if (isset($_POST["id_admin"])) {
     return "value= '".$resultado_dep['nombre_depto']."'";
 
   }
+
+  if (isset($_POST['nombre_puesto_adr'])) {
+    include_once 'MetodosUsuarios.php';
+    $resultado = new MetodosUsuarios();
+    $nom_dep = $_POST["nombre_puesto_adr"];
+    $resultado_dep = $resultado->Consulta_Puestos_us_insu_filtro($nom_dep);
+    header('Content-type: application/json; charset=utf-8');
+    echo json_encode($resultado_dep);
+    
+
+  }

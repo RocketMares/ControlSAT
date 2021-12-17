@@ -7,7 +7,7 @@ $(document).ready(function () {
         location.href = "Plantilla_empleados_activos.php";
     });
     $('#pag_inactivos').on('click', function () {
-        location.href = "#";
+        location.href = "Plantilla_empleados_baja.php";
     });
     $('#pag_estructura').on('click', function () {
         location.href = "Estructura.php";
@@ -235,6 +235,7 @@ $(document).ready(function () {
             })
         })
     })
+
     $('#id_sub_admin_add').change(function () {
         $('#id_sub_admin_add option:selected').each(function () {
             var admin = $(this).val();
@@ -242,6 +243,17 @@ $(document).ready(function () {
                 id_sub_admin: admin
             }, function (data) {
                 $('#ID_DEPA_add').html(data)
+            })
+        })
+    })
+    $('#id_puesto_adr').change(function () {
+        $('#id_puesto_adr option:selected').each(function () {
+            var id_puesto = $(this).val();
+            $.post("php/Obtener_combos.php", {
+                nombre_puesto_adr: id_puesto
+            }, function (data) {
+                $('#nombre_puesto_adr').val(data[0]['nombre_puesto'])
+                $("#Estatus_activo_adr option[value='" +data[0]['estatus'] + "']").attr("selected", true);
             })
         })
     })
@@ -805,3 +817,6 @@ function limpia_campos_form_agrega(){
 
 
 
+function modal_actualiza(no_emp){
+    $('#Muestra_modal_cambios_fotos').modal()
+}

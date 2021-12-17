@@ -64,6 +64,10 @@ $muesta = $vista_gen->Tabla_posisiones();
             var num = <?php echo $num = $_GET['pagina']; ?> ;
             $('#vista_posisiones').load("php/tablas_dinamicas_posisiones.php?pagina=" + num);
         })
+        $('#cerrar_mod_change_posis').on('click', function () {
+            var num = <?php echo $num = $_GET['pagina']; ?> ;
+            $('#vista_posisiones').load("php/tablas_dinamicas_posisiones.php?pagina=" + num);
+        })
   
         $('#posision_more').on('click', function () {
             $('#Agregar_posisones_nuevas').modal();

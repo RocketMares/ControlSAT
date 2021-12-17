@@ -1,5 +1,7 @@
 <?php
-
+    if (!$_GET ) {
+        header('Location:Plantilla_empleados_baja.php?pagina=1');
+    }
     require_once 'php/menu_dinamico.php';
    
 
@@ -35,9 +37,507 @@
 
 
 
-
-
+<script>
+  $(document).ready(function () {
+    
+    $('#act_tabla_inicio').on('click', function () {
+      var num = <?php 
+      switch ($_GET) {
+      case isset($_GET['pagina']) :
+      echo $num = $_GET['pagina']; 
+      break;
+      case isset($_GET['Estructura']) :
+      echo $num = $_GET['Estructura']; 
+      break;
+      case isset($_GET['Nombre']) :
+      echo $num = $_GET['Nombre']; 
+      break;
+      case isset($_GET['RFC']) :
+      echo $num = $_GET['RFC']; 
+      break;
+      case isset($_GET['Puestos']) :
+      echo $num = $_GET['Puestos']; 
+      break;
+      default:
+      echo $num = $_GET['pagina']; 
+      break;
+      }
+      ?> ;
+     var pagina = <?php 
+        switch ($_GET) {
+        case isset($_GET['pagina']):
+        echo "'pagina'";
+        break;
+        case isset($_GET['Estructura']):
+        echo"'Estructura'";
+        break;
+        case isset($_GET['Nombre']):
+        echo"'Nombre'";
+        break;
+        case isset($_GET['RFC']):
+        echo"'RFC'";
+        break;
+        case isset($_GET['Puestos']):
+        echo"'Puestos'";
+        break;
+        default:
+        echo "'pagina'";
+        break;
+        }
+      ?>;
+      $('#tabla_activa').load("php/tabla_bajas_actualiza.php?"+pagina+"=" + num);
+    })
+    $('#registrar_us_ins').on('click', function () {
+                var num = <?php 
+      switch ($_GET) {
+      case isset($_GET['pagina']) :
+      echo $num = $_GET['pagina']; 
+      break;
+      case isset($_GET['Estructura']) :
+      echo $num = $_GET['Estructura']; 
+      break;
+      case isset($_GET['Nombre']) :
+      echo $num = $_GET['Nombre']; 
+      break;
+      case isset($_GET['RFC']) :
+      echo $num = $_GET['RFC']; 
+      break;
+      case isset($_GET['Puestos']) :
+      echo $num = $_GET['Puestos']; 
+      break;
+      default:
+      echo $num = $_GET['pagina']; 
+      break;
+      }
+      ?> ;
+     var pagina = <?php 
+        switch ($_GET) {
+        case isset($_GET['pagina']):
+        echo "'pagina'";
+        break;
+        case isset($_GET['Estructura']):
+        echo"'Estructura'";
+        break;
+        case isset($_GET['Nombre']):
+        echo"'Nombre'";
+        break;
+        case isset($_GET['RFC']):
+        echo"'RFC'";
+        break;
+        case isset($_GET['Puestos']):
+        echo"'Puestos'";
+        break;
+        default:
+        echo "'pagina'";
+        break;
+        }
+      ?>;
+      $('#tabla_activa').load("php/tabla_bajas_actualiza.php?"+pagina+"=" + num);
+    })
+    $('#actualiza_area_asig').on('click', function () {
+                            var num = <?php 
+      switch ($_GET) {
+      case isset($_GET['pagina']) :
+      echo $num = $_GET['pagina']; 
+      break;
+      case isset($_GET['Estructura']) :
+      echo $num = $_GET['Estructura']; 
+      break;
+      case isset($_GET['Nombre']) :
+      echo $num = $_GET['Nombre']; 
+      break;
+      case isset($_GET['RFC']) :
+      echo $num = $_GET['RFC']; 
+      break;
+      case isset($_GET['Puestos']) :
+      echo $num = $_GET['Puestos']; 
+      break;
+      default:
+      echo $num = $_GET['pagina']; 
+      break;
+      }
+      ?> ;
+     var pagina = <?php 
+        switch ($_GET) {
+        case isset($_GET['pagina']):
+        echo "'pagina'";
+        break;
+        case isset($_GET['Estructura']):
+        echo"'Estructura'";
+        break;
+        case isset($_GET['Nombre']):
+        echo"'Nombre'";
+        break;
+        case isset($_GET['RFC']):
+        echo"'RFC'";
+        break;
+        case isset($_GET['Puestos']):
+        echo"'Puestos'";
+        break;
+        default:
+        echo "'pagina'";
+        break;
+        }
+      ?>;
+      $('#tabla_activa').load("php/tabla_bajas_actualiza.php?"+pagina+"=" + num);
+    })
+    $('#cerrar_modal_dat_area').on('click', function () {
+                            var num = <?php 
+      switch ($_GET) {
+      case isset($_GET['pagina']) :
+      echo $num = $_GET['pagina']; 
+      break;
+      case isset($_GET['Estructura']) :
+      echo $num = $_GET['Estructura']; 
+      break;
+      case isset($_GET['Nombre']) :
+      echo $num = $_GET['Nombre']; 
+      break;
+      case isset($_GET['RFC']) :
+      echo $num = $_GET['RFC']; 
+      break;
+      case isset($_GET['Puestos']) :
+      echo $num = $_GET['Puestos']; 
+      break;
+      default:
+      echo $num = $_GET['pagina']; 
+      break;
+      }
+      ?> ;
+     var pagina = <?php 
+        switch ($_GET) {
+        case isset($_GET['pagina']):
+        echo "'pagina'";
+        break;
+        case isset($_GET['Estructura']):
+        echo"'Estructura'";
+        break;
+        case isset($_GET['Nombre']):
+        echo"'Nombre'";
+        break;
+        case isset($_GET['RFC']):
+        echo"'RFC'";
+        break;
+        case isset($_GET['Puestos']):
+        echo"'Puestos'";
+        break;
+        default:
+        echo "'pagina'";
+        break;
+        }
+      ?>;
+      $('#tabla_activa').load("php/tabla_bajas_actualiza.php?"+pagina+"=" + num);
+    })
+    $('#cerrar_modal_dat_adicio').on('click', function () {
+                            var num = <?php 
+      switch ($_GET) {
+      case isset($_GET['pagina']) :
+      echo $num = $_GET['pagina']; 
+      break;
+      case isset($_GET['Estructura']) :
+      echo $num = $_GET['Estructura']; 
+      break;
+      case isset($_GET['Nombre']) :
+      echo $num = $_GET['Nombre']; 
+      break;
+      case isset($_GET['RFC']) :
+      echo $num = $_GET['RFC']; 
+      break;
+      case isset($_GET['Puestos']) :
+      echo $num = $_GET['Puestos']; 
+      break;
+      default:
+      echo $num = $_GET['pagina']; 
+      break;
+      }
+      ?> ;
+     var pagina = <?php 
+        switch ($_GET) {
+        case isset($_GET['pagina']):
+        echo "'pagina'";
+        break;
+        case isset($_GET['Estructura']):
+        echo"'Estructura'";
+        break;
+        case isset($_GET['Nombre']):
+        echo"'Nombre'";
+        break;
+        case isset($_GET['RFC']):
+        echo"'RFC'";
+        break;
+        case isset($_GET['Puestos']):
+        echo"'Puestos'";
+        break;
+        default:
+        echo "'pagina'";
+        break;
+        }
+      ?>;
+      $('#tabla_activa').load("php/tabla_bajas_actualiza.php?"+pagina+"=" + num);
+    })
+    $('#actualiza_dat_adicionales_bot').on('click', function () {
+                            var num = <?php 
+      switch ($_GET) {
+      case isset($_GET['pagina']) :
+      echo $num = $_GET['pagina']; 
+      break;
+      case isset($_GET['Estructura']) :
+      echo $num = $_GET['Estructura']; 
+      break;
+      case isset($_GET['Nombre']) :
+      echo $num = $_GET['Nombre']; 
+      break;
+      case isset($_GET['RFC']) :
+      echo $num = $_GET['RFC']; 
+      break;
+      case isset($_GET['Puestos']) :
+      echo $num = $_GET['Puestos']; 
+      break;
+      default:
+      echo $num = $_GET['pagina']; 
+      break;
+      }
+      ?> ;
+     var pagina = <?php 
+        switch ($_GET) {
+        case isset($_GET['pagina']):
+        echo "'pagina'";
+        break;
+        case isset($_GET['Estructura']):
+        echo"'Estructura'";
+        break;
+        case isset($_GET['Nombre']):
+        echo"'Nombre'";
+        break;
+        case isset($_GET['RFC']):
+        echo"'RFC'";
+        break;
+        case isset($_GET['Puestos']):
+        echo"'Puestos'";
+        break;
+        default:
+        echo "'pagina'";
+        break;
+        }
+      ?>;
+      $('#tabla_activa').load("php/tabla_bajas_actualiza.php?"+pagina+"=" + num);
+    })
+    $('#actualiza_dat_adicionales_bot_baja').on('click', function () {
+                            var num = <?php 
+      switch ($_GET) {
+      case isset($_GET['pagina']) :
+      echo $num = $_GET['pagina']; 
+      break;
+      case isset($_GET['Estructura']) :
+      echo $num = $_GET['Estructura']; 
+      break;
+      case isset($_GET['Nombre']) :
+      echo $num = $_GET['Nombre']; 
+      break;
+      case isset($_GET['RFC']) :
+      echo $num = $_GET['RFC']; 
+      break;
+      case isset($_GET['Puestos']) :
+      echo $num = $_GET['Puestos']; 
+      break;
+      default:
+      echo $num = $_GET['pagina']; 
+      break;
+      }
+      ?> ;
+     var pagina = <?php 
+        switch ($_GET) {
+        case isset($_GET['pagina']):
+        echo "'pagina'";
+        break;
+        case isset($_GET['Estructura']):
+        echo"'Estructura'";
+        break;
+        case isset($_GET['Nombre']):
+        echo"'Nombre'";
+        break;
+        case isset($_GET['RFC']):
+        echo"'RFC'";
+        break;
+        case isset($_GET['Puestos']):
+        echo"'Puestos'";
+        break;
+        default:
+        echo "'pagina'";
+        break;
+        }
+      ?>;
+      $('#tabla_activa').load("php/tabla_bajas_actualiza.php?"+pagina+"=" + num);
+    })
+    $('#cerrar_mod_actualiza_plazas').on('click', function () {
+                            var num = <?php 
+      switch ($_GET) {
+      case isset($_GET['pagina']) :
+      echo $num = $_GET['pagina']; 
+      break;
+      case isset($_GET['Estructura']) :
+      echo $num = $_GET['Estructura']; 
+      break;
+      case isset($_GET['Nombre']) :
+      echo $num = $_GET['Nombre']; 
+      break;
+      case isset($_GET['RFC']) :
+      echo $num = $_GET['RFC']; 
+      break;
+      case isset($_GET['Puestos']) :
+      echo $num = $_GET['Puestos']; 
+      break;
+      default:
+      echo $num = $_GET['pagina']; 
+      break;
+      }
+      ?> ;
+     var pagina = <?php 
+        switch ($_GET) {
+        case isset($_GET['pagina']):
+        echo "'pagina'";
+        break;
+        case isset($_GET['Estructura']):
+        echo"'Estructura'";
+        break;
+        case isset($_GET['Nombre']):
+        echo"'Nombre'";
+        break;
+        case isset($_GET['RFC']):
+        echo"'RFC'";
+        break;
+        case isset($_GET['Puestos']):
+        echo"'Puestos'";
+        break;
+        default:
+        echo "'pagina'";
+        break;
+        }
+      ?>;
+      $('#tabla_activa').load("php/tabla_bajas_actualiza.php?"+pagina+"=" + num);
+      limpia_campos_2()
+    })
+    $('#actualiza_plazas').on('click', function () {
+                            var num = <?php 
+      switch ($_GET) {
+      case isset($_GET['pagina']) :
+      echo $num = $_GET['pagina']; 
+      break;
+      case isset($_GET['Estructura']) :
+      echo $num = $_GET['Estructura']; 
+      break;
+      case isset($_GET['Nombre']) :
+      echo $num = $_GET['Nombre']; 
+      break;
+      case isset($_GET['RFC']) :
+      echo $num = $_GET['RFC']; 
+      break;
+      case isset($_GET['Puestos']) :
+      echo $num = $_GET['Puestos']; 
+      break;
+      default:
+      echo $num = $_GET['pagina']; 
+      break;
+      }
+      ?> ;
+     var pagina = <?php 
+        switch ($_GET) {
+        case isset($_GET['pagina']):
+        echo "'pagina'";
+        break;
+        case isset($_GET['Estructura']):
+        echo"'Estructura'";
+        break;
+        case isset($_GET['Nombre']):
+        echo"'Nombre'";
+        break;
+        case isset($_GET['RFC']):
+        echo"'RFC'";
+        break;
+        case isset($_GET['Puestos']):
+        echo"'Puestos'";
+        break;
+        default:
+        echo "'pagina'";
+        break;
+        }
+      ?>;
+      $('#tabla_activa').load("php/tabla_bajas_actualiza.php?"+pagina+"=" + num);
+    })
+    $('#act_tabla_inicio_baja').on('click', function () {
+                            var num = <?php 
+      switch ($_GET) {
+      case isset($_GET['pagina']) :
+      echo $num = $_GET['pagina']; 
+      break;
+      case isset($_GET['Estructura']) :
+      echo $num = $_GET['Estructura']; 
+      break;
+      case isset($_GET['Nombre']) :
+      echo $num = $_GET['Nombre']; 
+      break;
+      case isset($_GET['RFC']) :
+      echo $num = $_GET['RFC']; 
+      break;
+      case isset($_GET['Puestos']) :
+      echo $num = $_GET['Puestos']; 
+      break;
+      default:
+      echo $num = $_GET['pagina']; 
+      break;
+      }
+      ?> ;
+     var pagina = <?php 
+        switch ($_GET) {
+        case isset($_GET['pagina']):
+        echo "'pagina'";
+        break;
+        case isset($_GET['Estructura']):
+        echo"'Estructura'";
+        break;
+        case isset($_GET['Nombre']):
+        echo"'Nombre'";
+        break;
+        case isset($_GET['RFC']):
+        echo"'RFC'";
+        break;
+        case isset($_GET['Puestos']):
+        echo"'Puestos'";
+        break;
+        default:
+        echo "'pagina'";
+        break;
+        }
+      ?>;
+      $('#tabla_activa').load("php/tabla_bajas_actualiza.php?"+pagina+"=" + num);
+    })
+  });
+</script>
 <?php
+
+   // se imprime footer
+
+   echo"
+   <div class='modal fade' id='Muestra_modal_cambios_fotos' tabindex='-1' role='dialog' aria-hidden='true'>
+ <div class='modal-dialog' role='document'>
+   <div class='modal-content'>
+     <div class='modal-header'>
+       <h5 class='modal-title' id='titulos'>Modal title</h5>
+       <button type='button' class='close' data-dismiss='modal'>
+         <span aria-hidden='true'>&times;</span>
+       </button>
+     </div>
+     <div class='modal-body'>
+       ...
+     </div>
+     <div class='modal-footer'>
+       <button type='button' class='btn btn-secondary' data-dismiss='modal'>Close</button>
+       <button type='button' class='btn btn-primary'>Save changes</button>
+     </div>
+   </div>
+ </div>
+</div>
+   ";
 
    // se imprime footer
    $menu->Footer();

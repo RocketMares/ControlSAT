@@ -15,12 +15,11 @@
 
 
 
-<center>
 <br>
-<div class="mt-5 my-5">
-<h1 class="display-4">Estructura operativa</h1>
+<div class="mt-5 my-5 container-fluid">
+<h1 class="display-4 text-center">Estructura operativa</h1>
 </div>
-<div class="mt-5  my-5" >
+<div class="mt-5  my-5 container-fluid" >
 <div id="myDiagramDiv" class="fondo" style="border: solid 2px black;"></div>
 <?php   
 include_once 'php/Vistas_generales.php';
@@ -35,7 +34,7 @@ $vista_gen = $vis->Vista_general();
 
 
 
-</center>
+
 
 <?php
 

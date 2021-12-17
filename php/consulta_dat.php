@@ -6,48 +6,51 @@ if (isset($_POST['datos'])) {
     $cons = new ConsultaInfoADR();
     $datos_us = $cons->info_datos_us($id_user);
     if (isset($datos_us)) {
+        
         $nombre_empleado = $datos_us[0]['nombre_empleado'];
         $no_emppleado = $datos_us[0]['no_empleado'];
         $nombre_puest_fun = $datos_us[0]['nombre_puesto'];
-        $nombre_puest_ADR = $datos_us[0]['nombre_puesto_adr'];
+        //$nombre_puest_ADR = $datos_us[0]['nombre_puesto_adr'];
         $Rfc_corto = $datos_us[0]['rfc_corto'];
         $nombramiento = $datos_us[0]['tipo_nombramiento'];
-    
+        $nombre_deptos =  $datos_us[0]['nombre_depto'];
+        switch ($nombre_deptos) {
+            case 'ADMINISTRACIÓN':
+             $nombre_puest_ADR =  $datos_us[0]['nombre_puesto_adr'];
+             break;
+             case 'SUBADMINISTRACIÓN':
+             $nombre_puest_ADR =  $datos_us[0]['nombre_puesto_adr']." DE LA ".$datos_us[0]['nombre_sub_admin'] ;
+             break;
+            
+            default:
+            $nombre_puest_ADR =  $datos_us[0]['nombre_puesto_adr']." DEL AREA DE ".$nombre_deptos;
+                break;
+        }
         echo "
-        <div class='row  container-fluid mt-5 my-5' id ='vista'>
+        <div class='row  container-fluid mt-2 py-2' id ='vista'>
         <div class='col-sm-3 text-center ' >
-        <div id='imagen_empleado'>
-        <button type='button' id='muestra_boton' style='display:none;' class='btn btn-outline-primary'>Cambiar Foto.</button>
-        </div>
          <br>
       
-          <img src='img/fotos_empleados/$no_emppleado.jpg'  class='rounded-circle ' style='height: 200px; width: 200px ;border: solid 4px black;' alt=''>
+          <img src='img/fotos_empleados/$no_emppleado.jpg' onclick='modal_actualiza(\"$no_emppleado\")' class='rounded-circle ' style='height: 200px; width: 200px ;border: solid 4px black;' alt=''>
      
           </div>
          
         <div class='col-sm-9'>
-          <div class='card'>
+          <div class='card border-dark'>
             <div class='card-header card'>
-              Información general del usuario:
+              <b>Información general del usuario:</b>
             </div>
             <ul class='list-group list-group-flush '>
-              <li class='list-group-item'>$nombre_empleado</li>
-              <li class='list-group-item'>$nombre_puest_fun</li>
-              <li class='list-group-item'>$nombre_puest_ADR</li>
-              <li class='list-group-item'>$no_emppleado</li>
-              <li class='list-group-item'>$Rfc_corto</li>
+              <li class='list-group-item'> <b>Nombre del empleado:</b> $nombre_empleado</li>
+              <li class='list-group-item'><b>Nombre del puesto FUMP:</b> $nombre_puest_fun</li>
+              <li class='list-group-item'><b>Nombre del puesto Funcional:</b> $nombre_puest_ADR</li>
+              <li class='list-group-item'><b>Número de empleado:</b> $no_emppleado</li>
+              <li class='list-group-item'><b>RFC corto del empleado:</b> $Rfc_corto</li>
             </ul>
           </div>
         </div>
       
       </div>
-   
-      
-      
-
-     
-      
-
       
       ";
     }
@@ -137,9 +140,15 @@ if (isset($_POST['posision_predic'])) {
   include_once "ConsultaADR.php";
   $cons = new ConsultaInfoADR();
   $datos_plaza = $cons->vista_Posisiones_fijos();
-  for ($i=0; $i < count($datos_plaza) ; $i++) { 
-    echo"<option value='".$datos_plaza[$i]['id_num_posision']."'>".$datos_plaza[$i]['id_num_posision']."</option>";
+  if (isset($datos_plaza)) {
+    for ($i=0; $i < count($datos_plaza) ; $i++) { 
+      echo"<option value='".$datos_plaza[$i]['id_num_posision']."'>".$datos_plaza[$i]['id_num_posision']."</option>";
+    }
   }
+  else{
+    return false;
+  }
+
    
 }
  if(isset($_POST['mov_insumos'])){
@@ -148,7 +157,7 @@ if (isset($_POST['posision_predic'])) {
   $cons = new ConsultaInfoADR();
   $datos = $cons->Movimientos_del_personal($id_insumo);
   echo "
-  <table class='table text-center table-striped table-responsive shadow-sm'>
+  <table class='table text-center table-responsive  text-center vh-75 shadow p-1 bg-white rounded'>
   <thead>
     <tr>
       <th scope='col'>#</th>
@@ -170,7 +179,7 @@ if (isset($_POST['posision_predic'])) {
       echo" <tr>
       <th scope='row'>".$j++."</th>
       <td>".$datos[$i]['nombre_proc']."</td>
-      <td>".$datos[$i]['fecha_alta']->format('d-m-Y H:i')."</td>
+      <td>".$datos[$i]['fecha_alta']->format('d/m/Y H:i')."</td>
       <td>".$datos[$i]['user_alta']."</td>
       <td>".$datos[$i]['sub_admin']."</td>
       <td>".$datos[$i]['depto']."</td>
@@ -215,13 +224,63 @@ if (isset($_POST['actualiza_mante_posision'])) {
   include_once "ConsultaADR.php";
   $datos =$_POST['actualiza_mante_posision'];
   $cons = new ConsultaInfoADR();
-
-
   $data = json_decode($datos);
-  
-  //$datos = $cons->Consulta_datos_plaza($data);
-
+  $datos = $cons->Actualiza_posisiones_mantenimiento($data);
+echo $datos;
 }
+
+if(isset($_POST['revisa_mov_plazas'])){
+  $id_insumo = $_POST['revisa_mov_plazas'];
+  include_once "ConsultaADR.php";
+  $cons = new ConsultaInfoADR();
+  $datos = $cons->Movimientos_de_plazas($id_insumo);
+  echo "
+  <table class='table text-center table-responsive  text-center vh-75 shadow p-1 bg-white rounded'>
+  <thead>
+    <tr>
+      <th scope='col'>#</th>
+      <th scope='col'>Proceso</th>
+      <th scope='col'>Posisión</th>
+      <th scope='col'>Fecha</th>
+      <th scope='col'>Usuario Captura</th>
+      <th scope='col'>Ocupante</th>
+      <th scope='col'>Posision Jefe</th>
+      <th scope='col'>Nivel</th>
+      <th scope='col'>Clave Presupuestal</th>
+      <th scope='col'>Sueldo</th>
+      <th scope='col'>Puesto FUMP.</th>
+    </tr>
+  </thead>
+  <tbody>";
+  $j =1;
+  if (isset($datos)) {
+    for ($i=0; $i <count($datos) ; $i++) { 
+      echo" <tr>
+      <th scope='row'>".$j++."</th>
+      <td>".$datos[$i]['nombre_proc']."</td>
+      <td>".$datos[$i]['id_num_posision']."</td>
+      <td>".$datos[$i]['fecha_alta']->format('d/m/Y H:i')."</td>
+      <td>".$datos[$i]['user_alta']."</td>
+      <td>".$datos[$i]['nombre_empleado']."</td>
+      <td>".$datos[$i]['posision_jefe']."</td>
+      <td>".$datos[$i]['nivel']."</td>
+      <td>".$datos[$i]['Codigo_pres']."</td>
+      <td>".$datos[$i]['sueldo_neto']."</td>
+      <td>".$datos[$i]['puesto_fump']."</td>
+    </tr>";
+    }
+  }
+  else {
+    echo"no hay movimientos registrados datos";
+  }
+
+  
+
+    echo"</tbody>
+</table>
+  ";
+
+ }
 
 ?>
 
