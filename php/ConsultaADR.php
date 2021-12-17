@@ -1328,6 +1328,10 @@ class ConsultaInfoADR{
                 ,(SELECT nombre_sindical from cat_sindical where id_sindicato =$sindicatos) AS [sindicato]
                 ,(SELECT nombre_nombramiento from cat_nivel_jerarquico where id_nivel_jer =$nivel_jer) AS [nivel_jer]
                 ,'$sal_net' AS salario_neto
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0d2e10d0abc5bdb88b5a62c2492711c602adb5dd
                     INSERT INTO [mov_Posisiones] 
             (
               [id_posision]
