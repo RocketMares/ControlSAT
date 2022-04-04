@@ -41,7 +41,6 @@ switch ($divi) {// Seleccion del mes
         $mes = 'C';
     break;
     
-
     }
     // Seleccion del dia
     if ($divi[8]== 0 && $divi[9] == 1) {
@@ -71,12 +70,13 @@ switch ($divi) {// Seleccion del mes
     if ($divi[8]== 0 && $divi[9] == 9) {
         $dia = 9;
     }
-    if ($divi[8]== 1 && $divi[9] == 1) {
+    if ($divi[8]== 1 && $divi[9] == 0) {
         $dia = 'A';
     }
     if ($divi[8]== 1 && $divi[9] == 1) {
         $dia = 'B';
     }
+
     if ($divi[8]== 1 && $divi[9] == 2) {
         $dia = 'C';
     }

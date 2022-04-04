@@ -9,6 +9,7 @@ if (isset($_POST["array"])) {
     include_once 'MetodosUsuarios.php';
     $usuarios = new MetodosUsuarios();
     $datos = json_decode($_POST["objeto_user"]);
-    $resultado = $usuarios->Actualizar_usuario($datos);
+    //echo $datos = json_encode($_POST["objeto_user"]);
+     $resultado = $usuarios->Actualizar_usuario($datos);
     echo $resultado;
 }

@@ -1,6 +1,12 @@
 <?php 
 include_once 'php/sesion.php';
 include_once 'php/menu_dinamico.php';
+
+$perfil= $_SESSION['ses_id_perfil_ing'];
+if ($perfil != 1) {
+    header('location:index.php');
+}
+
 $menu = new Menu();
 
 $menu->cabecera_principal();

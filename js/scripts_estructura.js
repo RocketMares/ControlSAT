@@ -75,19 +75,39 @@ function Registrar_departamento() {
     var admin = $("#id_admin").val();
     var sub = $("#id_sub_admin").val();
     var nombre_dep = $("#nombre_dep").val();
+    var nombre_dep_c = $("#nombre_dep_corto").val();
+
     var datos = {
         admin: admin,
         sub: sub,
         nombre_dep: nombre_dep,
+        nombre_dep_c:nombre_dep_c
     }
-    var json = JSON.stringify(datos)
-     $.post("php/Ac_estructrutas.php", {
-         reg_dep: json
-     }, function (data) {
-         toastr.info(data,"Notificación",{
-             "progressBar":true
-         })
-    });
+    if (admin == 0) {
+        toastr.error("No puedes agregar un departamento sin seleccionar a que Administración pertenece")
+    } else {
+        if (sub == 0) {
+            toastr.error("No puedes agregar un departamento sin seleccionar a que subadministración pertenece")
+        } else {
+            if (nombre_dep == '') {
+                toastr.error("No puedes dejar bacio el nombre del departamento")
+            } else {
+                if (nombre_dep_c == '') {
+                    toastr.error("No puedes dejar bacio el nombre corto del departamento")
+                } else {
+                    var json = JSON.stringify(datos)
+                    $.post("php/Ac_estructrutas.php", {
+                        reg_dep: json
+                    }, function (data) {
+                        toastr.info(data,"Notificación",{
+                            "progressBar":true
+                        })
+                   });
+                }
+            }
+        }
+    }
+  
 
 
 }
@@ -98,33 +118,54 @@ function Actualiza_departamento() {
     var sub = $("#id_sub_admin_b").val();
     var dep_asoc = $("#deptos_f").val();
     var nombre_dep = $("#nombre_dep_cam").val();
+    var nombre_dep_c = $("#nombre_dep_cam_corto").val();
     var estatus = $('input:radio[name=Estatus_activo]:checked').val();
 
-    var datos = {
-        admin: admin,
-        sub: sub,
-        nombre_dep: nombre_dep,
-        dep_asoc: dep_asoc,
-        estatus: estatus,
+    if (admin == 0) {
+        toastr.error("Selecciona la Administración del departamento que deseas modificar")
+    } else {
+        if (sub == 0) {
+            toastr.error("Selecciona la Subadministración del departamento que deseas modificar")
+        } else {
+            if (dep_asoc == 0) {
+                toastr.error("Selecciona el departamento que deseas modificar")
+            } else {
+                if (nombre_dep == '') {
+                    toastr.error("No puedes dejar en blanco el nombre del departamento")
+                } else {
+                    if (nombre_dep_c == '') {
+                        toastr.error("No puedes dejar en blanco el nombre corto del departamento")
+                    } else {
+                       
+                        var datos = {
+                            admin: admin,
+                            sub: sub,
+                            nombre_dep: nombre_dep,
+                            dep_asoc: dep_asoc,
+                            estatus: estatus,
+                            nombre_dep_c:nombre_dep_c,
+                    
+                        };
+                        var json = JSON.stringify(datos);
+                    
+                
+                    
+                            $.post("php/Ac_estructrutas.php", {
+                                Act_dep: json
+                            }, function (data) {
+                                toastr.info(data,"Notificación",{
+                                    "progressBar":true
+                                })
+                            });
+                    }
+                }
+            }
+        }
+    }
 
-    };
-    var json = JSON.stringify(datos);
-
-    // toastr.info(json,"Notificación",{
-    //     "progressBar":true
-    // })
-    if (nombre_dep != "") {
-        $.post("php/Ac_estructrutas.php", {
-            Act_dep: json
-        }, function (data) {
-            toastr.info(data,"Notificación",{
-                "progressBar":true
-            })
-        });
-    } else
-        alert('No puede dejar en blanco el nombre del departamento a actualizar');
-    //    var json = JSON.stringify(datos);
-    //   alert('Si entra aqui' + json);    
+ 
+   
+      
 
 
 
@@ -199,29 +240,44 @@ function Actualiza_Sub_administracion() {
 
     var admin = $("#num_admin").val();
     var sub_admin_asoc = $("#id_sub_admin_b").val();
-    var nombre_sub = $("#nombre_area_1").val();
+    var nombre_sub = $("#nombre_sub_admin2").val();
+    var nombre_sub_c = $("#nombre_sub_admin2_corto").val();
     var estatus = $('input:radio[name=Estatus_activo]:checked').val();
 
     var datos = {
         admin: admin,
         sub_admin_asoc: sub_admin_asoc,
         nombre_sub: nombre_sub,
+        nombre_sub_c:nombre_sub_c,
         estatus: estatus,
 
     };
-    // var json = JSON.stringify(datos);
-    //alert('Si entra aqui' + json);    
-    if (nombre_sub != "") {
-        $.post("php/Ac_estructrutas.php", {
-            array2: datos
-        }, function (data) {
-            alert(data);
-            location.reload();
+    var json = JSON.stringify(datos)
+   if (admin == 0) {
+    alert('Tiene que seleccionar la Administración a la que pertenece Subadministración.')
+   } else {
+       if (sub_admin_asoc == 0) {
+        alert('Tiene que seleccionar la Subadministración.')
+       } else {
+           if (nombre_sub == '') {
+            alert('No puede dejar en blanco el nombre corto de la Subadministración.')
+           } else {
+            if (nombre_sub_c == "") {
+                alert('No puede dejar en blanco el nombre corto de la Subadministración.')
+            } else {
+                
+                $.post("php/Ac_estructrutas.php", {
+                    Act_sub: json
+                }, function (data) {
+                    alert(data);
+                    location.reload();
+        
+                });
+            }
+           }
+       }
+   }
 
-        });
-    } else {
-        alert('No puede dejar en blanco el nombre de la Sub Administración.')
-    }
 
 
 }
@@ -230,22 +286,32 @@ function Registrar_Sub_administracion() {
 
     var admin = $("#id_admin_1").val();
     var nombre_sub = $("#nombre_area").val();
+    var nombre_sub_c = $("#nombre_area_c").val();
     var datos = {
         admin: admin,
         nombre_sub: nombre_sub,
+        nombre_sub_c:nombre_sub_c
     };
-    //  var json = JSON.stringify(datos);
-    // alert('Si entra aqui' + json);
-    if (nombre_sub != "") {
-        $.post("php/Ac_estructrutas.php", {
-            array: datos
-        }, function (data) {
-            //alert(data);
-            location.reload();
-        });
+    var json = JSON.stringify(datos)
+    if (admin == 0) {
+        alert('Tiene que seleccionar la Administración a la que pertenece la Subadministración.')
     } else {
-        alert('No puede dejar en blanco el nombre de la Sub Administración.')
+        if (nombre_sub == '') {
+            alert('No puede dejar en blanco el nombre  de la Subadministración.')
+        } else {
+            if (nombre_sub_c != "") {
+                $.post("php/Ac_estructrutas.php", {
+                    reg_sub_admin: json
+                }, function (data) {
+                    alert(data);
+                    location.reload();
+                });
+            } else {
+                alert('No puede dejar en blanco el nombre corto de la Sub Administración.')
+            }
+        }
     }
+    
     //  //location.reload();
 
 }
@@ -310,7 +376,8 @@ $(document).ready(function () {
             $.post("php/Ac_estructrutas.php", {
                 auto_sbu_name: sub
             }, function (data) {}).done(function (data) {
-                $("#nombre_sub_admin2").val(data);
+                $("#nombre_sub_admin2").val(data[0]['nombre_sub_admin']);
+                $("#nombre_sub_admin2_corto").val(data[0]['nombre_corto']);
             })
         })
     })
@@ -323,7 +390,9 @@ $(document).ready(function () {
             $.post("php/Ac_estructrutas.php", {
                 auto_dep_name: dep
             }, function (data) {}).done(function (data) {
-                $("#nombre_dep_cam").val(data);
+
+                $("#nombre_dep_cam").val( data[0]['nombre_depto']);
+                $("#nombre_dep_cam_corto").val( data[0]['nombre_corto']);
             })
         })
     })
@@ -429,4 +498,17 @@ function Actualiza_puesto_ADR() {
     
 
 
+}
+
+function Genera_doc_excel_Carga_masiva_ejemplo()
+
+{
+ 
+  $.fileDownload("php/genera_archivo_carga_masiva.php") 
+   .done(function () {
+      alert('File download a success!'); 
+    }) 
+   .fail(function (data) {
+      alert(data); 
+    });  
 }

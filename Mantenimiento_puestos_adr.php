@@ -2,6 +2,10 @@
     require_once 'php/sesion.php';
     require_once 'php/menu_dinamico.php';
    
+    $perfil= $_SESSION['ses_id_perfil_ing'];
+    if ($perfil != 1) {
+        header('location:index.php');
+    }
 
     $menu = new Menu();
     ?>

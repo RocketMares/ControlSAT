@@ -7,6 +7,7 @@
         $BD_NAME = 'Control_Ingresos';
         $USER = 'Analisis';
         $pass = 'Malitos20';
+        //$ServerName = '99.85.26.227';
         $ServerName = '99.85.24.8';
         //$ServerName = 'DESKTOP-4Q2P8VT\SQLEXPRESS';
         $connectionInfo = ['Database' => "$BD_NAME",

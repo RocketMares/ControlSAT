@@ -57,6 +57,7 @@ class VistasPlantilla
     }
     public function paginacion_adaptable($datos)
     {
+        //$URL_ = "99.85.26.227:8484";
         $URL_ = "99.85.24.8:8282";
         
         //$URL_ = "localhost:8282";

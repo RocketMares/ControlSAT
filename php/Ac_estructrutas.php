@@ -1,6 +1,7 @@
 <?php
 
 if (isset($_POST["auto_admin_name"])) {
+    
 $id_admin = $_POST['auto_admin_name'];
 include_once 'MetodosUsuarios.php';
 $consulta = new MetodosUsuarios();
@@ -13,7 +14,8 @@ $id_sub = $_POST['auto_sbu_name'];
 include_once 'MetodosUsuarios.php';
 $consulta = new MetodosUsuarios();
 $resultado = $consulta->Consulta_AUTO_Subadmin($id_sub);
-echo $resultado[0]['nombre_sub_admin'];
+header('Content-type: application/json; charset=utf-8');
+echo json_encode($resultado);
 
 }
 if (isset($_POST["auto_admin_name_corto"])) {
@@ -29,7 +31,8 @@ $id_sub = $_POST['auto_dep_name'];
 include_once 'MetodosUsuarios.php';
 $consulta = new MetodosUsuarios();
 $resultado = $consulta->Consulta_AUTO_dep($id_sub);
-echo $resultado[0]['nombre_depto'];
+header('Content-type: application/json; charset=utf-8');
+echo json_encode($resultado);
 
 }
 
@@ -85,10 +88,10 @@ echo $datos_admin;
 }
 if (isset($_POST['Act_sub'])) {
 $admin_act = $_POST['Act_sub'];
-$datros =   json_decode($admin_act);
+$datros =  json_decode($admin_act);
 include_once 'MetodosUsuarios.php';
 $metodos = new MetodosUsuarios();
-$datos_admin= $metodos->Actualizar_datos_Admin($datros);
+$datos_admin= $metodos->Actualizar_datos_Sub_admin($datros);
 echo $datos_admin;
 }
 if (isset($_POST['registra_posision'])) {

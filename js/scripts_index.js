@@ -13,10 +13,16 @@ $(document).ready(function () {
         location.href = "Estructura.php";
     });
     $('#pag_sistemas').on('click', function () {
-        location.href = "#";
+        location.href = "Matriz_sistemas.php";
     });
 
 })
+
+function Editar_oficio(id_oficio,id_empleado) {
+    $('#Modal_editor_documento_oficios').modal();
+    $('#carga_documento_oficio_firmado_asig').attr('onclick','Subir_archivo_firmado('+id_oficio+','+id_empleado+')');
+    $('#cerrar_modal_editor_oficios').attr('onclick','trae_Oficios_historial('+id_empleado+')');
+}
 
 function BuscarDatosContrib(id_contrib) {
     var con = id_contrib
@@ -144,6 +150,7 @@ function modal_detalle_calendario(fecha) {
     });
 
 }
+
 function numero(evt) {
     evt = (evt) ? evt : window.event;
     var charCode = (evt.which) ? evt.which : evt.keyCode;
@@ -246,6 +253,34 @@ $(document).ready(function () {
             })
         })
     })
+    $('#ID_DEPA').change(function () {
+        $('#ID_DEPA option:selected').each(function () {
+            var dep = $(this).val();
+            $.post("php/Obtener_combos.php", {
+                filtra_jefe_por_dep: dep
+            }, function (data) {
+                $('#RFC_JEFE').html(data)
+                // console.log(data)
+            })
+        })
+    })
+    $('#Si_oficio').change(function () {
+        $('#Si_oficio option:selected').each(function () {
+            var si_ofi = $(this).val();
+
+            if (si_ofi == 1) {
+                $('#Bloque_genera_tipo_oficio').show();
+            } else {
+                $('#Bloque_genera_tipo_oficio').hide();
+            }
+            // $.post("php/Obtener_combos.php", {
+            //     id_admin: admin
+            // }, function (data) {
+            //     $('#id_sub_admin_add').html(data)
+            // })
+        })
+    })
+
     $('#id_puesto_adr').change(function () {
         $('#id_puesto_adr option:selected').each(function () {
             var id_puesto = $(this).val();
@@ -253,7 +288,7 @@ $(document).ready(function () {
                 nombre_puesto_adr: id_puesto
             }, function (data) {
                 $('#nombre_puesto_adr').val(data[0]['nombre_puesto'])
-                $("#Estatus_activo_adr option[value='" +data[0]['estatus'] + "']").attr("selected", true);
+                $("#Estatus_activo_adr option[value='" + data[0]['estatus'] + "']").attr("selected", true);
             })
         })
     })
@@ -308,17 +343,16 @@ $(document).ready(function () {
         var clave_presu = $("#clave_pres_add").val();
         var clave_puesto = $("#clav_puesto_add").val();
         var nombramiento = $("#tipo_nombramiento12_add").val();
-        var nivel_jerarq = $("#nivel_jerarquico_add").val(); 
-        var sindicato = $("#sindicato_add").val();  
-        var salario_net = $("#sueldo_neto_add").val();       
+        var nivel_jerarq = $("#nivel_jerarquico_add").val();
+        var sindicato = $("#sindicato_add").val();
+        var salario_net = $("#sueldo_neto_add").val();
         var ext = $('#archvioID').val().split('.').pop().toLowerCase();
 
-        if($.inArray(ext, ['jpg']) == -1) {
-            toastr.error('Extencion invalida, solo se pueden aceptar imagenes con extencion .jpg','Notificacion',{
-                "progressBar":true
+        if ($.inArray(ext, ['jpg']) == -1) {
+            toastr.error('Extencion invalida, solo se pueden aceptar imagenes con extencion .jpg', 'Notificacion', {
+                "progressBar": true
             });
-        }
-        else{
+        } else {
             var datoss = {
                 CURP: CURP,
                 rfc_comp: rfc_comp,
@@ -349,21 +383,21 @@ $(document).ready(function () {
                 nivel: nivel,
                 clave_presu: clave_presu,
                 clave_puesto: clave_puesto,
-                nombramiento:nombramiento,
-                nivel_jerarq:nivel_jerarq,
-                sindicato:sindicato,
-                salario_net:salario_net
+                nombramiento: nombramiento,
+                nivel_jerarq: nivel_jerarq,
+                sindicato: sindicato,
+                salario_net: salario_net
 
-             
+
             }
             var json = JSON.stringify(datoss);
-    
+
             if (CURP == '' || CURP.length < 18) {
                 toastr.error("La CURP no puedes dejarla en blanco o puede tener menos de 18 caracteres", 'Notificación:', {
                     "progressBar": true
                 })
             } else {
-    
+
                 if (rfc_comp == '' || rfc_comp.length < 13) {
                     toastr.error("El RFC no puedes dejarlo en blanco o puede tener menos de 13 caracteres", 'Notificación:', {
                         "progressBar": true
@@ -415,7 +449,7 @@ $(document).ready(function () {
                                                         })
                                                     } else {
                                                         if (escolaridad == 4 && est_escolar == 3 || escolaridad == 4 && est_escolar == 4 || escolaridad == 4 && est_escolar == 5) {
-    
+
                                                             if (carrera == '') {
                                                                 toastr.error("Falta agregar la carrera o titulo del empleado ", 'Notificación:', {
                                                                     "progressBar": true
@@ -439,9 +473,15 @@ $(document).ready(function () {
                                                                             $.post("php/valida_carga_fotos.php", {
                                                                                 datos: json
                                                                             }, function (respuesta) {
-                                                                                toastr.info(respuesta, 'Notificación:', {
-                                                                                    "progressBar": true
-                                                                                })
+                                                                                if (respuesta == true) {
+                                                                                    toastr.success("Usuario registrado con exito!", 'Notificación:', {
+                                                                                        "progressBar": true
+                                                                                    })
+                                                                                } else {
+                                                                                    toastr.error(respuesta, 'Notificación:', {
+                                                                                        "progressBar": true
+                                                                                    })
+                                                                                }
                                                                             }).done(function (data_in) {
                                                                                 if (data_in == true) {
                                                                                     $.ajax({
@@ -461,17 +501,17 @@ $(document).ready(function () {
                                                                                         "progressBar": true
                                                                                     })
                                                                                 }
-    
+
                                                                             })
                                                                         }
-    
-    
+
+
                                                                     }
-    
+
                                                                 }
-    
+
                                                             }
-    
+
                                                         } else if (escolaridad == 5 && est_escolar == 3 || escolaridad == 5 && est_escolar == 4 || escolaridad == 5 && est_escolar == 5) {
                                                             if (carrera == '') {
                                                                 toastr.error("Falta agregar la carrera o titulo del empleado ", 'Notificación:', {
@@ -496,9 +536,16 @@ $(document).ready(function () {
                                                                             $.post("php/valida_carga_fotos.php", {
                                                                                 datos: json
                                                                             }, function (respuesta) {
-                                                                                // toastr.info(respuesta, 'Notificación:', {
-                                                                                //     "progressBar": true
-                                                                                // })
+                                                                                if (respuesta == true) {
+                                                                                    toastr.success("Usuario registrado con exito!", 'Notificación:', {
+                                                                                        "progressBar": true
+                                                                                    })
+                                                                                } else {
+                                                                                    toastr.error(respuesta, 'Notificación:', {
+                                                                                        "progressBar": true
+                                                                                    })
+                                                                                }
+
                                                                             }).done(function (data_in) {
                                                                                 if (data_in == true) {
                                                                                     $.ajax({
@@ -514,21 +561,21 @@ $(document).ready(function () {
                                                                                         limpia_campos_form_agrega()
                                                                                     })
                                                                                 } else {
-                                                                                    toastr.error('No hay respuesta del servidor', 'Notificación:', {
+                                                                                    toastr.error('El usuario no se pudo registrar', 'Notificación:', {
                                                                                         "progressBar": true
                                                                                     })
                                                                                 }
-    
+
                                                                             })
                                                                         }
-    
-    
+
+
                                                                     }
-    
+
                                                                 }
-    
+
                                                             }
-                                                        } else if (escolaridad == 6 && est_escolar == 3 ||escolaridad == 6 && est_escolar == 4 || escolaridad == 6 && est_escolar == 5) {
+                                                        } else if (escolaridad == 6 && est_escolar == 3 || escolaridad == 6 && est_escolar == 4 || escolaridad == 6 && est_escolar == 5) {
                                                             if (carrera == '') {
                                                                 toastr.error("Falta agregar la carrera o titulo del empleado ", 'Notificación:', {
                                                                     "progressBar": true
@@ -552,9 +599,15 @@ $(document).ready(function () {
                                                                             $.post("php/valida_carga_fotos.php", {
                                                                                 datos: json
                                                                             }, function (respuesta) {
-                                                                                 toastr.info(respuesta, 'Notificación:', {
-                                                                                     "progressBar": true
-                                                                                 })
+                                                                                if (respuesta == true) {
+                                                                                    toastr.success("Usuario registrado con exito!", 'Notificación:', {
+                                                                                        "progressBar": true
+                                                                                    })
+                                                                                } else {
+                                                                                    toastr.error(respuesta, 'Notificación:', {
+                                                                                        "progressBar": true
+                                                                                    })
+                                                                                }
                                                                             }).done(function (data_in) {
                                                                                 if (data_in == true) {
                                                                                     $.ajax({
@@ -570,19 +623,19 @@ $(document).ready(function () {
                                                                                         limpia_campos_form_agrega()
                                                                                     })
                                                                                 } else {
-                                                                                    toastr.error('No hay respuesta del servidor', 'Notificación:', {
+                                                                                    toastr.error('El usuario no se pudo registrar', 'Notificación:', {
                                                                                         "progressBar": true
                                                                                     })
                                                                                 }
-    
+
                                                                             })
                                                                         }
-    
-    
+
+
                                                                     }
-    
+
                                                                 }
-    
+
                                                             }
                                                         } else if (escolaridad == 7 && est_escolar == 3 || escolaridad == 7 && est_escolar == 4 || escolaridad == 7 && est_escolar == 5) {
                                                             if (carrera == '') {
@@ -608,9 +661,15 @@ $(document).ready(function () {
                                                                             $.post("php/valida_carga_fotos.php", {
                                                                                 datos: json
                                                                             }, function (respuesta) {
-                                                                                toastr.info(respuesta, 'Notificación:', {
-                                                                                    "progressBar": true
-                                                                                })
+                                                                                if (respuesta == true) {
+                                                                                    toastr.success("Usuario registrado con exito!", 'Notificación:', {
+                                                                                        "progressBar": true
+                                                                                    })
+                                                                                } else {
+                                                                                    toastr.error(respuesta, 'Notificación:', {
+                                                                                        "progressBar": true
+                                                                                    })
+                                                                                }
                                                                             }).done(function (data_in) {
                                                                                 if (data_in == true) {
                                                                                     $.ajax({
@@ -626,18 +685,18 @@ $(document).ready(function () {
                                                                                         limpia_campos_form_agrega()
                                                                                     })
                                                                                 } else {
-                                                                                    toastr.error('No hay respuesta del servidor', 'Notificación:', {
+                                                                                    toastr.error('El usuario no se pudo registrar', 'Notificación:', {
                                                                                         "progressBar": true
                                                                                     })
                                                                                 }
-    
+
                                                                             })
                                                                         }
-    
+
                                                                     }
-    
+
                                                                 }
-    
+
                                                             }
                                                         } else if (escolaridad == 8 && est_escolar == 3 || escolaridad == 8 && est_escolar == 4 || escolaridad == 8 && est_escolar == 5) {
                                                             if (carrera == '') {
@@ -663,9 +722,15 @@ $(document).ready(function () {
                                                                             $.post("php/valida_carga_fotos.php", {
                                                                                 datos: json
                                                                             }, function (respuesta) {
-                                                                                toastr.info(respuesta, 'Notificación:', {
-                                                                                    "progressBar": true
-                                                                                })
+                                                                                if (respuesta == true) {
+                                                                                    toastr.success("Usuario registrado con exito!", 'Notificación:', {
+                                                                                        "progressBar": true
+                                                                                    })
+                                                                                } else {
+                                                                                    toastr.error(respuesta, 'Notificación:', {
+                                                                                        "progressBar": true
+                                                                                    })
+                                                                                }
                                                                             }).done(function (data_in) {
                                                                                 if (data_in == true) {
                                                                                     $.ajax({
@@ -681,19 +746,19 @@ $(document).ready(function () {
                                                                                         limpia_campos_form_agrega()
                                                                                     })
                                                                                 } else {
-                                                                                    toastr.error('No hay respuesta del servidor', 'Notificación:', {
+                                                                                    toastr.error('El usuario no se pudo registrar', 'Notificación:', {
                                                                                         "progressBar": true
                                                                                     })
                                                                                 }
-    
+
                                                                             })
                                                                         }
-    
-    
+
+
                                                                     }
-    
+
                                                                 }
-    
+
                                                             }
                                                         } else {
                                                             if (admin == 0 || sub == 0 || dep == 0) {
@@ -714,9 +779,15 @@ $(document).ready(function () {
                                                                         $.post("php/valida_carga_fotos.php", {
                                                                             datos: json
                                                                         }, function (respuesta) {
-                                                                            toastr.info(respuesta, 'Notificación:', {
-                                                                                "progressBar": true
-                                                                            })
+                                                                            if (respuesta == true) {
+                                                                                toastr.success("Usuario registrado con exito!", 'Notificación:', {
+                                                                                    "progressBar": true
+                                                                                })
+                                                                            } else {
+                                                                                toastr.error(respuesta, 'Notificación:', {
+                                                                                    "progressBar": true
+                                                                                })
+                                                                            }
                                                                         }).done(function (data_in) {
                                                                             if (data_in == true) {
                                                                                 $.ajax({
@@ -732,57 +803,57 @@ $(document).ready(function () {
                                                                                     limpia_campos_form_agrega()
                                                                                 })
                                                                             } else {
-                                                                                toastr.error('No hay respuesta del servidor', 'Notificación:', {
+                                                                                toastr.error('El usuario no se pudo registrar', 'Notificación:', {
                                                                                     "progressBar": true
                                                                                 })
                                                                             }
-    
+
                                                                         })
                                                                     }
-    
-    
+
+
                                                                 }
-    
+
                                                             }
-    
-    
+
+
                                                         }
-    
+
                                                     }
-    
+
                                                 }
-    
+
                                             }
-    
+
                                         }
-    
-    
+
+
                                     }
-    
+
                                 }
-    
+
                             }
                         }
-    
-    
+
+
                     }
-    
+
                 }
-    
-    
-    
-    
+
+
+
+
             }
         }
-  
-       
+
+
 
     });
 
 })
 
 
-function limpia_campos_form_agrega(){
+function limpia_campos_form_agrega() {
     $("#archvioID").val("");
     $("#CURP2_Add").val("");
     $("#RFC_COMP_add").val("");
@@ -799,6 +870,8 @@ function limpia_campos_form_agrega(){
     $("#estatus_add").val(0);
     $("#fecha_ingreso_add").val("");
     $("#sex_add").val(0);
+    $("#posision_ten").val(0);
+    $("#estatus_plazas_act").val(0);
     $("#Hijos_add").val(0);
     $("#estado_civ_add").val(0);
     $("#Escolaridad_add").val(0);
@@ -817,6 +890,163 @@ function limpia_campos_form_agrega(){
 
 
 
-function modal_actualiza(no_emp){
-    $('#Muestra_modal_cambios_fotos').modal()
+
+
+function ConfirmarCargaUSU(valor) {
+    //alert("si entra") 
+
+    $.ajax({
+        type: "POST",
+        url: "php/accion_carga.php",
+        data: {
+            USU1: valor
+        },
+        dataType: "html",
+        success: function (response) {
+            //    $("#resultado_carga").modal();
+            toastr.success(response, 'Notificacion');
+            console.log(response);
+        }
+    });
 }
+
+$(document).ready(function () {
+    $('#fecha_de_oficio_editar').datepicker({
+        endDate: 'today',
+        autoclose: true,
+        //daysOfWeekDisabled: [0, 6],
+        todayHighlight: true,
+        format: 'yyyy/mm/dd',
+        toggleActive: true,
+        language: 'es'
+    });
+ 
+
+
+})
+
+function Subir_archivo_firmado(id_oficio,id_empleado) {
+    var miArchvio_firmado = $('#carga_oficio_firm_asig').prop('files')[0];
+    var fecha_oficio = $('#fecha_de_oficio_editar').val();
+    var id_oficio = id_oficio;
+    var ext = $('#carga_oficio_firm_asig').val().split('.').pop().toLowerCase();
+
+    if ($.inArray(ext, ['pdf','zip']) == -1) {
+        toastr.error('Extencion invalida, solo se pueden aceptar documentos con extencion .pdf o .zip', 'Notificacion', {
+            "progressBar": true
+        });
+    } else {
+        if (fecha_oficio == '') {
+            toastr.error('Debes agregar la fecha en la que se firmo el documento.', 'Notificacion', {
+                "progressBar": true
+            });
+        }else{
+            var json3 = {
+                fecha_oficio: fecha_oficio,
+                id_oficio: id_oficio
+            }
+            //console.log(json3)
+            var formData_example = new FormData($('.form_example_asigna')[0]);
+            formData_example.append('miArchvio_firmado', miArchvio_firmado);
+            $.post('php/valida_carga_fotos.php', {
+                Aactualiza_oficio: json3
+            }, function (respuesta) {
+                if (respuesta == true) {
+                    toastr.success('Se actualizo el estado del oficio satisfactoriamente!', 'Notificación:', {
+                        'progressBar': true
+                    })
+                } else {
+                    toastr.error(respuesta, 'Notificación:', {
+                        'progressBar': true
+                    })
+                    //console.log(respuesta)
+                }
+            }).done(function (data_in) {
+                if (data_in == true) {
+                    $.ajax({
+                        url: './php/valida_carga_fotos.php',
+                        type: 'POST',
+                        contentType: false,
+                        processData: false,
+                        data: formData_example,
+                    }).done(function (respuesta) {
+                        toastr.success(respuesta, 'Notificación:', {
+                            'progressBar': true
+                        })
+    
+                    })
+                } else {
+                    toastr.error('El documento no se pudo cargar correctamente', 'Notificación:', {
+                        'progressBar': true
+                    })
+                    $('#cerrar_modal_editor_oficios').attr('onclick','trae_Oficios_historial('+id_empleado+')');
+                }
+    
+            })
+        }
+       
+    }
+
+}
+
+function descarga_documento(rfc,no_empleado,id_oficio,num_oficio,tipo_oficio)
+
+	{
+  
+        var nombre_doc=no_empleado+"_"+id_oficio+"_"+num_oficio+"_"+tipo_oficio;
+        createCookie('nombre_doc',nombre_doc,1)
+        createCookie('Carpeta',rfc,1)
+        location.href='php/Descarga_documentos.php'
+
+	}
+  
+
+    function modal_actualiza(id_empleado,no_emp) {
+        $('#Muestra_modal_cambios_fotos').modal()
+        $('#cerrar_modal_foto').attr('onclick','Revisa_info_det_us('+id_empleado+')')
+        $('#subir_foto').attr('onclick','subir_foto('+id_empleado+','+no_emp+')')
+    }
+    
+    
+function subir_foto(id_empleado,no_emp) {
+    var miArchvio = $("#Foto_nueva").prop('files')[0];
+    var formData_example = new FormData($(".formulario_cambia_foto")[0]);
+    formData_example.append('Foto_nueva', miArchvio);
+    var datos = {no_emp:no_emp}
+    var ext = $('#Foto_nueva').val().split('.').pop().toLowerCase();
+    if ($.inArray(ext, ['jpg']) == -1) {
+        toastr.error('Extencion invalida, solo se pueden aceptar imagenes con extencion .jpg', 'Notificacion', {
+            "progressBar": true
+        });
+    }
+    else{
+        $.post("php/valida_carga_fotos.php",{nombre_foto:datos},function(){
+        }).done(function(respuesta){
+            //toastr.info(respuesta,'Notificacion')
+            $.ajax({
+                url: "./php/valida_carga_fotos.php",
+                type: "POST",
+                contentType: false,
+                processData: false,
+                data: formData_example,
+            }).done(function (respuesta) {
+                toastr.success(respuesta, 'Notificación:', {
+                    "progressBar": true
+                })
+                Revisa_info_det_us(id_empleado)
+            })
+        })
+       
+    }
+}
+  
+function descarga_aplicacion(id_sistema)
+{
+
+ var id_sistema= id_sistema;
+ var carpeta = 'Sistemas_almacenados'
+ createCookie('Num_sistema',id_sistema,1)
+ createCookie('Carpeta',carpeta,1)
+ location.href='php/descarga_aplicacion.php'
+}
+

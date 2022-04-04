@@ -62,3 +62,19 @@ if (isset($_POST["id_admin"])) {
     
 
   }
+  if (isset($_POST['filtra_jefe_por_dep'])) {
+    include_once 'ConsultaADR.php';
+    $resultado = new ConsultaInfoADR();
+    $nom_dep = $_POST["filtra_jefe_por_dep"];
+    $resultado_dep = $resultado->Consulta_Jefe_por_deps($nom_dep);
+    if (isset($resultado_dep)) {
+      echo"<option value= '0'>Seleccion de opciones</option>";
+      for ($i=0; $i <count($resultado_dep) ; $i++) { 
+        echo "<option value= '".$resultado_dep[$i]['id_empleado_plant']."'>".$resultado_dep[$i]['nombre_empleado']."</option>";
+      }
+  
+    }
+    else {
+      echo"<option value= '0'>Seleccion de opciones</option>";
+    }
+  }

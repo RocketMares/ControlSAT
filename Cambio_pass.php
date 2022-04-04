@@ -41,7 +41,7 @@ if (isset($_GET['error'])) {
   <p class="h1">Cambio de contraseña.</p>
   <br>
   <div class="container">
-  <p class="lead">Por ser la primera vez que ingresas al <strong>Sistema de Entevistas SAT</strong>, 
+  <p class="lead">Por ser la primera vez que ingresas al <strong>Sistema de Control de Ingresos del Personal SAT</strong>, 
   te pedimos <strong>cambiar tu contraseña</strong> para asi garantizar la seguridad de tu cuenta y
    disfrutes mejor del contenido.</p>
    </div>

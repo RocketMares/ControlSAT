@@ -1,7 +1,10 @@
 <?php
     require_once 'php/sesion.php';
     require_once 'php/menu_dinamico.php';
-   
+    $perfil= $_SESSION['ses_id_perfil_ing'];
+    if ($perfil != 1) {
+        header('location:index.php');
+    }
 
     $menu = new Menu();
     ?>
@@ -58,6 +61,13 @@
                         placeholder=" Ejem: Subadministración de Control y Análisis Estratégico " name="nombre_area">
                 </div>
             </div>
+            <div class="form-group row">
+                <label for="inputState" class="col-sm-2 col-form-label">Nombre de la Subadministración</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="nombre_area_c"
+                        placeholder=" Ejem: Sub. Ctrl. Y A. E. " name="nombre_area_c">
+                </div>
+            </div>
 
             <div class="form-group row">
                 <div class="col-sm-10">
@@ -104,6 +114,13 @@
                 </label>
                 <div class="col-sm-10">
                     <input type="text" class="form-control" id="nombre_sub_admin2" name="nombre_sub_admin2">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputEmail3" class="col-sm-2 col-form-label"> Cambio de Nombre corto de la Subadministración :
+                </label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="nombre_sub_admin2_corto" name="nombre_sub_admin2_corto">
                 </div>
             </div>
 

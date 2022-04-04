@@ -1,9 +1,8 @@
 <?php
 
 $URL_ = "99.85.24.8:8282";
+//$URL_ = "99.85.26.227:8484";
 //$URL_ = "localhost:8282";
-
-
 	session_start();//valida si esta activa la seci?n, sino, no le deja seguir viendo la data y lo regresa a loginDEj.php
 	if (isset($_SESSION["ses_id_usuario_ing"]) 
 	&& isset($_SESSION["ses_rfc_corto_ing"]) 
@@ -16,7 +15,7 @@ $URL_ = "99.85.24.8:8282";
 	|| isset($_SESSION["estatus_ent_ing"])) {
 		# code...
 		if($_SESSION["ses_id_perfil_ing"] != 1){
-			$inactivo = 840;
+			$inactivo = 1800;
 			$vida_session = time() - $_SESSION['tiempo'];
 			if ($vida_session > $inactivo) {
 				require_once 'MetodosUsuarios.php';

@@ -1,7 +1,10 @@
 <?php
     require_once 'php/sesion.php';
     require_once 'php/menu_dinamico.php';
-   
+    $perfil= $_SESSION['ses_id_perfil_ing'];
+    if ($perfil != 1) {
+        header('location:index.php');
+    }
 
     $menu = new Menu();
     ?>
@@ -71,7 +74,14 @@
                 <label for="inputState" class="col-sm-2 col-form-label">Nombre del Departamento</label>
                 <div class="col-sm-10">
                     <input type="text" class="form-control" id="nombre_dep"
-                        placeholder=" Ejem:  Control y Analisis Estratejiico" name="nombre_area">
+                        placeholder=" Ejem:  Control y Analisis Estratejiico" name="nombre_area" onkeyup="javascript:this.value=this.value.toUpperCase();">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputState" class="col-sm-2 col-form-label">Nombre corto del Departamento</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="nombre_dep_corto"
+                        placeholder=" Ejem:  Ctrl Y A. E." name="nombre_dep_corto"  onkeyup="javascript:this.value=this.value.toUpperCase();">
                 </div>
             </div>
 
@@ -128,14 +138,20 @@
             <div class="form-group row">
                 <label for="inputEmail3" class="col-sm-2 col-form-label"> Cambio de Nombre : </label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" id="nombre_dep_cam" name="nombre_dep_cam" value="" required>
+                    <input type="text" class="form-control" id="nombre_dep_cam" name="nombre_dep_cam" value="" required onkeyup="javascript:this.value=this.value.toUpperCase();">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputEmail3" class="col-sm-2 col-form-label"> Cambio de Nombre corto: </label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="nombre_dep_cam_corto" name="nombre_dep_cam_corto" value="" required onkeyup="javascript:this.value=this.value.toUpperCase();">
                 </div>
             </div>
             <fieldset class="form-group">
                 <div class="row">
-                    <legend class="col-form-label col-sm-2 pt-0">Radios</legend>
-                    <div class="col-sm-10">
-                        <div class="form-check">
+                    <legend class="col-form-label col-sm-2 pt-0">Estado</legend>
+                    <div class="col-sm-10 text-left">
+                        <div class="form-check  ">
                             <input class="form-check-input" type="radio" name="Estatus_activo" id="Estatus_Activo" value="A"
                                 checked>
                             <label class="form-check-label" for="Estatus_Activo">

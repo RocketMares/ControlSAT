@@ -30,6 +30,32 @@ class MetodosUsuarios
          $conexion->CerrarConexion($con); 
      }        
   }
+  public function Saca_puesto_oficial($rfc){
+    include_once 'sesion.php';
+    include_once 'conexion.php';
+    $BD = new ConexionSQL();
+    $con = $BD->ObtenerConexionBD();
+    $query = "	SELECT puest.nombre_puesto from Empleado_insumo emp
+    INNER JOIN Posisiones pos ON pos.id_posision = emp.id_posision 
+    INNER JOIN Puesto_FUMP puest ON pos.id_puesto_fump = puest.id_puesto_fump 
+    where emp.rfc_corto = '$rfc'";
+     $prepare = sqlsrv_query($con,$query);
+     if($prepare){
+         while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+             $fila = $row;
+         }
+         if (isset($fila)) {
+             return $fila;
+             $conexion->CerrarConexion($con);
+         }else{
+             return null;
+             $conexion->CerrarConexion($con);
+         }
+     }else{
+         return print_r(sqlsrv_errors(),true);
+         $conexion->CerrarConexion($con); 
+     }        
+  }
     public function Consulta_Depto_filtro($id_admin,$sub)
   {
     include_once 'conexion.php';
@@ -223,7 +249,11 @@ class MetodosUsuarios
           ,[fecha_alta]
         ,[Estatus])
         VALUES('$nombre_puesto_adr','$user_alta',GETDATE(),'A')
-        END";
+        END
+        else
+        begin
+        return false
+        end";
     $prepare = sqlsrv_query($con, $query);
     if ($prepare == true) {
         return 'Se registro Exitosamente';
@@ -472,7 +502,7 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
     include_once 'conexion.php';
     $conexion = new ConexionSQL();
     $con = $conexion->ObtenerConexionBD();
-    $query = "SELECT 
+    $query = "		SELECT 
     Emp.nombre_empleado,
     Emp.no_empleado,
     Emp.fecha_alta,
@@ -482,9 +512,12 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
     Emp.user_alta,
     per.nombre_perfil,
     dep.nombre_depto,
-    (select nombre_empleado from [Empleados_usuario] where id_perfil = 1 AND estatus = 'A' AND id_puesto = 1 AND id_admin = $admin) As jefe,
-    (select correo from [Empleados_usuario] where id_perfil = 1 AND estatus = 'A' AND id_puesto = 1 AND id_admin = $admin) As correo_jefe,
-    (select rfc_corto from [Empleados_usuario] where id_perfil = 1 AND estatus = 'A' AND id_puesto = 1 AND id_admin = $admin) As rfc_jefe
+    (select nombre_empleado from [Empleados_usuario] where id_empleado_us = (select jefe_directo From Empleados_usuario where id_empleado_us = $id_empleado)) As jefe,
+    (select correo from [Empleados_usuario] where  id_empleado_us = (select jefe_directo From Empleados_usuario where id_empleado_us = $id_empleado)) As correo_jefe,
+    (select rfc_corto from [Empleados_usuario] where  id_empleado_us = (select jefe_directo From Empleados_usuario where id_empleado_us = $id_empleado)) As rfc_jefe,
+	(select nombre_empleado from [Empleados_usuario] where id_empleado_us = (select jefe_directo  From Empleados_usuario where id_empleado_us =  (select jefe_directo From Empleados_usuario where id_empleado_us = $id_empleado))) As jefe_sub,
+    (select correo from [Empleados_usuario] where id_empleado_us = (select jefe_directo  From Empleados_usuario where id_empleado_us =  (select jefe_directo From Empleados_usuario where id_empleado_us = $id_empleado))) As correo_jefe_sub,
+    (select rfc_corto from [Empleados_usuario] where id_empleado_us = (select jefe_directo  From Empleados_usuario where id_empleado_us =  (select jefe_directo From Empleados_usuario where id_empleado_us = $id_empleado))) As rfc_jefe_sub
     FROM [Empleados_usuario] Emp
     INNER JOIN Administracion adminx ON Emp.id_admin = adminx.id_admin
     INNER JOIN Puestos_usuario Pues ON Emp.id_puesto = Pues.id_puesto
@@ -746,6 +779,7 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
       $nombre_dep = $datos->nombre_dep;
       $estatus_dep = $datos->estatus;
       $dep_asoc = $datos->dep_asoc;
+      $nombre_dep_corto = $datos->nombre_dep_c;
      
       switch ($estatus_dep) {
             case 'A':
@@ -755,7 +789,8 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
             ,[nombre_depto] = '$nombre_dep'
             ,[estatus] = 'A'
             ,[user_mod] = '$user_alta'
-            ,[fecha_mod]= GETDATE() 
+            ,[fecha_mod]= GETDATE()
+            ,nombre_corto = '$nombre_dep_corto'
             WHERE id_depto = $dep_asoc ";
             break;
             case 'N':
@@ -766,6 +801,7 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
               ,[user_baja] = '$user_alta'
               ,[estatus] = 'N'
               ,[fecha_baja]= GETDATE() 
+              ,nombre_corto = '$nombre_dep_corto'
               WHERE id_depto = $dep_asoc ";
             break;
             default:
@@ -775,6 +811,7 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
             ,[nombre_depto] = '$nombre_dep'
             ,[user_mod] = '$user_alta'
             ,[fecha_mod]= GETDATE() 
+            ,nombre_corto = '$nombre_dep_corto'
             WHERE id_depto = $dep_asoc ";
             break;
       }
@@ -784,41 +821,50 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
           return 'Se actualizo Exitosamente';
           $conexion->CerrarConexion($con);
       } else {
-          return 'Algo no salbio bien';
+          return print_r(sqlsrv_errors(),false);
           $conexion->CerrarConexion($con);
       }
   }
-  public function Actualizar_datos_Sub_admin($admin, $sub_admin_asoc, $nombre_sub, $estatus)
+  public function Actualizar_datos_Sub_admin($datos)
   {
       include_once 'conexion.php';
+      include_once 'sesion.php';
       $conexion = new ConexionSQL();
       $con = $conexion->ObtenerConexionBD();
-      $user_alta = $_SESSION["ses_rfc_corto"];
+      $user_alta = $_SESSION["ses_rfc_corto_ing"];
+      $admin = $datos->admin; 
+      $sub_admin_asoc = $datos->sub_admin_asoc ; 
+      $nombre_sub1 = $datos->nombre_sub; 
+      $nombre_sub_corto = $datos->nombre_sub_c; 
+      $estatus = $datos->estatus;
       switch ($estatus) {
           case 'A':
               $query = "UPDATE SubAdmin  
-              set nombre_sub_admin = '$nombre_sub'
+              set nombre_sub_admin = '$nombre_sub1'
               , id_admin = $admin 
               , user_mod = '$user_alta'
               , estatus = 'A'
               ,fecha_mod = GETDATE()
+              ,nombre_corto = '$nombre_sub_corto'
               where id_sub_admin = $sub_admin_asoc";
               break;
           case 'N':
               $query = "UPDATE SubAdmin  
-              set nombre_sub_admin = '$nombre_sub'
+              set nombre_sub_admin = '$nombre_sub1'
               , id_admin = $admin 
               , user_mod = '$user_alta'
               , estatus = 'N'
               ,fecha_mod = GETDATE()
+              ,nombre_corto = '$nombre_sub_corto'
               where id_sub_admin = $sub_admin_asoc";
               break;
           default:
               $query = "UPDATE SubAdmin  
-              set nombre_sub_admin = '$nombre_sub'
+              set nombre_sub_admin = '$nombre_sub1'
               , id_admin = $admin 
               , user_mod = '$user_alta'
               ,fecha_mod = GETDATE()
+              ,nombre_corto = '$nombre_sub_corto'
               where id_sub_admin = $sub_admin_asoc";
               break;
       }
@@ -1029,7 +1075,7 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
           30,
           31,
           32,
-          34,37) 
+          34,37) and id_proc = 9
         AND estatus = 'A'";
         $prepare = sqlsrv_query($con,$query);
         if($prepare){
@@ -2398,6 +2444,7 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
                     ,correo = '".$datos->correo."'
                     ,jefe_directo = ".$datos->jefe."
                     ,estatus = '".$datos->estatus."'
+                    ,responsiva = ".$datos->responsiva."
                     ,user_mod = '$user'
                     ,RFC  = '".$datos->rfc_comp."'
                     ,fecha_mod = GETDATE()

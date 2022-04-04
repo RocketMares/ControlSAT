@@ -85,6 +85,15 @@ $menu->cabecera_principal_log();
                                 </div>";
                         echo $error;
                     break;
+                    case 9:
+                        $error ="<div class='alert alert-danger' role='alert'>
+                                El usuario no tiene firmada su responsiva.
+                                <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
+                                    <span aria-hidden='true'>&times;</span>
+                                </button> 
+                                </div>";
+                        echo $error;
+                    break;
                 
             }    
         }
