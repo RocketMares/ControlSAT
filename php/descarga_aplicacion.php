@@ -1,6 +1,6 @@
 <?php
 
-if (isset($_COOKIE['Carpeta']) && isset($_COOKIE['Num_sistema']) ) {
+if (isset($_COOKIE['Carpeta']) && isset($_COOKIE['no_empleado']) ) {
 
     include_once "ConsultaADR.php";
     $sistema = new ConsultaInfoADR();
@@ -40,5 +40,5 @@ if (isset($_COOKIE['Carpeta']) && isset($_COOKIE['Num_sistema']) ) {
    
 
 else {
-    header('location:../Matriz_sistemas.php?pagina=1');
+    header('location:../Matriz_sistemas.php?prueba=1');
 }

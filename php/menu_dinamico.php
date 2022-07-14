@@ -2,7 +2,7 @@
 
 class Menu
 {
-    public function ConsultaMenu($id_perfil, $id_padre)
+    public static function ConsultaMenu($id_perfil, $id_padre)
     {
         include_once 'conexion.php';
         $conexion = new ConexionSQL();// SE INSTANCIA LA CLASE CONEXIÓN
@@ -17,16 +17,14 @@ class Menu
         $filas[] = null;
         if ($rst) {
             while ($rows = sqlsrv_fetch_array($rst, SQLSRV_FETCH_ASSOC)) {
-                $filas[] = array('id_menu' => $rows['id_menu'],'id_padre' => $rows['id_padre'],
-            'orden' => $rows['orden'],'nombre_menu' => $rows['nombre_menu'],'url_menu' => $rows['url_menu'],
-          'estatus' => $rows['estatus'],'Funcion' => $rows['Funcion']);
+                $filas[] =  $rows;
             }
             return $filas;
             $conexion->CerrarConexion($con);
         }
     }
   
-    public function ConsultaMenu_Encabezados($id_perfil)
+    public static function ConsultaMenu_Encabezados($id_perfil)
     {
         include_once 'conexion.php';
         $conexion = new ConexionSQL();// SE INSTANCIA LA CLASE CONEXIÓN
@@ -39,16 +37,14 @@ class Menu
         if ($rst) {
             $filas[] = null;
             while ($rows = sqlsrv_fetch_array($rst, SQLSRV_FETCH_ASSOC)) {
-                $filas[] = array('id_menu' => $rows['id_menu'],'id_padre' => $rows['id_padre'],
-            'orden' => $rows['orden'],'nombre_menu' => $rows['nombre_menu'],'url_menu' => $rows['url_menu'],
-          'estatus' => $rows['estatus'],'Funcion' => $rows['Funcion']);
+                $filas[] =  $rows;
             }
             return $filas;
             $conexion->CerrarConexion($con);
         }
     }
   
-    public function RenderMenu($id_perfil)
+    public static function RenderMenu($id_perfil)
     {
         $menu = self::ConsultaMenu_Encabezados($id_perfil);
         $html[] = null;
@@ -57,15 +53,15 @@ class Menu
         for ($i = 0; $i <count($menu);$i++) {
             if ($menu[$i]["estatus"] == "A") {
                 $posicion++;
-                $html[$posicion] ="<li class='nav-item '><a class='nav-link' href='". $menu[$i]['url_menu']."'>". $menu[$i]['nombre_menu']."</a></li>";
+                $html[$posicion] ="<li class='nav-item '><a class='nav-link' href='". $menu[$i]['url_menu']."' target='_blank'>". $menu[$i]['nombre_menu']."</a></li>";
                 $submenu = self::ConsultaMenu($id_perfil, $menu[$i]["id_menu"]);
                 if (count($submenu)-1 !=0) {
-                    $html[$posicion] = "<li class='nav-item dropdown'><a class='nav-link dropdown-toggle' id='navbarDropdown' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false' href='". $menu[$i]['url_menu']."'>".$menu[$i]['nombre_menu']."</a>
+                    $html[$posicion] = "<li class='nav-item dropdown'><a class='nav-link dropdown-toggle' id='navbarDropdown' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false' href='". $menu[$i]['url_menu']."' target='_blank'>".$menu[$i]['nombre_menu']."</a>
             <div class='dropdown-menu' aria-labelledby='navbarDropdown'>";
                     for ($j = 0; $j<count($submenu); $j++) {
                         if ($submenu[$j]["estatus"] == "A") {
                             $posicion++;
-                            $html[$posicion] = "<a class='dropdown-item' href='".$submenu[$j]['url_menu'] ."'>".$submenu[$j]['nombre_menu']."</a>";
+                            $html[$posicion] = "<a class='dropdown-item' href='".$submenu[$j]['url_menu'] ."' target='_blank'>".$submenu[$j]['nombre_menu']."</a>";
                             $subopcion = self::ConsultaMenu($id_perfil, $submenu[$j]["id_menu"]);
                             if (count($subopcion)-1 !=0) {
                                 $posicion++;
@@ -73,7 +69,7 @@ class Menu
                                 for ($m=0; $m <count($subopcion) ; $m++) {
                                     if ($subopcion[$m]["estatus"] == "A") {
                                         $posicion++;
-                                        $html[$posicion] = "<a class='' href='".$subopcion[$m]['url_menu'] ."'onclick='".$subopcion[$m]['Funcion'] ."'>".$subopcion[$m]['nombre_menu']."</a>";
+                                        $html[$posicion] = "<a class='' href='".$subopcion[$m]['url_menu'] ."'onclick='".$subopcion[$m]['Funcion'] ."' target='_blank'>".$subopcion[$m]['nombre_menu']."</a>";
                                     }
                                 }
                                 $posicion++;
@@ -127,6 +123,7 @@ class Menu
     {
         // SE COMVIERTE EN ARREGLO EL NOMBRE DELIMITADO POR ESPACIOS
       $nombre =  $_SESSION["ses_nombre_empleado_ing"];  // SE CREA EL NOMBRE CONCATENADO CON LA PRIMERA LETRA DE LA POSICIÓN 1
+    
       echo "
       <!-- Footer inicio -->
  
@@ -138,8 +135,7 @@ class Menu
         <p class=' float-md-none text-white text-center' >Esta información esta clasificada como reservada en términos de los artículos 13 fracción V, 14 fracciones II y VI, y 63 de la Ley Federal de Transparencia y Acceso a la Información Pública Gubernamental; el lineamiento Vigésimo Cuarto, fracciones I, II y IV, de los “Lineamientos Generales para la Clasificación y Desclasificación de la información de las Dependencias de la Administración Pública Federal”, publicados en el Diario Oficial de la Federación el 18 de agosto de 2003; así como el artículo 69, primer párrafo, del Código Fiscal de la Federación vigente. El conocimiento y uso de la información contenida en el presente, por personas y/o fines diversos para los que ha sido remitido, puede ser constitutivo de responsabilidades administrativas y/o penales, sancionadas conforme a la legislación vigente.</p>
 
         </footer>
-      
-            
+                
         <!-- Footer fin -->
         <script type='text/javascript' src='js/toastr.min.js'></script>
         <script src='js/jquery-3.1.1.js'></script>
@@ -158,7 +154,6 @@ class Menu
         <script src='js/inputmask.binding.js'></script>
         <script src='js/moment.min.js'></script>
         <script src='js/jquery.fileDownload.js'></script>
-        <script src='https://smtpjs.com/v3/smtp.js'></script>
         <script type='text/javascript'>
           $(document).ready(function() {
             $(\"#CerrarSesion\").click(function (e) { 
@@ -235,10 +230,7 @@ class Menu
         <body class='fondo' id='body_cer'>";
   
     }
-    public function cabecera_principal_log(){
-
-
-     
+    public function cabecera_principal_log(){     
      echo"
      <!doctype html>
      <html lang='en'>
@@ -629,6 +621,7 @@ class Menu
     $rows_perfil = $mu->Consulta_Perfiles();
     $datos_motivos = $cons->Motivos_especiales();
     $datos_tipos_oficios = $cons->Catalogo_de_tipos_oficio();
+    $info_sistemas = $cons->Lista_sistemas_reg();
     // Modal de información del usuario detalles de movimientos
     
     switch ($perfil) {
@@ -692,22 +685,22 @@ class Menu
                             ECHO"
                             <ul class='nav nav-pills mb-3' id='pills-tab' role='tablist'>
                                 <li class='nav-item'>
-                                    <a class='nav-link active' id='pills-home-tab' data-toggle='pill' href='#datos_basc'
+                                    <a class='nav-link active' id='dat_basc_ac' data-toggle='pill' href='#datos_basc'
                                         role='tab' aria-controls='pills-home' aria-selected='true'>Datos Basicos</a>
                                 </li>";
                                 if ($perfil == 1 || $perfil == 4 || $perfil == 5|| $perfil == 7) {
                                     echo"<li class='nav-item'>
-                                    <a class='nav-link' id='pills-home-tab' data-toggle='pill' href='#datos_basc_adic'
+                                    <a class='nav-link' id='dat_add_ac' data-toggle='pill' href='#datos_basc_adic'
                                         role='tab' aria-controls='pills-home' aria-selected='true'>Datos adicionales</a>
                                 </li>";
                                 }
                                 echo"<li class='nav-item'>
-                                    <a class='nav-link' id='pills-profile-tab' data-toggle='pill' href='#datos_op'
+                                    <a class='nav-link' id='dat_est_fun_ac' data-toggle='pill' href='#datos_op'
                                         role='tab' aria-controls='pills-profile' aria-selected='false'>Estructura Funcional</a>
                                 </li>";
                                 if ($perfil == 1 || $perfil == 4 || $perfil == 5|| $perfil == 7 ) {
                                     echo"<li class='nav-item'>
-                                    <a class='nav-link' id='pills-contact-tab' data-toggle='pill' href='#datos_fun'
+                                    <a class='nav-link' id='dat_est_cent_ac' data-toggle='pill' href='#datos_fun'
                                         role='tab' aria-controls='pills-contact' aria-selected='false'>Estructura Central</a>
                                 </li>";
                                 }
@@ -999,7 +992,7 @@ class Menu
                   
                             <div class='form-row'>
                   
-                                <div class='form-group col-md-6'>
+                                <div class='form-group col-md-4'>
                                     <label for='ID_DEPA'>Departamento:<samp class='text-danger'>*</samp></label>
                                     <select class='custom-select formato_campos_activos' id='ID_DEPA' name='ID_DEPA'>
                                         <option value='0'>Seleccionar Departamento</option>";
@@ -1011,7 +1004,15 @@ class Menu
                                     echo"
                                     </select>
                                 </div>
-                                <div class='form-group col-md-6'>
+                                <div class='form-group col-md-4'>
+                                <label for='estructura_1'>Jefe de Estructura:<samp class='text-danger'>*</samp></label>
+                                <select class='custom-select formato_campos_activos' id='estructura_2' name='estructura_2'>
+                                    <option value='0'selected>Seleccionar Opcion de estructura</option>
+                                    <option value='1'>Si</option>
+                                    <option value='2'>No</option>
+                                </select>
+                            </div>
+                                <div class='form-group col-md-4'>
                                     <label for='RFC_JEFE'>Jefe Directo:<samp class='text-danger'>*</samp></label>
                                     <select class='custom-select formato_campos_activos' id='RFC_JEFE' name='RFC_JEFE'>
                                         <option value='0'>Seleccionar Jefe directo</option>";
@@ -1025,6 +1026,7 @@ class Menu
                                     echo"
                                     </select>
                                 </div>
+                               
                             </div>
                            
                             <div class='form-row'>
@@ -1291,20 +1293,51 @@ class Menu
                          //  FIN DE REGISTRO DE MOVIMIENTOS
                          //  INICIO DE ACCESO A SISTEMAS
                          ECHO" <div class='tab-pane fade' id='SISTEMAS' role='tabpanel' aria-labelledby='nav-sistemas-tab'>
-                            <div class=' Arreglos'></div>
+                         <div class='container my-2 mt-2' >
+                         <button type='button' class='btn btn-success' id='Muestra_from_access_sistem' > Agregar acceso a otro sistema <i class='fas fa-plus-circle' ></i></button>   
+                         
+                         </div>
+                         <div class='container mt-2 my-2 hide' id='form_agrega_acceso_sis_a_user' style=' display:none;' >
+                                <form>
+                                    <div class='form-group row'>
+                                        <label for='selec_sistem_access' class='col-sm-2 col-form-label'>Sistema</label>
+                                        <div class='col-sm-10'>
+                                        <select class='form-control form-control-sm' id='selec_sistem_access'>
+                                        <option value='0' selected >Selecciona el sistema</option>";
+                                        for ($i=0; $i <count($info_sistemas) ; $i++) { 
+                                            echo"<option value='".$info_sistemas[$i]['id_system']."'>".$info_sistemas[$i]['nombre_sistema']."</option>";
+                                        }
+                                        echo"</select>
+                                        </div>
+                                    </div>
+                                    <div id='muestra_roles' ></div>
+                                    <div class='form-group row'>
+                                        <label for='selec_sistem_access' class='col-sm-2 col-form-label'>Fecha de ingreso:</label>
+                                        <div class='col-sm-10'>
+                                        <input type='text' class='form-control' id='fecha_responsiva' placeholder='dd/mm/yyyy'>
+                                        </div>
+                                    </div>
+                                    <div class='form-group row'>
+                                        <div class='col-sm-10'>
+                                        <button type='button' class='btn btn-primary' id='agrega_acceso_al_sistema'>Agregar acceso</button>
+                                        </div>
+                                    </div>
+                                    </form>
+                         </div>
+                         <div class='' id='historial_matriz_por_empleados' ></div>
 
-
+                
 
 
                             <div class='modal-footer'>
-                            <button type='button' class='btn btn-secondary' data-dismiss='modal'>Cerrar</button>
-                            <button type='button' class='btn btn-success'>Actualizar</button>
+                            <button type='button' class='btn btn-secondary' data-dismiss='modal' id='cerrar_detalle'>Cerrar</button>
+                       
                         </div>
                         </div>";
                         //  FIN DE ACCESO A SISTEMAS
                         //  INICIO DE REGISTRO DE DOCUMENTOS FIRMADOS/RESPONSIVAS/CAMBIOS DE NOMBRAMIENTOS
                         if ($perfil == 1 || $perfil == 4 || $perfil == 5|| $perfil == 7) {
-                            echo" <div class='tab-pane fade' id='RESPONSIVAS' role='tabpanel' aria-labelledby='nav-Oficios_his-tab'>
+                            echo" <div class='tab-pane fade' id='RESPONSIVAS' role='tabpanel'  >
                             ";
                             if ($perfil == 1 || $perfil == 4 || $perfil == 5) {
                                 echo"<div class='container' >
@@ -1314,10 +1347,6 @@ class Menu
                             
                             echo"<div id='caja_oficios_historial_ins' class='vh-50 mt-3 my-3'>
                             </div>
-
-
-
-
 
                             <div class='modal-footer'>
                             <button type='button' class='btn btn-secondary' data-dismiss='modal'>Cerrar</button>
@@ -1340,7 +1369,41 @@ class Menu
 
 
 // Modal para agregar usuarios a la plantilla de activos
+echo"
+<div class='modal fade' id='mod_edit_estado_proc' tabindex='-1' role='dialog' aria-hidden='true'>
+<div class='modal-dialog' role='document'>
+    <div class='modal-content'>
+        <div class='modal-header'>
+            <h5 class='modal-title' id='titulos'>Cambia es estado</h5>
+            <button type='button' class='close' data-dismiss='modal'>
+                <span aria-hidden='true'>&times;</span>
+            </button>
+        </div>
+        <div class='modal-body'>
+            <div class='form-group'>
+                <label for='Cambia_estado_cuenta'>Estado:</label>
+                <select class='form-control' id='Cambia_estado_cuenta'>
+                    <option value='0' selected>Selecciona estado de la cuenta</option>
+                    <option value='11'>BAJA</option>
+                    <option value='31'>ACTIVO</option>
+                </select>
+            </div>
+            <div class='form-group col-md-5'>
+                <label for='fecha_cambio_est_resp'>Fecha de cambio:<samp class='text-danger'>*</samp></label>
+                <input type='text' class='form-control datepicker-inline formato_campos_activos'
+                    id='fecha_cambio_est_resp' name='fecha_cambio_est_resp' placeholder='yyyy/mm/dd' required>
+            </div>
 
+        </div>
+        <div class='modal-footer'>
+            <button type='button' class='btn btn-secondary' id='' data-dismiss='modal'>Cancelar</button>
+            <button type='button' class='btn btn-success' id='Mares_obser'>Actualiza estado de la
+                responsiva</button>
+        </div>
+    </div>
+</div>
+</div>
+";
 // Modal para confirmar accion de aactualizacion de datos basicos
 
 echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user_insumo' role='dialog' aria-hidden='true'>
@@ -1668,6 +1731,7 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' id='agregar_user
                                   echo"
                                   </select>
                               </div>
+                             
                           </div>
                          
                           <div class='form-row'>
@@ -1845,7 +1909,31 @@ echo"
 
 
 //----------------------------------FIN MODAL CAMBIO DE FOTOS------------------------//
+//----------------------------------MODAL CAMBIO DE FOTOS----------------------------//
 
+
+
+
+//----------------------------------FIN MODAL CAMBIO DE FOTOS------------------------//
+echo"<div class='modal fade' id='Confirma_cambio_resp' tabindex='-1' role='dialog' aria-labelledby='exampleModalLabel' aria-hidden='true'>
+  <div class='modal-dialog' role='document'>
+    <div class='modal-content'>
+      <div class='modal-header'>
+        <h5 class='modal-title' id='exampleModalLabel'>Modal title</h5>
+        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+          <span aria-hidden='true'>&times;</span>
+        </button>
+      </div>
+      <div class='modal-body'>
+        ...
+      </div>
+      <div class='modal-footer'>
+        <button type='button' class='btn btn-secondary' data-dismiss='modal'>Close</button>
+        <button type='button' class='btn btn-primary'>Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>";
 //----------------------------------MODAL DE OFICIOS NUEVOS--------------------------//
 echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' role='dialog' id='oficio_nuevo_modal' aria-hidden='true'>
 <div class='modal-dialog modal-dialog-centered modal-xl'>
@@ -1905,6 +1993,40 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' role='dialog' id
 </div>
 </div>
 ";
+//---------------------------------------MODAL RETRO RESPONSIVA POR EMPLEADO-------------------------------------//
+echo"<div class='modal fade bd-example-modal-lg' id='Modal_retro_responsivas' tabindex='-1' role='dialog'
+aria-labelledby='Modal_retro_responsivas' aria-hidden='true'>
+<div class='modal-dialog modal-dialog-centered modal-lg' role='document'>
+    <div class='modal-content'>
+        <div class='modal-header'>
+            <h5 class='modal-title' id='exampleModalCenterTitle'>SEGUIMIENTO DE RESPONSIVAS</h5>
+            <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+                <span aria-hidden='true'>&times;</span>
+            </button>
+        </div>
+        <div class='modal-body'>
+        <!-- AQUI SE VALIDA SI QUIERE RETROALIMENTAR LA FIRMA DE LA RESPONSIVA -->
+            <div id='Contenedor_principal'>
+
+            
+            </div>
+        </div>
+            <div class='modal-footer'>
+                <button type='button' class='btn btn-secondary' id='cerrar_modal_responsiva_retro'
+                    data-dismiss='modal'>Close</button>
+                <button type='button' class='btn btn-primary' id='carga_modal_responsiva_retro'>Carga
+                    documento</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+";
+//---------------------------------------FIN MODAL RETRO RESPONSIVA POR EMPLEADO-------------------------------------//
+
    }
 
    public function Modal_posisiones(){
@@ -2134,6 +2256,7 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' role='dialog' id
   </div>
 </div>
    ";
+
    }
    public function Modals_bajas_laudos(){
     include_once 'vistas_Plantilla.php';
@@ -2771,7 +2894,8 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' role='dialog' id
    public function Modal_matriz(){
        include_once "sesion.php";
        include_once "ConsultaADR.php";
-
+       $cons = new ConsultaInfoADR();
+       //$info_sistemas = $cons->Lista_sistemas_reg();
        $perfil= $_SESSION['ses_id_perfil_ing'];
        if ($perfil== 1 || $perfil == 4 || $perfil == 5 || $perfil == 7) {
              echo"
@@ -2787,7 +2911,7 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' role='dialog' id
                         </button>
                     </div>
                     <div class='modal-body'>
-                        <form>
+                        <form class='Carga_sistemas_nuevos_con_app'>
                         <div  class='row'>
                             <div class='form-group col-sm-3'>
                                 <label for='name_sistema' class='col-form-label'>Nombre del sistema/carpeta:</label>
@@ -2798,14 +2922,21 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' role='dialog' id
                                 <select class='form-control' id='admin_sistema'>
                                     <option value='0' selected >Selecciona Administración</option>
                                     <option value='1' >ADR DF 4</option>
-                                    <option value='2' >Desconcentradas</option>
-                                    <option value='3' >Centrales</option>
+                                    <option value='2' >Centrales</option>
+                                    <option value='3' >Desconcentradas</option>
                                     <option value='4' >Externo</option>
                                 </select>
                             </div>
-                            <div class='form-group col-sm-3'>
-                                <label for='recipient-name' class='col-form-label'>Núm. cuentas permitidas:</label>
-                                <input type='text' class='form-control' id='num_cuentas_sistema'>
+                            <div class='form-group col-sm-1' >
+                            <label for='recipient-name' class='col-form-label '>Cuentas sin limite:</label>
+                            <div class='custom-control custom-switch'>
+                            <input type='checkbox' class='custom-control-input' id='cuentas_ilimitadas_sis'>
+                            <label class='custom-control-label' for='cuentas_ilimitadas_sis'>Sí</label>
+                            </div>
+                        </div>
+                            <div class='form-group col-sm-2'>
+                            <label for='recipient-name' class='col-form-label'>Núm. cuentas permitidas:</label>
+                            <input type='text' class='form-control' id='num_cuentas_sistema'>
                             </div>
 
                             <div class='form-group col-sm-3'>
@@ -2822,15 +2953,15 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' role='dialog' id
                                 <option value='1' >Página web</option>
                                 <option value='2' >Carpeta de red</option>
                                 <option value='3' >Aplicación de escritorio</option>
-                                <option value='4' >Aplicación de Microsoft Office</option>
+                                <option value='4' >Aplicación de escritorio Externa</option>
                               </select>
                             </div>
-                            <div class='form-group col-sm-4' id='input_liga' >
+                            <div class='form-group col-sm-8' id='input_liga'style='display:none;'>
                                 <label for='recipient-name' class='col-form-label'>Liga o página web:</label>
                                 <input type='text' class='form-control' id='Liga_acces_sistema'>
                             </div>
-                            <div class='form-group col-sm-2'>
-                                <label for='recipient-name' class='col-form-label'>Cuentas con aplicación para carga:</label>
+                            <div class='form-group col-sm-2' id='div_option_archivo' style='display:none;'>
+                                <label for='recipient-name' class='col-form-label '>Cuentas con aplicación para carga:</label>
                                 <div class='custom-control custom-switch'>
                                 <input type='checkbox' class='custom-control-input' id='Selecciona_Opicion_sis'>
                                 <label class='custom-control-label' for='Selecciona_Opicion_sis'>Sí</label>
@@ -2852,7 +2983,7 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' role='dialog' id
                     </div>
                     <div class='modal-footer'>
                         <button type='button' class='btn btn-secondary' data-dismiss='modal'>Cerrar</button>
-                        <button type='button' class='btn btn-primary'>Continuar registro</button>
+                        <button type='button' class='btn btn-primary' onclick='Agrega_sistema_nuevo()'>Continuar registro</button>
                     </div>
 
                 </div>
@@ -2860,7 +2991,217 @@ echo "<div class='modal fade bd-example-modal-xl' tabindex='-1' role='dialog' id
         </div>
              
              ";
+             // ------------- Modal para editar oficios-----------------------//
+
        }
+
+       // DETALLE DE SISTEMAS 
+       echo"
+       <div class='modal fade bd-example-modal-xl' tabindex='-1' role='dialog' id='Rockers' aria-hidden='true'>
+       <div class='modal-dialog modal-xl'>
+           <div class='modal-content'>
+   
+               <div class='modal-header'>
+                   <h5 class='modal-title' id='exampleModalLabel'>DETALLE <spam id='nombre_sistema_titulo'></spam>
+                   </h5>
+                   <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+                       <span aria-hidden='true'>&times;</span>
+                   </button>
+               </div>
+               <div class='modal-body'>
+                   <!---------------------------------------MENU DESPLAZAMIENTO DEL SISTEMA------------------------->
+                   <nav>
+                       <div class='nav nav-tabs' id='nav-tab' role='tablist'>
+                           <a class='nav-item nav-link active' id='Indice_edicion' data-toggle='tab' href='#Edicion'
+                               role='tab' aria-controls='nav-home' aria-selected='true'>Descipción</a>
+                           <a class='nav-item nav-link' id='Indice_empleados_actiovos_baja' data-toggle='tab'
+                               href='#actiovos_baja' role='tab' aria-controls='actiovos_baja' aria-selected='false'>Roles o
+                               privilegios</a>
+                           <a class='nav-item nav-link' id='indice_otros' data-toggle='tab' href='#otros' role='tab'
+                               aria-controls='nav-contact' aria-selected='false'>Usuarios</a>
+                       </div>
+                   </nav>
+   
+                   <div class='tab-content' id='nav-tabContent'>
+                       <!---------------------------------------INICIA PRIMERA PARTE DE DATOS SISTEMA------------------------->
+                       <div class='tab-pane fade show active' id='Edicion' role='tabpanel'
+                           aria-labelledby='Indice_edicion'>
+                           <nav>
+                           <div class='nav nav-tabs' id='nav-tab' role='tablist'>
+                               <a class='nav-item nav-link active' id='loc_pres_sistema' data-toggle='tab' href='#pres_sistema' role='tab'
+                                   aria-controls='nav-home' aria-selected='true' data-toggle='tooltip' data-placement='top' title='Detalle información' >DETALLE</a>
+                               <a class='nav-item nav-link' id='loc_sistem_edition_mod' data-toggle='tab' href='#sistem_edition_mod' role='tab'
+                                   aria-controls='nav-profile' aria-selected='false' data-toggle='tooltip' data-placement='top' title='Editar información'>Mantenimiento <i class='fas fa-tools'></i></a>
+                       
+                           </div>
+                       </nav>
+                       <div class='tab-content' id='nav-tabContent'>
+                           <div class='tab-pane fade show active' id='pres_sistema' role='tabpanel' aria-labelledby='nav-home-tab'>
+                               <div class='card'>
+                       
+                                   <div class='card-body'>
+                                       <h5 class='card-title' id='nombre_sistema_titulo_'></h5>
+                       
+                                   </div>
+                                   <ul class='list-group list-group-flush'>
+                                       <li class='list-group-item'> <b>DESCRIPCIÓN: </b>
+                                           <p id='tarjeta_presentacion_sistema'></p>
+                                       </li>
+                                       <li class='list-group-item'> <b>TIPO DE ACCESO: </b>
+                                           <p id='tipo_sistema'></p>
+                                       </li>
+                                       <li class='list-group-item'> <b>ADMINISTRACIÓN DEL SISTEMA: </b>
+                                           <p id='adminin_sis'></p>
+                                       </li>
+                                       <li class='list-group-item'> <b>AUTORIZADOR: </b>
+                                           <p id='aprob_sis'></p>
+                                       </li>
+                       
+                                   </ul>
+                       
+                                   <div class='card-body'>
+                                       <b>ACCESO: </b>
+                                       <div id='aqui_van_links'></div>
+                       
+                                   </div>
+                       
+                       
+                               </div>
+                       
+                           </div>
+                           <div class='tab-pane fade' id='sistem_edition_mod' role='tabpanel' aria-labelledby='nav-profile-tab'>
+                               <form class='Carga_sistemas_nuevos_con_app2'>
+                                   <div class='row'>
+                                       <div class='form-group col-sm-3'>
+                                           <label for='name_sistema' class='col-form-label'>Nombre del sistema/carpeta:</label>
+                                           <input type='text' class='form-control' id='name_sistema2' required
+                                               onkeyup='javascript:this.value=this.value.toUpperCase();'>
+                                       </div>
+                                       <div class='form-group col-sm-3'>
+                                           <label for='recipient-name' class='col-form-label'>Administración del sistema:</label>
+                                           <select class='form-control' id='admin_sistema2'>
+                                               <option value='0' selected>Selecciona Administración</option>
+                                               <option value='1'>ADR DF 4</option>
+                                               <option value='2'>Centrales</option>
+                                               <option value='3'>Desconcentradas</option>
+                                               <option value='4'>Externo</option>
+                                           </select>
+                                       </div>
+                                       <div class='form-group col-sm-2'>
+                                       <label class='form-check-label' for='cuentas_ilimitadas_sis2'> Cuentas sin limite?: </label>
+                                       <div class='custom-control custom-switch'>
+                                       <input type='checkbox' class='custom-control-input' id='cuentas_ilimitadas_sis2'>
+                                       <label class='custom-control-label' for='cuentas_ilimitadas_sis2'>Sí</label>
+                                     </div>
+                                            </div>
+                                       <div class='form-group col-sm-2'>
+                                           <label for='recipient-name' class='col-form-label'>No. cuentas:</label>
+                                           <input type='text' class='form-control' id='num_cuentas_sistema2'>
+                                       </div>
+                       
+                                       <div class='form-group col-sm-3'>
+                                           <label for='recipient-name' class='col-form-label'>Autoriza cuentas del sistema:</label>
+                                           <input type='text' class='form-control' id='Autorizador_sistema2'>
+                                       </div>
+                                   </div>
+                       
+                                   <div class='row'>
+                                       <div class='form-group col-sm-3'>
+                                           <label for='recipient-name' class='col-form-label'>Tipo de acceso:</label>
+                                           <select class='form-control' id='Tipo_acceso2'>
+                                               <option value='0' selected>Selecciona tipo de acceso</option>
+                                               <option value='1'>Página web</option>
+                                               <option value='2'>Carpeta de red</option>
+                                               <option value='3'>Aplicación de escritorio</option>
+                                               <option value='4'>Aplicación de escritorio Externa</option>
+                                           </select>
+                                       </div>
+                                       <div class='form-group col-sm-8' id='input_liga2' style='display:none;'>
+                                           <label for='recipient-name' class='col-form-label'>Liga o página web:</label>
+                                           <input type='text' class='form-control' id='Liga_acces_sistema2'>
+                                       </div>
+                                       <div class='form-group col-sm-2' id='div_option_archivo2' style='display:none;'>
+                                           <label for='Selecciona_Opicion_sis2' class='col-form-label '>Cuentas con aplicación para carga:</label>
+                                           <div class='custom-control custom-switch'>
+                                               <input type='checkbox' class='custom-control-input' id='Selecciona_Opicion_sis2'>
+                                               <label class='custom-control-label' for='Selecciona_Opicion_sis2'>Sí</label>
+                                           </div>
+                                       </div>
+                                       <div class='form-group col-sm-3' id='input_carga_sis2' Style='display:none;'>
+                                           <label for='recipient-name' class='col-form-label'>Cargar aplicación:</label>
+                                           <input type='file' class='form-control-file' id='archivo_sistema_app2'>
+                                       </div>
+                                       <div class='form-group col-sm-8' id='descarg'></div>
+                       
+                                   </div>
+                       
+                                   <div class='form-group col-sm-8'>
+                                       <label for='message-text' class='col-form-label'>Descripción (máximo 750 caracteres):</label>
+                                       <textarea class='form-control' id='desc_sistema2' maxlength='750'></textarea>
+                                   </div>
+                               </form>
+                               <button type='button' class='btn btn-secondary' id='modifica_sistema_matriz' >Modificar datos</button>
+                           </div>
+                       
+                       </div>
+   
+                       </div>
+                       <!---------------------------------------FIN PRIMERA PARTE DE DATOS SISTEMA------------------------->
+                       <!---------------------------------------INICIA SEGUNDA PARTE DE DATOS SISTEMA------------------------->
+                       <div class='tab-pane fade' id='actiovos_baja' role='tabpanel' aria-labelledby='Indice_empleados_actiovos_baja'>
+   
+                           <button type='button' class='btn btn-success' id='muestra_agrega_roles_forms'> AGREGAR ROL O
+                               PRIVILEGIO <i class='fas fa-plus-square'></i></button>
+   
+                           <div class='container' id='casilla_para_agregar_roles' style='display:none;'>
+                               <form>
+                                   <div class='form-group row'>
+                                       <label for='selec_sistem_access' class='col-sm-2 col-form-label'>Nombre del Rol o
+                                           Privilegio</label>
+                                       <div class='col-sm-10'>
+                                           <input type='text' class='form-control' placeholder='Ejem:Operativo'
+                                               id='nombre_rol'>
+                                       </div>
+                                   </div>
+                                   <div class='form-group row'>
+                                       <label for='selec_sistem_access' class='col-sm-2 col-form-label'>Clave de Rol o
+                                           Privilegio</label>
+                                       <div class='col-sm-10'>
+                                           <input type='text' class='form-control' placeholder='Ejem: 1' id='clave_rol'>
+                                       </div>
+                                   </div>
+   
+                                   <div class='form-group row'>
+                                       <div class='col-sm-10'>
+                                           <button type='button' class='btn btn-primary' id='agrega_rol_al_sistema'>Agregar
+                                               nuevo Rol</button>
+                                       </div>
+                                   </div>
+                               </form>
+                           </div>
+   
+                           <div class='container' id='Tabla_roles'></div>
+   
+                       </div>
+                       <!---------------------------------------FIN SEGUNDA PARTE DE DATOS SISTEMA------------------------->
+                       <!---------------------------------------INICIA TERCERA PARTE DE DATOS SISTEMA------------------------->
+                       <div class='tab-pane fade' id='otros' role='tabpanel' aria-labelledby='indice_otros'>
+                       <div class='container' id='ussers_x_sistems'></div>
+                       </div>
+                       <!---------------------------------------FIN TERCERA PARTE DE DATOS SISTEMA------------------------->
+                   </div>
+                   <div class='modal-footer'>
+                   <button type='button' class='btn btn-secondary' id='cerrar_detalle' data-dismiss='modal'>Cerrar</button>
+                   
+               </div>
+               </div>
+           </div>
+       </div>
+   </div>
+   
+   ";
+
+       //---------------Fin Modal Editor de Oficios---------------------//
        
    }
 }

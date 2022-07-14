@@ -1,7 +1,305 @@
 <?php
 
 class ConsultaInfoADR{
+    public function Consulta_encarg_dep($id_emp){
+        include_once 'conexion.php';
+        include_once 'sesion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $usuario = $_SESSION["ses_rfc_corto_ing"];
+        //echo $id_usu."/". $tipo_doc."/". $no_ofi."/". $fecha_oficio."/". $usuario;
+        $query = "   SELECT jefe_dep FROM Departamento WHERE id_depto = (
+            SELECT id_depto FROM Empleado_insumo WHERE id_empleado_plant = $id_emp
+        )"; 
+         $respuesta = sqlsrv_query($con,$query);
+         if($respuesta){
+          while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
+              $fila = $row;
+          }
+          if (isset($fila)) {
+              return $fila['jefe_dep'];
+              $conexion->CerrarConexion($con);
+          }else{
+              return "No se puede ver el resultado";
+              $conexion->CerrarConexion($con);
+          }
+      }else{
+          return print_r(sqlsrv_errors(),true);
+          $conexion->CerrarConexion($con); 
+      }
 
+    }
+    public function Actualiza_responsiva_us($acceso,$estado,$fecha){
+        include_once 'conexion.php';
+        include_once 'sesion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $usuario = $_SESSION["ses_rfc_corto_ing"];
+        //echo $id_usu."/". $tipo_doc."/". $no_ofi."/". $fecha_oficio."/". $usuario;
+        $query = "UPDATE [Regstro_accesos] 
+        SET id_proc = $estado,
+        fecha_baja = GETDATE(),
+        fecha_baja_acceso_real = case $estado when  11 then '$fecha' else NULL end,
+        user_mod ='$usuario' 
+        where id_reg_acceso = $acceso ";
+        $respuesta = sqlsrv_query($con,$query);
+        if ($respuesta == false) {
+             return (print_r(sqlsrv_errors(), true));
+        } else {
+            return true;
+        }
+    }
+    public function Actualiza_sistema($datos){
+        include_once 'conexion.php';
+        include_once 'sesion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $usuario = $_SESSION["ses_rfc_corto_ing"];
+        //echo $id_usu."/". $tipo_doc."/". $no_ofi."/". $fecha_oficio."/". $usuario;
+        $query = "UPDATE [Systems] 
+        SET
+         [nombre_sistema]= CASE '".$datos->nombre_sistema."' WHEN '' THEN NULL ELSE '".$datos->nombre_sistema."' END 
+        ,[url/acceso]= CASE '".$datos->liga_acceso."' WHEN '' THEN NULL ELSE '".$datos->liga_acceso."' END   
+        ,[Administraciion_sistema]= CASE '".$datos->administra_sistem."' WHEN '' THEN NULL ELSE '".$datos->administra_sistem."' END    
+        ,[Descripcion_sistema] = CASE '".$datos->descripcion_sistema."' WHEN '' THEN NULL ELSE '".$datos->descripcion_sistema."' END   
+        ,[Aprobador_Sistemas] = CASE '".$datos->quien_autoriza."' WHEN '' THEN NULL ELSE '".$datos->quien_autoriza."' END   
+        ,[funcion] = CASE '".$datos->opcion_carga."' WHEN '' THEN NULL ELSE '".$datos->opcion_carga."' END  
+        ,[tipo_sistema]= CASE '".$datos->tipo_sistema."' WHEN '' THEN NULL ELSE '".$datos->tipo_sistema."' END   
+        ,[estatus]= 'A'  
+        ,[user_alta]= '$usuario'  
+        ,[fecha_alta]= GETDATE()  
+        WHERE id_system = ".$datos->id_system."";
+        $respuesta = sqlsrv_query($con,$query);
+        if ($respuesta == false) {
+            die(print_r(sqlsrv_errors(), true));
+        } else {
+            return true;
+        }
+    }
+    public static function Registra_sistema($datos)
+    {
+        include_once 'conexion.php';
+        include_once 'sesion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $usuario = $_SESSION["ses_rfc_corto_ing"];
+        //echo $id_usu."/". $tipo_doc."/". $no_ofi."/". $fecha_oficio."/". $usuario;
+        $query = "   INSERT INTO [Systems] (
+            [nombre_sistema]
+            ,[url/acceso]
+            ,[Administraciion_sistema]
+            ,[Descripcion_sistema]
+            ,[Num_cuentas_Siistema]
+            ,[Aprobador_Sistemas]
+             ,[funcion]
+            ,[tipo_sistema]
+            ,[estatus]
+            ,[user_alta]
+            ,[fecha_alta]
+        )
+        SELECT 
+             CASE '".$datos->nombre_sistema."' WHEN '' THEN NULL ELSE '".$datos->nombre_sistema."' END  AS	[nombre_sistema]
+            ,CASE '".$datos->liga_acceso."' WHEN '' THEN NULL ELSE '".$datos->liga_acceso."' END  AS [url/acceso]
+            ,CASE '".$datos->administra_sistem."' WHEN '' THEN NULL ELSE '".$datos->administra_sistem."' END  AS  [Administraciion_sistema]
+            ,CASE '".$datos->descripcion_sistema."' WHEN '' THEN NULL ELSE '".$datos->descripcion_sistema."' END  AS [Descripcion_sistema]
+            ,CASE '".$datos->num_cuentas."' WHEN '' THEN NULL ELSE '".$datos->num_cuentas."' END  AS [Num_cuentas_Siistema]
+            ,CASE '".$datos->quien_autoriza."' WHEN '' THEN NULL ELSE '".$datos->quien_autoriza."' END  AS [Aprobador_Sistemas]
+            ,CASE '".$datos->opcion_carga."' WHEN '' THEN NULL ELSE '".$datos->opcion_carga."' END AS [funcion]
+            ,CASE '".$datos->tipo_sistema."' WHEN '' THEN NULL ELSE '".$datos->tipo_sistema."' END  AS [tipo_sistema]
+            ,'A' AS [estatus]
+            ,'$usuario' AS [user_alta]
+            ,GETDATE() AS [fecha_alta]
+            SELECT SCOPE_IDENTITY() as id  ";
+            $respuesta = sqlsrv_query($con,$query);
+            if($respuesta){
+                sqlsrv_next_result($respuesta);
+                sqlsrv_fetch($respuesta);
+                $fila = array('id' => sqlsrv_get_field($respuesta, 0));
+                if ($fila["id"] != null) {
+                    return $fila["id"];
+                } else {
+                    return print_r(sqlsrv_errors(), true);
+                }
+            }
+    }
+    public static function Agrega_sistema_acceso_al_empleado($sistema,$id_emp,$array_roles,$fec_resp)
+    {
+        include_once 'conexion.php';
+        include_once 'sesion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $usuario = $_SESSION["ses_rfc_corto_ing"];
+        $query = "INSERT INTO [Regstro_accesos](
+            [id_empleado]
+              ,[id_system]
+              ,[id_proc]
+              ,[passwd]
+              ,[fecha_alta_resp]
+              ,[user_alta]
+              ,[fecha_alta])
+            SELECT 
+            $id_emp AS [id_empleado]
+             ,$sistema AS [id_system]
+             , 30 AS [id_proc]
+             ,'e10adc3949ba59abbe56e057f20f883e' AS passwd
+             ,CASE '$fec_resp' WHEN '' THEN NULL ELSE '$fec_resp' END AS[fecha_alta_resp]
+             ,'$usuario' AS [user_alta]
+              ,GETDATE() AS [fecha_alta]
+              SELECT SCOPE_IDENTITY() as id";
+         $respuesta = sqlsrv_query($con,$query);
+        if($respuesta){
+            sqlsrv_next_result($respuesta);
+            sqlsrv_fetch($respuesta);
+            $fila = array('id' => sqlsrv_get_field($respuesta, 0));
+            if ($fila["id"] != null) {
+                $respuesta = self::Agrega_roles_acceso_al_empleado($fila["id"],$array_roles);
+                return $respuesta;
+            } else {
+                return print_r(sqlsrv_errors(), true);
+            }
+        }
+    
+    }
+    public function Revisa_cuenta_activa_sistema($id_emp,$id_system){
+        include_once "conexion.php";
+        include_once 'sesion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $query = "SELECT id_proc FROM Regstro_accesos WHERE id_empleado = $id_emp and id_system = $id_system and id_proc in (30,31)";
+        $respuesta = sqlsrv_query($con,$query);
+        if($respuesta){
+            while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
+                $fila = $row;
+            }
+            if (isset($fila)) {
+                return true;
+                $conexion->CerrarConexion($con);
+            }else{
+                return false;
+                $conexion->CerrarConexion($con);
+            }
+        }else{
+            return print_r(sqlsrv_errors(),true);
+            $conexion->CerrarConexion($con); 
+        }
+    }
+    public static function Modifica_roles_acceso_al_empleado($id_acceso,$array_roles)
+    {
+        include_once 'conexion.php';
+        include_once 'sesion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $usuario = $_SESSION["ses_rfc_corto_ing"];
+        $query = "DELETE FROM reg_roles_accesos where id_reg_acceso = $id_acceso";
+         $respuesta = sqlsrv_query($con,$query);
+        if($respuesta){
+             $respuesta = self::Agrega_roles_acceso_al_empleado($id_acceso,$array_roles);
+                return $respuesta;
+            } else {
+                return print_r(sqlsrv_errors(), true);
+            
+        }
+    
+    }
+    public static function retro_sistema_acceso_al_empleado($sistema,$id_emp,$array_roles,$fec_resp)
+    {
+        include_once 'conexion.php';
+        include_once 'sesion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $usuario = $_SESSION["ses_rfc_corto_ing"];
+        $query = "INSERT INTO [Regstro_accesos](
+            [id_empleado]
+              ,[id_system]
+              ,[id_proc]
+              ,[fecha_alta_resp]
+              ,[user_alta]
+              ,[fecha_alta])
+            SELECT 
+            $id_emp AS [id_empleado]
+             ,$sistema AS [id_system]
+             , 30 AS [id_proc]
+             ,CASE '$fec_resp' WHEN '' THEN NULL ELSE '$fec_resp' END AS[fecha_alta_resp]
+             ,'$usuario' AS [user_alta]
+              ,GETDATE() AS [fecha_alta]
+              SELECT SCOPE_IDENTITY() as id";
+         $respuesta = sqlsrv_query($con,$query);
+         if ($respuesta === false) {
+             die(print_r(sqlsrv_errors(), true));
+         } else {
+            return true; 
+         }
+        
+    
+    }
+    public static function Agrega_roles_acceso_al_empleado($id_reg_acc,$array_roles)
+    {
+        include_once 'conexion.php';
+        include_once 'sesion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $usuario = $_SESSION["ses_rfc_corto_ing"];
+        
+        for ($i=0; $i <count($array_roles)-1 ; $i++) { 
+            $query = "  INSERT INTO [reg_roles_accesos]
+            ([id_reg_acceso]
+                ,[id_rol]
+                ,[estatus]
+                ,[user_alta]
+                ,[fecha_alta])
+                SELECT
+                 $id_reg_acc AS [id_reg_acceso]
+                ,".$array_roles[$i]." AS [id_rol]
+                ,'A' AS [estatus]
+                ,'$usuario' AS [user_alta]
+                ,GETDATE() AS [fecha_alta]
+                   ";
+            $respuesta = sqlsrv_query($con,$query);
+        }
+     
+        if ($respuesta == false) {
+            return "No se puede ver el resultado no fue satisfactorio, revisamos el metodo Agrega_roles_acceso_al_empleado reisa errores (".print_r(sqlsrv_errors(),true).")";
+        } else {
+            return "Se agrego el sistema al usuuario exitosamente";
+            
+        }
+    }
+    public static function Borra_acceso_y_borra_registro($id_reg_acc)
+    {
+        include_once 'conexion.php';
+        include_once 'sesion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $usuario = $_SESSION["ses_rfc_corto_ing"];
+
+            $query = "DELETE FROM reg_roles_accesos where id_reg_acceso = $id_reg_acc
+            DELETE FROM Regstro_accesos where id_reg_acceso = $id_reg_acc
+                   ";
+            $respuesta = sqlsrv_query($con,$query);
+        if ($respuesta == false) {
+            return "Cancelación fallida";
+        } else {
+            return "Se cancelo la responsiva del sistema exitosamente";
+            
+        }
+    }
+    public static function Se_carga_responsiva_firmada_afecta_base($id_reg_acc,$fecha_alta)
+    {
+        include_once 'conexion.php';
+        include_once 'sesion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $usuario = $_SESSION["ses_rfc_corto_ing"];
+
+            $query = "  UPDATE [Regstro_accesos] SET id_proc = 31, fecha_alta_acceso_real = '$fecha_alta' where id_reg_acceso =  $id_reg_acc  ";
+            $respuesta = sqlsrv_query($con,$query);
+        if ($respuesta == false) {
+            return print_r(sqlsrv_errors(),false) ;
+        } else {
+            return true;
+            
+        }
+    }
     public static function Inserta_nuevo_documento($datos)
     {
         include_once 'conexion.php';
@@ -32,13 +330,13 @@ class ConsultaInfoADR{
             ,[fecha_alta]
         )
         values(
-          $id_usu
-          ,$tipo_doc
-          ,'$no_ofi'
-          ,'$fecha_oficio'
-          ,'$fecha_oficio'
-          ,31
-          ,'$usuario'
+            $id_usu
+            ,$tipo_doc
+            ,'$no_ofi'
+            ,'$fecha_oficio'
+            ,'$fecha_oficio'
+            ,31
+            ,'$usuario'
           ,GETDATE()
         )
                ";
@@ -210,11 +508,13 @@ class ConsultaInfoADR{
             $query = "SELECT 
             id_empleado_plant,
             CONCAT(nombre_s,' ',apellido_p,' ',apellido_m) nombre_empleado
-            FROM Empleado_insumo where id_depto = $dep and (id_puesto = 37 OR
+            FROM Empleado_insumo WHERE (id_depto = $dep AND (id_puesto = 37 OR
             id_puesto =   41 OR
-            id_puesto =   4 OR
+            id_puesto =   4  OR
             id_puesto =   15 OR
-            id_puesto =   22) and id_proc = 9";
+            id_puesto =   22) AND id_proc = 9) OR id_sub_admin = (select id_sub_admin FROM Departamento where id_depto = $dep)  AND (
+            id_puesto =   15 
+           ) AND id_proc = 9";
             $respuesta = sqlsrv_query($con,$query);
             if($respuesta){
                 while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
@@ -249,6 +549,39 @@ class ConsultaInfoADR{
         INNER JOIN Empleado_insumo emp ON emp.id_empleado_plant = ofi_his.id_empleado_plant 
 		INNER JOIN [dbo].[cat_Tipo_Oficios] tip ON tip.id_tipo_of = ofi_his.Tipo_oficio 
         where ofi_his.id_oficio_gen = $id_oficio";
+            $respuesta = sqlsrv_query($con,$query);
+            if($respuesta){
+                while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
+                    $fila = $row;
+                }
+                if (isset($fila)) {
+                    return $fila;
+                   
+                }else{
+                    return null;
+              
+                }
+            }else{
+                return print_r(sqlsrv_errors(),true);
+                $BD->CerrarConexion($con); 
+            }  
+        }
+        public function Consulta_datos_de_la_responsiva_para_nombrar($id_acceso){
+            include_once 'conexion.php';
+            include_once 'sesion.php';
+            $BD = new ConexionSQL();
+            $con = $BD->ObtenerConexionBD(); 
+            $query = "SELECT 
+            CONCAT (emp.nombre_s,' ',emp.apellido_p,' ',apellido_m) nombre_comp
+            ,emp.rfc_corto
+            ,emp.no_empleado
+            ,acc.id_reg_acceso
+            ,sis.nombre_sistema
+            FROM Regstro_accesos acc
+            INNER JOIN Empleado_insumo emp ON emp.id_empleado_plant = acc.id_empleado
+            INNER JOIN Systems sis ON sis.id_system = acc.id_system
+            where acc.id_reg_acceso = $id_acceso
+            ";
             $respuesta = sqlsrv_query($con,$query);
             if($respuesta){
                 while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
@@ -322,59 +655,43 @@ class ConsultaInfoADR{
             $ruta = "temp_files/carga_nueva$id_user.xlsx";
             if (is_file($ruta)) {
                 $objPHPExcel = $objReader->load($ruta);
-    
+               
                 // Asignar hoja de excel activa
                 $objPHPExcel->setActiveSheetIndex(0);
                 $i = 0; //posición 0 del arreglo
                 $j = 2; //desde que fila se cuenta
                 $_DATOS_EXCEL[] = null;
                 do {
-                    $_DATOS_EXCEL[$i]['CURP'] = $objPHPExcel->getActiveSheet()->getCell('A' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['RFC'] = $objPHPExcel->getActiveSheet()->getCell('B' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['RFC CORTO'] = $objPHPExcel->getActiveSheet()->getCell('C' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['NO.EMPLEADO'] = $objPHPExcel->getActiveSheet()->getCell('D' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['NOMBRES'] = $objPHPExcel->getActiveSheet()->getCell('E' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['APELLIDO_P'] = $objPHPExcel->getActiveSheet()->getCell('F' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['APELLIDO_M'] = $objPHPExcel->getActiveSheet()->getCell('G' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['CORREO_INST'] = $objPHPExcel->getActiveSheet()->getCell('H' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['CORREO_P'] = $objPHPExcel->getActiveSheet()->getCell('I' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['TEL_1'] = $objPHPExcel->getActiveSheet()->getCell('J' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['TEL_2'] = $objPHPExcel->getActiveSheet()->getCell('K' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['EXT'] = $objPHPExcel->getActiveSheet()->getCell('L' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['ESTATUS_ACT'] = $objPHPExcel->getActiveSheet()->getCell('M' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['FECHA_INGRESO'] = $objPHPExcel->getActiveSheet()->getCell('N' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['TIPO_NOM'] = $objPHPExcel->getActiveSheet()->getCell('O' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['NIVEL_JER'] = $objPHPExcel->getActiveSheet()->getCell('P' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['SINDICATO'] = $objPHPExcel->getActiveSheet()->getCell('Q' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['SEXO'] = $objPHPExcel->getActiveSheet()->getCell('R' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['HIJOS'] = $objPHPExcel->getActiveSheet()->getCell('S' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['ESTADO_CIVIL'] = $objPHPExcel->getActiveSheet()->getCell('T' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['ESCOLARIDAD'] = $objPHPExcel->getActiveSheet()->getCell('U' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['ESTATUS_ESTUDIOS'] = $objPHPExcel->getActiveSheet()->getCell('V' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['CARRERA'] = $objPHPExcel->getActiveSheet()->getCell('W' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['ADMIN'] = $objPHPExcel->getActiveSheet()->getCell('X' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['SUB'] = $objPHPExcel->getActiveSheet()->getCell('Y' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['DEP'] = $objPHPExcel->getActiveSheet()->getCell('Z' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['JEFE_DIRECTO'] = $objPHPExcel->getActiveSheet()->getCell('AA' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['PUESTO_FUNCIONAL'] = $objPHPExcel->getActiveSheet()->getCell('AB' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['POSISION'] = $objPHPExcel->getActiveSheet()->getCell('AC' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['NIVEL'] = $objPHPExcel->getActiveSheet()->getCell('AD' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['CLAVE_PRESUPUESTAL'] = $objPHPExcel->getActiveSheet()->getCell('AE' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['CLAVE_PUESTO'] = $objPHPExcel->getActiveSheet()->getCell('AF' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['SUELDO'] = $objPHPExcel->getActiveSheet()->getCell('AG' . $j)->getCalculatedValue();
-                    $_DATOS_EXCEL[$i]['POSISION JEFE'] = $objPHPExcel->getActiveSheet()->getCell('AH' . $j)->getCalculatedValue();
+                    $_DATOS_EXCEL['NO.EMPLEADO'] = $objPHPExcel->getActiveSheet()->getCell('D' . $j)->getCalculatedValue();
+                    $_DATOS_EXCEL['NOMBRES'] = $objPHPExcel->getActiveSheet()->getCell('E' . $j)->getCalculatedValue();
+                    $_DATOS_EXCEL['APELLIDO_P'] = $objPHPExcel->getActiveSheet()->getCell('F' . $j)->getCalculatedValue();
+                    $_DATOS_EXCEL['APELLIDO_M'] = $objPHPExcel->getActiveSheet()->getCell('G' . $j)->getCalculatedValue();
+                    $_DATOS_EXCEL['CORREO_INST'] = $objPHPExcel->getActiveSheet()->getCell('H' . $j)->getCalculatedValue();
+                    $_DATOS_EXCEL['CURP'] = $objPHPExcel->getActiveSheet()->getCell('A' . $j)->getCalculatedValue();
+                     $_DATOS_EXCEL['RFC'] = $objPHPExcel->getActiveSheet()->getCell('B' . $j)->getCalculatedValue();
+                     $_DATOS_EXCEL['ESTATUS_ACT'] = $objPHPExcel->getActiveSheet()->getCell('M' . $j)->getCalculatedValue();
                     $i++;
                     $j++;
-                } while ($j <= 200);
-    
+                    $numerador = 1;
+                   
+                } while ($j <= 100);
+
                 $numerador = 1;
                 $html[] = null;
                 for ($i = 0; $i < count($_DATOS_EXCEL); $i++) {
-                    $html[$i] = self::rows_leer_archivo2($_DATOS_EXCEL[$i], $numerador);
-                    $numerador++;
+                    $html[$i] =  self::rows_leer_archivo2(
+                        $_DATOS_EXCEL[$i]['NO.EMPLEADO']
+                         ,$_DATOS_EXCEL[$i]['NOMBRES']
+                          , $_DATOS_EXCEL[$i]['APELLIDO_P']
+                           , $_DATOS_EXCEL[$i]['APELLIDO_M']
+                           , $_DATOS_EXCEL[$i]['CORREO_INST']
+                           ,$_DATOS_EXCEL[$i]['CURP']
+                           ,$_DATOS_EXCEL[$i]['RFC']
+                           ,$_DATOS_EXCEL[$i]['ESTATUS_ACT'] , $numerador);
+                 
                 }
-    
-    
+               
+
                 echo "
                  <div class='text-center py-3'>
                         <button class='btn btn-dark btn_sat_black text-white' onclick='ConfirmarCargaUSU(1)'>Confirmar carga</button>
@@ -388,11 +705,14 @@ class ConsultaInfoADR{
                     <th scope='col'>No. Empleado</th>
                     <th scope='col'>Nombre</th>
                     <th scope='col'>Correo</th>
+                    <th scope='col'>CURP</th>
+                    <th scope='col'>RFC</th>
+                    <th scope='col'>PROCESO</th>
                     <th scope='col'>Estado</th>
                    </tr>
                  </thead>
                  <tbody>";
-    
+
                 for ($i = 0; $i < count($html); $i++) {
                     echo $html[$i];
                 }
@@ -405,11 +725,9 @@ class ConsultaInfoADR{
                 echo "<p class='h1 vh-100'>No se ha cargado ningun archivo aún.</p>";
             }
         }
-        public static function rows_leer_archivo2($datos, $numerador)
+        public static function rows_leer_archivo2($NO_EMPLEADO,$NOMBRES, $APELLIDO_P, $APELLIDO_M, $CORREO_INST,$CURP,$RFC,$ESTATUS_ACT, $numerador)
         {
-            include_once 'php/MetodosUsuarios.php';
-            $usuarios = new MetodosUsuarios();
-    
+       
             $error_a = "<span class='d-inline-block' data-toggle='tooltip' data-placement='top' data-html='true' title='<b>Empleado ingresado con anterioridad.</b>'>
                             <i class='fas fa-exclamation-circle text-warning'></i>
                         </span>";
@@ -418,19 +736,26 @@ class ConsultaInfoADR{
                 </span>";
     
     
-            if (self::Consulta_usu_exist($datos["NO.EMPLEADO"]) == false) {
+           
+        
+            if (  (self::Consulta_usu_exist($NO_EMPLEADO)) == false) {
                 $identificado = $valido_a;
             } else {
                 $identificado = $error_a;
             }
+                $html = "<tr>
+                <th scope='row'>" . $numerador."</td>
+                <td>" . $NO_EMPLEADO . "</td>
+                <td>" . $NOMBRES . " " . $APELLIDO_P . " " . $APELLIDO_M . "</td>
+                <td>" . $CORREO_INST . "</td>
+                <td>" . $CURP . "</td>
+                <td>" . $RFC . "</td>
+                <td>" . $ESTATUS_ACT . "</td>
+                <td>" . $identificado."</td>
+            </tr>";
+            
     
-            $html = "<tr>
-                        <th scope='row'>$numerador</td>
-                        <td>" . $datos["NO.EMPLEADO"] . "</td>
-                        <td>" . $datos["NOMBRES"] . " " . $datos["APELLIDO_P"] . " " . $datos["APELLIDO_M"] . "</td>
-                        <td>" . $datos["CORREO_INST"] . "</td>
-                        <td>$identificado</td>
-                    </tr>";
+           
             return $html;
         }
         public static function Consulta_usu_exist($no_empleado)
@@ -470,6 +795,30 @@ class ConsultaInfoADR{
             if ($prepare) {
                 while ($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)) {
                     $filas =$row;
+                }
+                if (isset($filas)) {
+                    return $filas;
+                } else {
+                    return false;
+                }
+                $conexion->CerrarConexion($con);
+            } else {
+                return false;
+            }
+        }
+        public static function Consulta_COUNC_NOMBRE_Exist($rfc_c)
+        {
+            include_once 'conexion.php';
+            $conexion = new ConexionSQL(); // SE INSTANCIA LA CLASE CONEXIÓN
+            //SE CREA UN QUERY
+            $query = "SELECT * FROM Empleado_insumo WHERE (nombre_s LIKE '%$rfc_c%' OR apellido_p LIKE '%$rfc_c%' OR apellido_m LIKE '%$rfc_c%' ) ";
+            //SE MANDA A LLAMAR LA CONEXIÓN Y SE ABRE
+            $con = $conexion->ObtenerConexionBD();
+            //SE VALIDA EL QUERY CON FORME A LA CONEXIÓN
+            $prepare = sqlsrv_query($con, $query);
+            if ($prepare) {
+                while ($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)) {
+                    $filas[] =$row;
                 }
                 if (isset($filas)) {
                     return $filas;
@@ -568,7 +917,6 @@ class ConsultaInfoADR{
             $clave_puesto = $datos['CLAVE_PUESTO'];
             $sal_net = $datos['SUELDO'];
             $posision_jefe = $datos['POSISION JEFE'];
-
             $usuario = $_SESSION["ses_rfc_corto_ing"];
             $query = " INSERT INTO [Posisiones] (
                 [id_puesto_fump]
@@ -583,19 +931,51 @@ class ConsultaInfoADR{
                 ,[sueldo_neto]
                 )
                 SELECT 
-                (SELECT [id_puesto_fump] FROM [Puesto_FUMP] where [clave_puesto] = '$clave_puesto') AS [id_puesto_fump]
+                (SELECT top 1 [id_puesto_fump] FROM [Puesto_FUMP] where [clave_puesto] = '$clave_puesto') AS [id_puesto_fump]
                 ,'$num_plaza' AS [id_num_posision]
                 ,9 AS [id_proc]
-                , '$usuario' AS [user_alta]
-                ,GETDATE() [fecha_alta]
+                ,'$usuario' AS [user_alta]
+                ,GETDATE() AS [fecha_alta]
                 ,'A' AS [estatus]
                 , CASE '$posision_jefe'WHEN '' THEN NULL ELSE '$posision_jefe' END  AS [posision_jefe]
-                , case '$nivel' when '' then NULL else '$nivel' end AS [nivel]
-                , case '$clave_presupuesto' when '' then NULL else '$clave_presupuesto' end  AS [Codigo_pres]
-                ,CASE '$sal_net'WHEN '' THEN NULL ELSE '$sal_net' END AS [sueldo_neto]
+                , case '$nivel' when '' then NULL else '$nivel' END AS [nivel]
+                , case '$clave_presupuesto' when '' then NULL else '$clave_presupuesto' END  AS [Codigo_pres]
+                ,CASE '$sal_net' WHEN '' THEN NULL ELSE '$sal_net' END AS [sueldo_neto]
+
+                SELECT SCOPE_IDENTITY() as id 
+                ";
+    
+            $prepare = sqlsrv_query($con, $query);
+            if ($prepare === false) {
+                return $num_plaza;
+            } else {
+                sqlsrv_next_result($respuesta);
+                sqlsrv_fetch($respuesta);
+                $fila = array('id' => sqlsrv_get_field($respuesta, 0));
+                if ($fila["id"] != null) {
+                    return self::Crear_Posision_masiva_part2($datos,$fila["id"]);
+                } else {
+                    return "Error en el metodo Crear_Posision_masiva(".print_r(sqlsrv_errors(),false).")";
+                }
+            }
+        }
+        public static function Crear_Posision_masiva_part2($datos,$id)
+        {
+            include_once 'conexion.php';
+            include_once 'sesion.php';
+            include_once 'Classes/PHPExcel.php';
+            include_once 'Classes/PHPExcel/Reader/Excel2007.php';
+            $conexion = new ConexionSQL();
+            $con = $conexion->ObtenerConexionBD();
             
-            
-                INSERT INTO [mov_Posisiones] 
+            $num_plaza = $datos['POSISION'];
+            $nivel = $datos['NIVEL'];
+            $clave_presupuesto = $datos['CLAVE_PRESUPUESTAL'];
+            $clave_puesto = $datos['CLAVE_PUESTO'];
+            $sal_net = $datos['SUELDO'];
+            $posision_jefe = $datos['POSISION JEFE'];
+            $usuario = $_SESSION["ses_rfc_corto_ing"];
+            $query = "INSERT INTO [mov_Posisiones] 
                 (
                 [id_posision]
                 ,[nombre_empleado]
@@ -611,12 +991,12 @@ class ConsultaInfoADR{
                 ,[estatus]
                 )
                 SELECT
-                (select TOP 1 CAST (SCOPE_IDENTITY() AS INT) AS id_posision from Posisiones) AS [id_posision]
-                ,(select Concat( emp.nombre_s,' ',emp.apellido_p,' ',emp.apellido_m) from Posisiones pos 
-                FULL JOIN Empleado_insumo emp ON emp.id_empleado_plant = pos.id_empleado 
+                $id AS [id_posision]
+                ,(select top 1 Concat( emp.nombre_s,' ',emp.apellido_p,' ',emp.apellido_m) from Posisiones pos 
+                FULL JOIN Empleado_insumo emp ON emp.id_posision = pos.id_posision 
                 where pos.[id_num_posision] = '$num_plaza'
                 ) AS [nombre_empleado]
-                ,(SELECT nombre_puesto FROM Puesto_FUMP WHERE clave_puesto = '$clave_puesto' ) AS [puesto_fump]
+                ,(SELECT top 1 nombre_puesto FROM Puesto_FUMP WHERE clave_puesto = '$clave_puesto' ) AS [puesto_fump]
                 ,'$num_plaza' AS [id_num_posision]
                 , CASE '$posision_jefe'WHEN '' THEN NULL ELSE '$posision_jefe' END  AS [posision_jefe]
                 ,case '$nivel' when '' then NULL else '$nivel' end AS [nivel]
@@ -630,7 +1010,7 @@ class ConsultaInfoADR{
     
             $prepare = sqlsrv_query($con, $query);
             if ($prepare === false) {
-                die(print_r(sqlsrv_errors(), true));
+                return "Error en el metodo Crear_Posision_masiva_part2(".print_r(sqlsrv_errors(),false).")";
             } else {
                 return true;
             }
@@ -687,6 +1067,8 @@ class ConsultaInfoADR{
                     $_DATOS_EXCEL['CLAVE_PUESTO'] = $objPHPExcel->getActiveSheet()->getCell('AF' . $j)->getCalculatedValue();
                     $_DATOS_EXCEL['SUELDO'] = $objPHPExcel->getActiveSheet()->getCell('AG' . $j)->getCalculatedValue();
                     $_DATOS_EXCEL['POSISION JEFE'] = $objPHPExcel->getActiveSheet()->getCell('AH' . $j)->getCalculatedValue();
+                    $_DATOS_EXCEL['MOTIVO ESPECAL'] = $objPHPExcel->getActiveSheet()->getCell('AI' . $j)->getCalculatedValue();
+                    $_DATOS_EXCEL['FechaBaja'] = $objPHPExcel->getActiveSheet()->getCell('AJ' . $j)->getCalculatedValue();
                     $llave = self::Consulta_usu_exist($_DATOS_EXCEL["NO.EMPLEADO"]);
     
                 if ($llave == false) {
@@ -718,7 +1100,8 @@ class ConsultaInfoADR{
     
     
                 $j++;
-            } while (($objPHPExcel->getActiveSheet()->getCell('A' . $j)->getCalculatedValue() != null));
+            } while (($objPHPExcel->getActiveSheet()->getCell('D' . $j)->getCalculatedValue() != null));
+
     
             unlink($ruta);
             if (isset($errores)) {
@@ -786,9 +1169,27 @@ class ConsultaInfoADR{
             include_once 'Classes/PHPExcel.php';
             include_once 'Classes/PHPExcel/Reader/Excel2007.php';
             $objFecha = new PHPExcel_Shared_Date();
-            $timestamp =  $objFecha->ExcelToPHP($datos['FECHA_INGRESO']);
-            $fecha_Ing = date("Y-m-d", $timestamp);
-            $fec_ing =  DateTime::createFromFormat('Y-m-d', $fecha_Ing);
+            if (!isset($datos['FECHA_INGRESO'])) {
+                $fecha_ingreso = "";
+            }
+            else{
+                
+                $timestamp =  $objFecha->ExcelToPHP($datos['FECHA_INGRESO']);
+                $fecha_Ing = date('Y/m/d', $timestamp);
+                $fec_ing =  DateTime::createFromFormat('Y/m/d', $fecha_Ing);
+                $fecha_ingreso =  $fec_ing->format('Y/m/d');
+            }
+            if (!isset($datos['FechaBaja'])) {
+                      $fechas_bajas_2 = "";
+            }
+            else{
+         
+                $timestamp2 =  $objFecha->ExcelToPHP($datos['FechaBaja']);
+                $fec_baj = date('Y/m/d', $timestamp2);
+                $fechas_baj =  DateTime::createFromFormat('Y/m/d', $fec_baj);
+                $fechas_bajas_2 =  $fechas_baj->format('Y/m/d');
+            }
+           
             $conexion = new ConexionSQL();
             $con = $conexion->ObtenerConexionBD();
             $CURP = $datos['CURP'];
@@ -804,7 +1205,6 @@ class ConsultaInfoADR{
             $telefono_2 = $datos['TEL_2'];
             $ext_tele = $datos['EXT'];
             $estatus_opera = $datos['ESTATUS_ACT'];
-            $fecha_ingreso =  $fec_ing->format('Y/m/d');;
             $tipo_nom = $datos['TIPO_NOM'];
             $nivel_jer = $datos['NIVEL_JER'];
             $sindicatos = $datos['SINDICATO'];
@@ -824,6 +1224,8 @@ class ConsultaInfoADR{
             $clave_presupuesto = $datos['CLAVE_PRESUPUESTAL'];
             $clave_puesto = $datos['CLAVE_PUESTO'];
             $sal_net = $datos['SUELDO'];
+            $motivo_especial = $datos['MOTIVO ESPECAL'];
+            $fec_baja = $datos['FechaBaja'];
             $user_alta = $_SESSION['ses_rfc_corto_ing'];
     
     
@@ -849,6 +1251,7 @@ class ConsultaInfoADR{
             ,[fecha_alta]
             ,[id_proc]
             ,[fec_ingreso]
+            ,fec_fin_rel_laboral
             ,[RFC]
             ,[CURP]
             ,[Genero]
@@ -859,7 +1262,8 @@ class ConsultaInfoADR{
             ,[Carrera]
             ,[tipo_nombramiento]
             ,[id_sindicato]
-            ,[id_nivel_jer])
+            ,[id_nivel_jer]
+            ,[id_motivo_esp])
             SELECT 
             $No_Empleado AS [no_empleado]
             ,$admin AS [id_admin]
@@ -881,7 +1285,8 @@ class ConsultaInfoADR{
             ,'$user_alta' AS [user_alta]
             ,GETDATE() AS [fecha_alta]
             ,$estatus_opera AS [id_proc]
-            ,'$fecha_ingreso' AS [fec_ingreso]
+            ,case '$fecha_ingreso' when '' then null else '$fecha_ingreso' end AS [fec_ingreso]
+            ,case '$fechas_bajas_2' when '' then null else '$fechas_bajas_2' end AS [fec_fin_rel_laboral]
             ,'$RFC_comp' AS [RFC]
             ,'$CURP' AS [CURP]
             ,'$Genero' AS [Genero]
@@ -893,36 +1298,183 @@ class ConsultaInfoADR{
             ,$tipo_nom AS [tipo_nombramiento]
             ,$sindicatos AS [id_sindicato]
             ,$nivel_jer AS [id_nivel_jer]
-        
-        
-            UPDATE Posisiones set id_empleado =( SELECT top 1 CAST(scope_identity() AS int) as empleado  from Empleado_insumo ),
-            sueldo_neto =Case '$sal_net' when '' then NULL else '$sal_net' end where id_num_posision = '$num_plaza'
-        
-        
+            ,Case '$motivo_especial' when '' then NULL Else $motivo_especial end AS [id_motivo_esp]
+            select scope_identity() as id       
             ";
             $prepare = sqlsrv_query($con, $query);
             if ($prepare == false) {
-                die(print_r(sqlsrv_errors(), true));
+                return $No_Empleado;
             } else {
-                if($insert_historial= self::crea_historiales_carga_masvia($datos) != true){
-                    return $insert_historial;
+                sqlsrv_next_result($prepare);
+                sqlsrv_fetch($respuesta);
+                $fila = array('id' => sqlsrv_get_field($respuesta, 0));
+                if ($fila["id"] != null) {
+                    if (($fil = self::Busca_estatus_insumo($fila["id"]))!=false) {
+                        if (($proc_adicional =  self::Crear_Usuario_actualiza_plaza($datos,$fila["id"])!=false)){
+                         if($insert_historial= self::crea_historiales_carga_masvia($datos,$fila["id"]) != true){
+                             return $insert_historial;
+                         }
+                         else {
+                             return true;
+                         }
+                        }
+                        else{
+                         return $proc_adicional;
+                        }
+     
+                     }
+                     else{
+                         if($insert_historial= self::crea_historiales_carga_masvia($datos,$fila["id"]) != true){
+                             return $insert_historial;
+                         }
+                         else {
+                             return true;
+                         }
+                     }
+                } else {
+                    return "Error en el metodo Crear_Usuario_insumo_masvio(".print_r(sqlsrv_errors(),false).")";
                 }
-                else {
-                    return true;
-                }
+              
+               
             }
                 
             }
-            public static function crea_historiales_carga_masvia($datos)
+            public static function Crear_Usuario_actualiza_plaza($datos,$id)
+            {
+                include_once 'conexion.php';
+                include_once 'sesion.php';
+                include_once 'Classes/PHPExcel.php';
+                include_once 'Classes/PHPExcel/Reader/Excel2007.php';
+                $objFecha = new PHPExcel_Shared_Date();
+                if (!isset($datos['FECHA_INGRESO'])) {
+                    $fecha_ingreso = "";
+                }
+                else{
+                    
+                    $timestamp =  $objFecha->ExcelToPHP($datos['FECHA_INGRESO']);
+                    $fecha_Ing = date('Y/m/d', $timestamp);
+                    $fec_ing =  DateTime::createFromFormat('Y/m/d', $fecha_Ing);
+                    $fecha_ingreso =  $fec_ing->format('Y/m/d');
+                }
+                if (!isset($datos['FechaBaja'])) {
+                          $fechas_bajas_2 = "";
+                }
+                else{
+             
+                    $timestamp2 =  $objFecha->ExcelToPHP($datos['FechaBaja']);
+                    $fec_baj = date('Y/m/d', $timestamp2);
+                    $fechas_baj =  DateTime::createFromFormat('Y/m/d', $fec_baj);
+                    $fechas_bajas_2 =  $fechas_baj->format('Y/m/d');
+                }
+               
+                $conexion = new ConexionSQL();
+                $con = $conexion->ObtenerConexionBD();
+                $CURP = $datos['CURP'];
+                $RFC_comp = $datos['RFC'];
+                $RFC_Corto = $datos['RFC CORTO'];
+                $No_Empleado = $datos['NO.EMPLEADO'];
+                $nombres = $datos['NOMBRES'];
+                $apellido_P = $datos['APELLIDO_P'];
+                $apellido_M = $datos['APELLIDO_M'];
+                $Correo_sat = $datos['CORREO_INST'];
+                $Correo_P = $datos['CORREO_P'];
+                $telefono_1 = $datos['TEL_1'];
+                $telefono_2 = $datos['TEL_2'];
+                $ext_tele = $datos['EXT'];
+                $estatus_opera = $datos['ESTATUS_ACT'];
+                $tipo_nom = $datos['TIPO_NOM'];
+                $nivel_jer = $datos['NIVEL_JER'];
+                $sindicatos = $datos['SINDICATO'];
+                $Genero = $datos['SEXO'];
+                $Hijos = $datos['HIJOS'];
+                $estado_civil = $datos['ESTADO_CIVIL'];
+                $Escolaridad = $datos['ESCOLARIDAD'] ;
+                $est_escolar = $datos['ESTATUS_ESTUDIOS'];
+                $carrera = $datos['CARRERA'];
+                $admin = $datos['ADMIN'];
+                $sub = $datos['SUB'];
+                $dep = $datos['DEP'];
+                $jefe = $datos['JEFE_DIRECTO'];
+                $puesto_adr = $datos['PUESTO_FUNCIONAL'];
+                $num_plaza = $datos['POSISION'];
+                $nivel = $datos['NIVEL'];
+                $clave_presupuesto = $datos['CLAVE_PRESUPUESTAL'];
+                $clave_puesto = $datos['CLAVE_PUESTO'];
+                $sal_net = $datos['SUELDO'];
+                $motivo_especial = $datos['MOTIVO ESPECAL'];
+                $fec_baja = $datos['FechaBaja'];
+                $user_alta = $_SESSION['ses_rfc_corto_ing'];
+        
+            $query = "UPDATE Posisiones 
+            set id_empleado = $id, 
+            sueldo_neto =Case '$sal_net' when '' then NULL else '$sal_net' end 
+            where id_num_posision = '$num_plaza'
+                ";
+                $prepare = sqlsrv_query($con, $query);
+                if ($prepare == false) {
+                    die(print_r(sqlsrv_errors(), true));
+                } else {
+                    if($insert_historial= self::crea_historiales_carga_masvia($datos) != true){
+                        return $insert_historial;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+                    
+                }
+            public static function Busca_estatus_insumo($id){
+                include_once "conexion.php";
+                $conexion = new ConexionSQL();
+                $con = $conexion->ObtenerConexionBD();
+
+                $query ="SELECT id_proc FROM Empleado_insumo WHERE id_empleado_plant = $id and id_proc in ( 11 ,32 , 11,3)";
+
+                $respuesta = sqlsrv_query($con,$query);
+                if($respuesta){
+                    while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
+                        $fila = $row;
+                    }
+                    if (isset($fila)) {
+                        return $fila['id_proc'];
+                       
+                    }else{
+                        return false;
+                  
+                    }
+                }else{
+                    return print_r(sqlsrv_errors(),true);
+                    $BD->CerrarConexion($con); 
+                }  
+
+            }
+            public static function crea_historiales_carga_masvia($datos,$id)
         {
             include_once 'conexion.php';
             include_once 'sesion.php';
             include_once 'Classes/PHPExcel.php';
             include_once 'Classes/PHPExcel/Reader/Excel2007.php';
             $objFecha = new PHPExcel_Shared_Date();
-            $timestamp =  $objFecha->ExcelToPHP($datos['FECHA_INGRESO']);
-            $fecha_Ing = date("Y-m-d", $timestamp);
-            $fec_ing =  DateTime::createFromFormat('Y-m-d', $fecha_Ing);
+            if (!isset($datos['FECHA_INGRESO'])) {
+                $fecha_ingreso = "";
+            }
+            else{
+                
+                $timestamp =  $objFecha->ExcelToPHP($datos['FECHA_INGRESO']);
+                $fecha_Ing = date("Y/m/d", $timestamp);
+                $fec_ing =  DateTime::createFromFormat('Y/m/d', $fecha_Ing);
+                $fecha_ingreso =  $fec_ing->format('Y/m/d');
+            }
+            if (!isset($datos['FechaBaja'])) {
+                      $fechas_bajas_2 = "";
+            }
+            else{
+         
+                $timestamp2 =  $objFecha->ExcelToPHP($datos['FechaBaja']);
+                $fec_baj = date('Y/m/d', $timestamp2);
+                $fechas_baj =  DateTime::createFromFormat('Y/m/d', $fec_baj);
+                $fechas_bajas_2 =  $fechas_baj->format('Y/m/d');
+            }
             $conexion = new ConexionSQL();
             $con = $conexion->ObtenerConexionBD();
             $CURP = $datos['CURP'];
@@ -938,7 +1490,6 @@ class ConsultaInfoADR{
             $telefono_2 = $datos['TEL_2'];
             $ext_tele = $datos['EXT'];
             $estatus_opera = $datos['ESTATUS_ACT'];
-            $fecha_ingreso =  $fec_ing->format('Y/m/d');;
             $tipo_nom = $datos['TIPO_NOM'];
             $nivel_jer = $datos['NIVEL_JER'];
             $sindicatos = $datos['SINDICATO'];
@@ -958,6 +1509,7 @@ class ConsultaInfoADR{
             $clave_presupuesto = $datos['CLAVE_PRESUPUESTAL'];
             $clave_puesto = $datos['CLAVE_PUESTO'];
             $sal_net = $datos['SUELDO'];
+            $motivo_especial = $datos['MOTIVO ESPECAL'];
             $user_alta = $_SESSION['ses_rfc_corto_ing'];
           
             $query="INSERT INTO [mov_insumo](
@@ -983,6 +1535,7 @@ class ConsultaInfoADR{
                 ,[fecha_alta]
                 ,[id_proc]
                 ,[fec_ingreso]
+                ,[fec_fin_rel_laboral]
                 ,[RFC]
                 ,[CURP]
                 ,[Genero]
@@ -995,16 +1548,17 @@ class ConsultaInfoADR{
                 ,[sindicato]
                 ,[nivel_jer]
                 ,salario_neto
+                ,[Motivo_especial]
                 )
                 SELECT 
-                ( SELECT id_empleado_plant FROM Empleado_insumo where no_empleado = $No_Empleado) AS [id_empleado_plant]
+                $id AS [id_empleado_plant]
                 ,Case '$jefe' when '' then null Else (select concat(nombre_s, ' ',apellido_p, ' ',apellido_m) as nombre_jefe from Empleado_insumo where no_empleado = '$jefe')  end  AS [jefe_directo]
                 ,$No_Empleado AS [no_empleado]
-                ,(SELECT nombre_admin FROM Administracion WHERE id_admin = $admin) AS [admin]
-                ,(SELECT nombre_sub_admin FROM SubAdmin WHERE id_sub_admin = $sub) AS [sub_admin]
-                ,(SELECT nombre_depto FROM Departamento WHERE id_depto = $dep) AS [depto]
+                ,(SELECT top 1 nombre_admin FROM Administracion WHERE id_admin = $admin) AS [admin]
+                ,(SELECT top 1 nombre_sub_admin FROM SubAdmin WHERE id_sub_admin = $sub) AS [sub_admin]
+                ,(SELECT top 1 nombre_depto FROM Departamento WHERE id_depto = $dep) AS [depto]
                 ,'$num_plaza' as [id_num_posision]
-                ,(SELECT nombre_puesto FROM Puesto_ADR WHERE id_puesto = $puesto_adr) AS [puesto]
+                ,(SELECT top 1 nombre_puesto FROM Puesto_ADR WHERE id_puesto = $puesto_adr) AS [puesto]
                 ,'$RFC_Corto' AS [rfc_corto]
                 ,'$nombres' AS [nombre_s]
                 ,'$apellido_P' AS [apellido_p]
@@ -1017,20 +1571,22 @@ class ConsultaInfoADR{
                 ,'A' AS [estatus]
                 ,'$user_alta' AS [user_alta]
                 ,GETDATE() AS [fecha_alta]
-                ,16 AS [id_proc]
-                ,'$fecha_ingreso' AS[fec_ingreso]
+                ,$estatus_opera AS [id_proc]
+                ,CASE '$fecha_ingreso' WHEN '' THEN NULL ELSE '$fecha_ingreso' END AS [fec_ingreso]
+                ,CASE '$fechas_bajas_2' WHEN '' THEN NULL ELSE '$fechas_bajas_2' END AS [fec_fin_rel_laboral]
                 ,'$RFC_comp' AS [RFC]
                 ,'$CURP' AS [CURP]
                 ,'$Genero' AS [Genero]
                 ,Case '$Hijos' when '' then null Else '$Hijos' end  AS [Hijos]
-                ,(SELECT nombre_escolaridad from cat_escolaridad where id_escolaridad =$Escolaridad) AS [Escolaridad]
-                ,(SELECT nombre_estatus_escolaridad from cat_estatus_escolar where id_estatus_escolaridad =$est_escolar) AS [estatus_escolaridad]
-                ,(SELECT nombre_estado_civil from cat_estado_civil where id_estado_civil =$estado_civil) AS [estado_civil]
+                ,(SELECT top 1 nombre_escolaridad from cat_escolaridad where id_escolaridad =$Escolaridad) AS [Escolaridad]
+                ,(SELECT top 1 nombre_estatus_escolaridad from cat_estatus_escolar where id_estatus_escolaridad =$est_escolar) AS [estatus_escolaridad]
+                ,(SELECT top 1 nombre_estado_civil from cat_estado_civil where id_estado_civil =$estado_civil) AS [estado_civil]
                 ,(Case '$carrera' when '$carrera' then NULL else '$carrera' end) AS [Carrera]
-                ,(SELECT nombre_nombramiento from cat_nombramiento where id_tipo_nombramiento =$tipo_nom) AS [tipo_nombramiento]
-                ,(SELECT nombre_sindical from cat_sindical where id_sindicato =$sindicatos) AS [sindicato]
-                ,(SELECT nombre_nombramiento from cat_nivel_jerarquico where id_nivel_jer =$nivel_jer) AS [nivel_jer]
+                ,(SELECT top 1 nombre_nombramiento from cat_nombramiento where id_tipo_nombramiento =$tipo_nom) AS [tipo_nombramiento]
+                ,(SELECT top 1 nombre_sindical from cat_sindical where id_sindicato =$sindicatos) AS [sindicato]
+                ,(SELECT top 1 nombre_nombramiento from cat_nivel_jerarquico where id_nivel_jer =$nivel_jer) AS [nivel_jer]
                 ,Case '$sal_net' when '' then NULL else '$sal_net' end AS salario_neto
+                ,CASE '$motivo_especial' WHEN '' THEN NULL ELSE '$motivo_especial' END AS [Motivo_especial]
                     
                  INSERT INTO [mov_Posisiones] 
                 (
@@ -1049,10 +1605,7 @@ class ConsultaInfoADR{
                 )
                 SELECT
                 (select  id_posision from Posisiones where [id_num_posision] = '$num_plaza') AS [id_posision]
-                ,(select Concat( emp.nombre_s,' ',emp.apellido_p,' ',emp.apellido_m) from Posisiones pos 
-                FULL JOIN Empleado_insumo emp ON emp.id_empleado_plant = pos.id_empleado 
-                where pos.[id_num_posision] = '$num_plaza'
-                ) AS [nombre_empleado]
+                ,$id AS [nombre_empleado]
                 ,(SELECT nombre_puesto FROM Puesto_FUMP WHERE clave_puesto = '$clave_puesto' ) AS [puesto_fump]
                 ,'$num_plaza' AS [id_num_posision]
                 ,(SELECT posision_jefe from Posisiones where id_num_posision = '$num_plaza')  AS [posision_jefe]
@@ -1065,7 +1618,7 @@ class ConsultaInfoADR{
                 ,'A' AS [estatus] ";
             $prepare = sqlsrv_query($con, $query);
             if ($prepare === false) {
-                die(print_r(sqlsrv_errors(), true));
+                return "Error en metodo crea_historiales_carga_masvia(".print_r(sqlsrv_errors(), true).")";
             } else {
                 return true;
             }
@@ -1248,27 +1801,30 @@ class ConsultaInfoADR{
         include_once 'conexion.php';
         $BD = new ConexionSQL();
         $con = $BD->ObtenerConexionBD();
-        $query = "SELECT [id_mov_posision]
-        ,[id_posision]
-        ,[nombre_empleado]
+        $query = "	SELECT [id_mov_posision]
+        ,mov_pos.[id_posision]
+        ,mov_pos.[nombre_empleado]
         ,[puesto_fump]
-        ,[id_num_posision]
-        ,[posision_jefe]
-        ,[nivel]
-        ,[Codigo_pres]
-        ,[sueldo_neto]
+        ,puest.clave_puesto
+        ,mov_pos.[id_num_posision]
+        ,mov_pos.[posision_jefe]
+        ,mov_pos.[nivel]
+        ,mov_pos.[Codigo_pres]
+        ,mov_pos.[sueldo_neto]
         ,mov_pos.[id_proc]
         ,procc.nombre_proc
         ,mov_pos.[user_alta]
         ,mov_pos.[fecha_alta] 
-        ,[user_mod]
-        ,[fecha_mod]
-        ,[user_baja]
-        ,[fecha_baja]
-        ,[estatus]
+        ,mov_pos.[user_mod]
+        ,mov_pos.[fecha_mod]
+        ,mov_pos.[user_baja]
+        ,mov_pos.[fecha_baja]
+        ,mov_pos.[estatus]
     FROM [Control_Ingresos].[dbo].[mov_Posisiones] mov_pos
     INNER JOIN Procesos procc ON procc.id_proc = mov_pos.id_proc
-    WHERE id_posision = $id_plaza ORDER BY mov_pos.fecha_alta DESC";
+    INNER JOIN Posisiones pos ON pos.id_posision = mov_pos.id_posision
+    INNER JOIN Puesto_FUMP puest ON puest.id_puesto_fump = pos.id_puesto_fump
+    WHERE mov_pos.id_posision = $id_plaza ORDER BY mov_pos.fecha_alta DESC";
         $respuesta = sqlsrv_query($con,$query);
         if($respuesta){
             while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
@@ -1423,7 +1979,7 @@ class ConsultaInfoADR{
         $respuesta = sqlsrv_query($con,$query);
     if($respuesta){
         while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
-            $fila[] = $row;
+            $fila = $row;
         }
         if (isset($fila)) {
             return $fila;
@@ -1605,52 +2161,65 @@ class ConsultaInfoADR{
         switch ($_GET) {
         case isset($_GET['pagina']):
             $condicion ="";
+            $condicion_INT ="";
             break;
             case isset($_GET['Cod_puesto']):
             $id_puesto_fump = $_COOKIE['Cod_puest'];
             $condicion = "AND busq.id_puesto_fump = $id_puesto_fump";
+            $condicion_INT = "WHERE pos.id_puesto_fump = $id_puesto_fump";
             break;
             case isset($_GET['Nivel']):
                 $NIVEL = $_COOKIE['Nivel_select'];
                 $condicion = "AND busq.nivel = '$NIVEL'";
+                $condicion_INT = "WHERE pos.nivel = '$NIVEL'";
             break;
             case isset($_GET['Pos_gerente']):
                 $ps_ger = $_COOKIE['pos_gerentes'];
                 $condicion = "AND busq.posision_jefe = '$ps_ger'";
+                $condicion_INT = "WHERE posision_jefe = '$ps_ger'";
             break;
             case isset($_GET['Posision']):
                 $posision = $_COOKIE['posiscion_busc'];
                 $condicion = "AND busq.id_num_posision like '%$posision%'";
+                $condicion_INT = "WHERE pos.id_num_posision like '%$posision%'";
             break;
             case isset($_GET['Stock']):
                 $opcion = $_COOKIE['extra'];
                 switch ($opcion) {
                     case 1:
-                        $condicion = "and busq.id_empleado is null";
+                        $condicion = "AND busq.id_empleado is null";
+                        $condicion_INT = "WHERE pos.id_empleado is null";
                     break;
                     case 2:
-                        $condicion = "and busq.id_empleado is not null and (busq.id_proc = 9 or busq.id_proc = 12)";
+                        $condicion = "AND busq.id_empleado is not null and (busq.id_proc = 9 or busq.id_proc = 12)";
+                        $condicion_INT = "WHERE pos.id_empleado  is not null and (emp.id_proc = 9 or emp.id_proc = 12)";
                     break;
                     case 3:
-                        $condicion = "and busq.id_proc = 7 or busq.id_proc = 7";
+                        $condicion = "AND busq.id_proc = 7 or busq.proc_empleado = 25";
+                        $condicion_INT = "WHERE pos.id_proc = 7 or emp.id_proc = 25";
                     break;
                     case 4:
-                        $condicion = "and busq.id_proc = 25 or busq.proc_empleado = 25";
+                        $condicion = "AND busq.id_proc = 25 or busq.proc_empleado = 25";
+                        $condicion_INT = "WHERE pos.id_proc = 25 or emp.id_proc = 25 ";
+                   
                     break;
                     case 5:
-                        $condicion = "and busq.id_proc = 6 or busq.proc_empleado = 6";
+                        $condicion = "AND busq.id_proc = 6 or busq.proc_empleado = 6";
+                        $condicion_INT = "WHERE pos.id_proc = 6  or emp.id_proc = 6";
                     break;
                     case 6:
-                        $condicion = "and busq.id_proc = 28 or busq.proc_empleado = 28";
+                        $condicion = "AND busq.id_proc = 28 or busq.proc_empleado = 28";
+                        $condicion_INT = "WHERE pos.id_proc = 28 or emp.id_proc = 28";
                     break;
     
                     }
             break;
             default:
             $condicion ="";
+            $condicion_INT ="";
             break;
           }
-        $query = "  	       SELECT distinct TOP (50)
+        $query = "  	           SELECT distinct TOP (50)
         busq.seq
        ,busq.id_posision
        ,busq.id_empleado
@@ -1675,8 +2244,8 @@ class ConsultaInfoADR{
      FROM( 
        SELECT 
          ROW_NUMBER() OVER(ORDER BY pos.id_num_posision asc) AS seq
-       ,pos.[id_posision]
-         , id_empleado
+         ,pos.[id_posision]
+         ,pos.id_empleado
 		 ,emp.id_proc as estado_analista
 		 ,procc1.nombre_proc as nombre_proc_analista
          ,pos.[id_puesto_fump]
@@ -1702,7 +2271,8 @@ class ConsultaInfoADR{
      FULL JOIN Empleado_insumo emp ON emp.id_empleado_plant = pos.id_empleado 
      INNER JOIN Procesos procc ON procc.id_proc = pos.id_proc 
 	 FULL JOIN Procesos procc1 ON procc1.id_proc = emp.id_proc 
-     inner JOIN Puesto_FUMP puest ON puest.id_puesto_fump = pos.id_puesto_fump ) busq
+     INNER JOIN Puesto_FUMP puest ON puest.id_puesto_fump = pos.id_puesto_fump 
+     $condicion_INT) busq
      WHERE busq.seq >=  $num $condicion";
         $respuesta = sqlsrv_query($con,$query);
     if($respuesta){
@@ -2042,7 +2612,7 @@ class ConsultaInfoADR{
     if($respuesta){
         while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
             $fila = $row;
-        }
+        }   
         if (isset($fila)) {
             return $fila;
             $BD->CerrarConexion($con);
@@ -2055,6 +2625,45 @@ class ConsultaInfoADR{
         $BD->CerrarConexion($con); 
     }  
   }
+  public function Accesos_x_sistemas($id_system){
+    include_once 'conexion.php';
+    $BD = new ConexionSQL();
+    $con = $BD->ObtenerConexionBD();
+    $query = "SELECT 
+    acc.[id_reg_acceso]
+    ,acc.[id_empleado]
+    ,Concat(emp.nombre_s,' ', emp.apellido_p,' ', emp.apellido_m) as nombre_emp
+    ,acc.[id_system]
+    ,acc.[id_proc]
+    ,procc.nombre_proc
+    ,acc.[user_alta]
+    ,acc.[fecha_alta]
+    ,acc.[user_mod]
+    ,acc.[fecha_mod]
+    ,acc.[user_baja]
+    ,acc.[fecha_baja]
+    ,acc.[estatus]
+    FROM [Control_Ingresos].[dbo].[Regstro_accesos] acc
+    INNER JOIN Empleado_insumo emp ON emp.id_empleado_plant = acc.id_empleado 
+    INNER JOIN Procesos procc ON acc.id_proc = procc.id_proc 
+    where acc.id_system = $id_system ";
+    $respuesta = sqlsrv_query($con,$query);
+    if($respuesta){
+        while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
+            $fila[] = $row;
+        }
+        if (isset($fila)) {
+            return $fila;
+            $BD->CerrarConexion($con);
+        }else{
+            return null;
+            $BD->CerrarConexion($con);
+        }
+    }else{
+        return print_r(sqlsrv_errors(),true);
+        $BD->CerrarConexion($con); 
+    }  
+}
     public function info_datos_us($id_us){
         include_once 'conexion.php';
         $BD = new ConexionSQL();
@@ -2097,9 +2706,9 @@ class ConsultaInfoADR{
         INNER JOIN Administracion ad ON emp.id_admin = ad.id_admin
       INNER JOIN SubAdmin sub ON emp.id_sub_admin = sub.id_sub_admin
       INNER JOIN Departamento dep ON emp.id_depto = dep.id_depto
-      INNER JOIN Posisiones pos ON emp.id_posision = pos.id_posision
+      LEFT JOIN Posisiones pos ON emp.id_posision = pos.id_posision
       INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
-      INNER JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump
+      LEFT JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump
        WHERE  id_empleado_plant = $id_us and emp.estatus = 'A' ORDER BY emp.id_sub_admin & emp.id_depto ASC
 ";
         $respuesta = sqlsrv_query($con,$query);
@@ -2123,78 +2732,83 @@ class ConsultaInfoADR{
         include_once 'conexion.php';
         $BD = new ConexionSQL();
         $con = $BD->ObtenerConexionBD();
-        $query = "SELECT TOP 1
-        [id_empleado_plant]
-       ,emp.[no_empleado]
-       ,ad.nombre_admin
-       ,ad.direccion
-       ,emp.id_admin
-       ,emp.id_sub_admin
-       ,emp.id_depto
-       ,sub.nombre_sub_admin
-       ,dep.nombre_depto
-       ,puest_adr.id_puesto
-       ,emp.[jefe_directo]
-       ,pos.id_posision
-       ,pos.id_num_posision
-       ,pos.posision_jefe
-       ,pos.nivel
-       ,pos.sueldo_neto
-       ,pos.Codigo_pres
-       ,(select clave_puesto from Puesto_FUMP where id_puesto_fump = (select top 1 id_puesto_fump  from Posisiones where id_num_posision =(SELECT posision_jefe from Posisiones where id_empleado = $id_us))) as clave_jefe
-       ,(select concat(nombre_s,' ',apellido_p,' ',apellido_m ) from Empleado_insumo where id_posision = (select top 1 id_posision from Posisiones where id_num_posision =(SELECT posision_jefe from Posisiones where id_empleado = $id_us))) as nombre_jefe
-       ,CASE WHEN(  emp.[tipo_nombramiento] = 1) THEN 'Base'
-       WHEN(  emp.[tipo_nombramiento] = 2) THEN 'Confianza'
-       WHEN(  emp.[tipo_nombramiento] = 3) THEN 'Eventual'
-       WHEN(  emp.[tipo_nombramiento] = 4) THEN 'Honorarios'
-       end as [tipo_nombramiento],
-       emp.tipo_nombramiento as num_nombramiento
-       ,puest_adr.nombre_puesto
-       ,emp.[id_perfil]
-       ,emp.[RFC] as rfc_comp
-       ,emp.[CURP] as curp_comp
-       ,emp.[rfc_corto]
-       ,[nombre_s]
-       ,[apellido_p]
-       ,[apellido_m]
-       ,emp.[correo_inst]
-       ,emp.[correo_personal]
-       ,emp.[numero_contacto_1]
-       ,emp.[numero_contacto_2]
-       ,emp.[ext_tel]
-       ,emp.[estatus]
-       ,emp.[user_alta]
-       ,emp.[Escolaridad]
-       ,emp.[estatus_escolaridad]
-       ,emp.[Carrera]
-       ,emp.[id_sindicato]
-       ,emp.[id_nivel_jer]
-       ,emp.[Genero]
-       ,emp.[Hijos]
-       ,emp.[fecha_alta]
-       ,emp.[user_mod]
-       ,emp.[fecha_mod]
-       ,emp.[user_baja]
-       ,emp.[fecha_baja]
-       ,emp.[id_proc]
-       ,emp.id_motivo_esp
-       ,emp.[fec_ingreso]
-       ,emp.fec_fin_rel_laboral
-       ,emp.estado_civil
-       ,puest_fun.nombre_puesto as nombre_puesto_fun
-       ,puest_fun.clave_puesto
-       ,cat_esc.nombre_escolaridad
-       ,cat_esc.nombre_honor
-        FROM [Control_Ingresos].[dbo].[Empleado_insumo] emp
-       INNER JOIN Administracion ad ON emp.id_admin = ad.id_admin
-       INNER JOIN cat_escolaridad cat_esc ON emp.Escolaridad = cat_esc.id_escolaridad
-     INNER JOIN SubAdmin sub ON emp.id_sub_admin = sub.id_sub_admin
-     INNER JOIN Departamento dep ON emp.id_depto = dep.id_depto
-     INNER JOIN Posisiones pos ON emp.id_posision = pos.id_posision
-     INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
-     INNER JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump
-      WHERE  id_empleado_plant = $id_us and emp.estatus = 'A'
-";
+        $query = "		SELECT TOP 1
+		[id_empleado_plant]
+		,emp.[no_empleado]
+		,ad.nombre_admin
+		,ad.direccion
+		,emp.id_admin
+		,emp.id_sub_admin
+		,emp.id_depto
+		,sub.nombre_sub_admin
+		,dep.nombre_depto
+		,puest_adr.id_puesto
+		,emp.[jefe_directo]
+		,pos.id_posision
+		,pos.id_num_posision
+		,pos.posision_jefe
+		,pos.nivel
+		,pos.sueldo_neto
+		,pos.Codigo_pres
+		,(select top 1 clave_puesto from Puesto_FUMP where id_puesto_fump =
+		(select top 1 id_puesto_fump  from Posisiones where id_num_posision = 
+        (select posision_jefe from Posisiones where id_posision = 
+        (select id_posision from Empleado_insumo where id_empleado_plant =$id_us ))))  as clave_jefe
+		,(select top 1 concat(nombre_s,' ',apellido_p,' ',apellido_m ) from Empleado_insumo where  id_proc = 9 and  id_posision =
+		(select top 1 id_posision from Posisiones where id_num_posision =
+		(SELECT top 1 posision_jefe from Posisiones where id_posision = 
+        (select id_posision from Empleado_insumo where id_empleado_plant = $id_us)))) as nombre_jefe
+		,CASE WHEN(  emp.[tipo_nombramiento] = 1) THEN 'Base'
+		WHEN( emp.[tipo_nombramiento] = 2) THEN 'Confianza'
+		WHEN( emp.[tipo_nombramiento] = 3) THEN 'Eventual'
+		WHEN( emp.[tipo_nombramiento] = 4) THEN 'Honorarios'
+		end as [tipo_nombramiento],
+		emp.tipo_nombramiento as num_nombramiento
+		,puest_adr.nombre_puesto
+		,emp.[id_perfil]
+		,emp.[RFC] as rfc_comp
+		,emp.[CURP] as curp_comp
+		,emp.[rfc_corto]
+		,[nombre_s]
+		,[apellido_p]
+		,[apellido_m]
+		,emp.[correo_inst]
+		,emp.[correo_personal]
+		,emp.[numero_contacto_1]
+		,emp.[numero_contacto_2]
+		,emp.[ext_tel]
+		,emp.[estatus]
+		,emp.[user_alta]
+		,emp.[Escolaridad]
+		,emp.[estatus_escolaridad]
+		,emp.[Carrera]
+		,emp.[id_sindicato]
+		,emp.[id_nivel_jer]
+		,emp.[Genero]
+		,emp.[Hijos]
+		,emp.[fecha_alta]
+		,emp.[user_mod]
+		,emp.[fecha_mod]
+		,emp.[user_baja]
+		,emp.[fecha_baja]
+		,emp.[id_proc]
+		,emp.id_motivo_esp
+		,emp.[fec_ingreso]
+		,emp.fec_fin_rel_laboral
+		,emp.estado_civil
+		,puest_fun.nombre_puesto as nombre_puesto_fun
+		,puest_fun.clave_puesto
+		,cat_esc.nombre_escolaridad
+		,cat_esc.nombre_honor
+		FROM [Control_Ingresos].[dbo].[Empleado_insumo] emp
+		INNER JOIN Administracion ad ON emp.id_admin = ad.id_admin
+		INNER JOIN cat_escolaridad cat_esc ON emp.Escolaridad = cat_esc.id_escolaridad
+		INNER JOIN SubAdmin sub ON emp.id_sub_admin = sub.id_sub_admin
+		INNER JOIN Departamento dep ON emp.id_depto = dep.id_depto
+		LEFT JOIN Posisiones pos ON emp.id_posision = pos.id_posision
+		INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
+		LEFT JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump
+        WHERE  id_empleado_plant = $id_us and emp.estatus = 'A'";
         $respuesta = sqlsrv_query($con,$query);
         if($respuesta){
             while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
@@ -2357,11 +2971,11 @@ class ConsultaInfoADR{
 		pues.nombre_puesto,
         emp.no_empleado
         FROM [Control_Ingresos].[dbo].[Departamento] dep
-		 INNER JOIN Empleado_insumo emp ON emp.id_admin =  dep.id_admin
+		INNER JOIN Empleado_insumo emp ON emp.id_admin =  dep.id_admin
         INNER JOIN Administracion admi ON admi.id_admin =  dep.id_admin
         INNER JOIN SubAdmin sub ON sub.id_sub_admin =  dep.id_sub_admin
-		  INNER JOIN Puesto_ADR pues ON emp.id_puesto =  pues.id_puesto
-		WHERE id_posision = 14 and emp.id_proc = 9
+		INNER JOIN Puesto_ADR pues ON emp.id_puesto =  pues.id_puesto
+		WHERE id_posision = 14 and (emp.id_proc = 9 OR emp.id_proc = 12) 
         ORDER BY id_admin asc";
         $respuesta = sqlsrv_query($con,$query);
         if($respuesta){
@@ -2401,9 +3015,9 @@ class ConsultaInfoADR{
         FULL JOIN Departamento dep ON SUB.id_sub_admin = dep.id_sub_admin	
         INNER JOIN Empleado_insumo emp ON emp.id_depto = dep.id_depto
         FULL JOIN Puesto_ADR puest ON puest.id_puesto = emp.id_puesto
-        WHERE nombre_depto = 'SUBADMINISTRACIÓN' AND nombre_puesto = 'SUBADMINISTRADOR' 
-		and emp.id_proc = 9
-        or nombre_puesto = 'ENCARGADO' AND no_empleado != null order by nombre_sub_admin asc";
+        WHERE nombre_depto = 'SUBADMINISTRACIÓN' AND nombre_puesto = 'SUBADMINISTRADOR'   OR nombre_puesto = 'ENCARGADO'
+		and (emp.id_proc = 9 or emp.id_proc = 12)
+        AND no_empleado != null order by nombre_sub_admin asc";
         $respuesta = sqlsrv_query($con,$query);
         if($respuesta){
             while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
@@ -2427,7 +3041,7 @@ class ConsultaInfoADR{
         include_once 'conexion.php';
         $BD = new ConexionSQL();
         $con = $BD->ObtenerConexionBD();
-        $query = "SELECT 
+        $query = "		   SELECT 
         dep.nombre_depto,
         sub.nombre_sub_admin,
         emp.id_empleado_plant,
@@ -2435,22 +3049,13 @@ class ConsultaInfoADR{
         emp.id_puesto,
         CONCAT(emp.nombre_s,' ',emp.apellido_p,' ',apellido_m) nombre_empleado,
         puest_adr.nombre_puesto,
+        CASE  WHEN dep.jefe_dep is null then 'VACANTE' else dep.jefe_dep END  jefe_dep,
         emp.jefe_directo
         FROM Departamento dep
         INNER JOIN SubAdmin sub ON sub.id_sub_admin = dep.id_sub_admin
         INNER JOIN Empleado_insumo emp ON emp.id_depto = dep.id_depto
         INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto 
-        WHERE( emp.id_puesto != 22 
-        AND emp.id_puesto != 37 
-        AND emp.id_puesto != 4 
-        AND emp.id_puesto != 22 
-        AND emp.id_puesto != 15) 
-        AND jefe_directo = $jefe 
-        AND (emp.id_proc != 11 
-        AND emp.id_proc != 7 
-        AND emp.id_proc != 6 
-        AND emp.id_proc != 25 
-        and emp.id_proc != 28 ) and emp.id_proc = 9 
+		WHERE dep.id_depto = $jefe and (emp.id_proc = 9 or emp.id_proc = 12) 
         order by dep.id_sub_admin asc,  dep.id_depto asc, emp.id_puesto asc";
         $respuesta = sqlsrv_query($con,$query);
         if($respuesta){
@@ -2476,57 +3081,22 @@ class ConsultaInfoADR{
         $BD = new ConexionSQL();
         $con = $BD->ObtenerConexionBD();
         $query = "		SELECT 
-        emp.id_empleado_plant
-       ,emp.[no_empleado]
-       ,emp.[id_admin]
-       ,emp.[id_sub_admin]
-       ,sub.nombre_sub_admin
-       ,emp.[id_depto]
-       ,dep.nombre_depto
-       ,emp.[jefe_directo]
-       ,emp.[id_posision]
-       ,emp.[id_puesto]
-       ,puest_adr.nombre_puesto
-       ,emp.[id_perfil]
-       ,emp.[rfc_corto]
-       ,Concat(emp.[nombre_s],' ',emp.[apellido_p],' ',emp.[apellido_m]) as nombre_empleado
-       ,emp.[correo_inst]
-       ,emp.[correo_personal]
-       ,emp.[numero_contacto_1]
-       ,emp.[numero_contacto_2]
-       ,emp.[ext_tel]
-       ,emp.[estatus]
-       ,emp.[user_alta]
-       ,emp.[fecha_alta]
-       ,emp.[user_mod]
-       ,emp.[fecha_mod]
-       ,emp.[user_baja]
-       ,emp.[fecha_baja]
-       ,emp.[id_proc]
-       ,emp.[fec_ingreso]
-       ,emp.[RFC]
-       ,emp.[CURP]
-       ,emp.[Genero]
-       ,emp.[Hijos]
-       ,emp.[Escolaridad]
-       ,emp.[estatus_escolaridad]
-       ,emp.[estado_civil]
-       ,emp.[Carrera]
-       ,emp.[fec_fin_rel_laboral]
-       ,emp.[tipo_nombramiento]
-       ,emp.[id_sindicato]
-       ,emp.[id_nivel_jer]
- from Empleado_insumo emp 
- INNER JOIN SubAdmin sub ON sub.id_sub_admin = emp.id_sub_admin
- INNER JOIN Departamento dep ON dep.id_depto = emp.id_depto 
- INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto 
- WHERE 
- (emp.id_puesto = 22 
- OR emp.id_puesto = 37 
- OR  emp.id_puesto = 4 
- OR emp.id_puesto = 22 
- OR emp.id_puesto = 15 and emp.estatus = 'A' ) AND emp.id_proc = 9
- ORDER BY emp.id_sub_admin ASC,  emp.id_depto ASC, emp.id_puesto ASC";
+		dep.id_depto
+        ,dep.id_sub_admin
+		,dep.nombre_depto
+		,sub.nombre_sub_admin
+		,CASE  WHEN dep.jefe_dep is null then 'VACANTE' ELSE dep.jefe_dep END  jefe_dep
+		,CASE  WHEN  dep.jefe_dep is null then 'VACANTE' ELSE (SELECT concat( nombre_s,' ', apellido_p,' ', apellido_m) FROM Empleado_insumo where id_empleado_plant = dep.jefe_dep) END as nombre_empleado
+		,CASE  WHEN  dep.jefe_dep is null then 'LOGO11' ELSE (SELECT cast(no_empleado as varchar) no_empleado FROM Empleado_insumo where id_empleado_plant = dep.jefe_dep) END as no_empleado
+		,CASE  WHEN  dep.jefe_dep is null then 'VACANTE' ELSE (SELECT nombre_puesto FROM Puesto_ADR where id_puesto =(select id_puesto from Empleado_insumo WHERE id_empleado_plant =  dep.jefe_dep)) END as nombre_puesto
+		
+		FROM 
+		Departamento dep
+		left JOIN Empleado_insumo emp ON emp.id_empleado_plant = dep.jefe_dep
+        left JOIN Puesto_ADR puest on puest.id_puesto = emp.id_puesto
+        INNER JOIN SubAdmin sub ON sub.id_sub_admin = dep.id_sub_admin
+		where dep.estatus = 'A'
+        ORDER BY dep.id_sub_admin ASC,  dep.id_depto ASC";
         $respuesta = sqlsrv_query($con,$query);
         if($respuesta){
             while($row = sqlsrv_fetch_array($respuesta, SQLSRV_FETCH_ASSOC)){
@@ -3364,6 +3934,10 @@ class ConsultaInfoADR{
                 $no = $_COOKIE["no_empleado_cokie"];
                 $condicion = "AND emp.no_empleado = $no";
             break;
+            case isset($_GET['nivel']):
+                $no = $_COOKIE["nivels"];
+                $condicion = "AND pos.nivel = '$no'";
+            break;
             case isset($_GET['RFC']):
                 $RFC = $_COOKIE["rfc_corto_cokie"];
                 $condicion = " AND emp.rfc_corto = '$RFC' ";
@@ -3397,6 +3971,151 @@ class ConsultaInfoADR{
                 break;
                 }
             break;
+            case isset($_GET['fecha_ingreso']):
+                $fec_ini = $_COOKIE["fec_ini_filtro"];
+                $fec_fin = $_COOKIE["fec_fin_filtro"];
+                $condicion = " AND emp.[fec_ingreso] between '$fec_ini' and '$fec_fin'";
+            break;
+            default:
+            $condicion = "";
+            break;
+          }
+        $query = "   SELECT TOP 1
+         (SELECT count(*) 
+        FROM [Control_Ingresos].[dbo].[Empleado_insumo] emp
+       INNER JOIN Administracion ad ON emp.id_admin = ad.id_admin
+     INNER JOIN SubAdmin sub ON emp.id_sub_admin = sub.id_sub_admin
+     INNER JOIN Departamento dep ON emp.id_depto = dep.id_depto
+     INNER JOIN Posisiones pos ON emp.id_posision = pos.id_posision
+     INNER JOIN Procesos procs ON emp.id_proc = procs.id_proc
+     INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
+     INNER JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump
+      WHERE emp.estatus = 'A' and emp.id_proc IN (9,6,25,28,12) $condicion ) as total_total
+        ,(select count(*) from Empleado_insumo emp
+        INNER JOIN Administracion ad ON emp.id_admin = ad.id_admin
+      INNER JOIN SubAdmin sub ON emp.id_sub_admin = sub.id_sub_admin
+      INNER JOIN Departamento dep ON emp.id_depto = dep.id_depto
+      INNER JOIN Posisiones pos ON emp.id_posision = pos.id_posision
+      INNER JOIN Procesos procs ON emp.id_proc = procs.id_proc
+      INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
+      INNER JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump WHERE emp.id_proc = 9 $condicion) TOTAL 
+       ,(select count(*) from Empleado_insumo emp
+        INNER JOIN Administracion ad ON emp.id_admin = ad.id_admin
+      INNER JOIN SubAdmin sub ON emp.id_sub_admin = sub.id_sub_admin
+      INNER JOIN Departamento dep ON emp.id_depto = dep.id_depto
+      INNER JOIN Posisiones pos ON emp.id_posision = pos.id_posision
+      INNER JOIN Procesos procs ON emp.id_proc = procs.id_proc
+      INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
+      INNER JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump WHERE emp.id_proc = 6 $condicion) total_comision_sindical
+       ,(select count(*) from Empleado_insumo emp
+        INNER JOIN Administracion ad ON emp.id_admin = ad.id_admin
+      INNER JOIN SubAdmin sub ON emp.id_sub_admin = sub.id_sub_admin
+      INNER JOIN Departamento dep ON emp.id_depto = dep.id_depto
+      INNER JOIN Posisiones pos ON emp.id_posision = pos.id_posision
+      INNER JOIN Procesos procs ON emp.id_proc = procs.id_proc
+      INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
+      INNER JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump WHERE emp.id_proc = 25 $condicion) total_suspendidos 
+       ,(select count(*) from Empleado_insumo emp
+        INNER JOIN Administracion ad ON emp.id_admin = ad.id_admin
+      INNER JOIN SubAdmin sub ON emp.id_sub_admin = sub.id_sub_admin
+      INNER JOIN Departamento dep ON emp.id_depto = dep.id_depto
+      INNER JOIN Posisiones pos ON emp.id_posision = pos.id_posision
+      INNER JOIN Procesos procs ON emp.id_proc = procs.id_proc
+      INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
+      INNER JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump WHERE emp.id_proc = 28 $condicion) total_Comision_sin_goze_sueldo 
+       ,(select count(*) from Empleado_insumo emp
+        INNER JOIN Administracion ad ON emp.id_admin = ad.id_admin
+      INNER JOIN SubAdmin sub ON emp.id_sub_admin = sub.id_sub_admin
+      INNER JOIN Departamento dep ON emp.id_depto = dep.id_depto
+      INNER JOIN Posisiones pos ON emp.id_posision = pos.id_posision
+      INNER JOIN Procesos procs ON emp.id_proc = procs.id_proc
+      INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
+      INNER JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump WHERE emp.id_proc = 12 $condicion) total_Licencia_medica 
+       from Empleado_insumo  ";
+        //SE VALIDA EL QUERY CON FORME A LA CONEXI?N
+        $prepare = sqlsrv_query($con, $query);
+        if ($prepare) {
+            while ($rows = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)) {
+                $filas[] = $rows;
+            }
+            sqlsrv_close($con);
+
+            if (isset($filas)) {
+                return $filas;
+            } else {
+                return null;
+            }
+        } else {
+            print_r(sqlsrv_errors(), true);
+        }
+    }
+    public function universo_usuarios_bajas()
+    {
+        include_once "conexion.php";
+        $conexion = new ConexionSQL(); // SE INSTANCIA LA CLASE CONEXI?N
+        //SE MANDA A LLAMAR LA CONEXI?N Y SE ABRE
+        $con = $conexion->ObtenerConexionBD();
+        //SE CREA UN QUERY
+        switch ($_GET) {
+            case isset($_GET['pagina']):
+                    $condicion = "";
+            break;
+            case isset($_GET['Estructura']):
+                $sub = $_COOKIE["sub"];
+                $dep = $_COOKIE["dep"];
+                if ($dep == 0) {
+                    $condicion = " AND emp.id_sub_admin = $sub" ;
+                }
+                else {
+                    $condicion = " AND emp.id_sub_admin = $sub AND emp.id_depto = $dep ";
+                }
+            break;
+            case isset($_GET['Nombre']):
+                $nom = $_COOKIE["nombre"];
+                $condicion = "AND  (emp.nombre_s LIKE '%$nom%' OR  emp.apellido_p LIKE '%$nom%' OR  emp.apellido_m LIKE '%$nom%')";
+            break;
+            case isset($_GET['no_empleado']):
+                $no = $_COOKIE["no_empleado_cokie"];
+                $condicion = "AND emp.no_empleado = $no";
+            break;
+            case isset($_GET['RFC']):
+                $RFC = $_COOKIE["rfc_corto_cokie"];
+                $condicion = " AND emp.rfc_corto = '$RFC' ";
+            break;
+            case isset($_GET['Puestos']):
+                $puest = $_COOKIE["puest_adr"];
+                $condicion = " AND puest_adr.id_puesto = $puest ";
+            break;
+            case isset($_GET['Stock']):
+                $Stock = $_COOKIE["extra_option"];
+                switch ($Stock) {
+                case 1:
+                    $condicion = "";
+                break;
+                case 2:
+                    $condicion = " AND emp.id_nivel_jer = 6 AND emp.id_sindicato = 2";
+                break;
+                case 3:
+                    $condicion = " AND emp.id_nivel_jer = 6 AND emp.id_sindicato = 1";
+
+                break;
+                case 4:
+                    $condicion = " AND emp.id_nivel_jer = 6";
+                break;
+                case 5:
+                    $condicion = " AND emp.id_nivel_jer = 1 OR emp.id_nivel_jer = 2 OR emp.id_nivel_jer = 3 OR emp.id_nivel_jer = 4 OR emp.id_nivel_jer = 5";
+
+                break;
+                default:
+                $condicion = "";
+                break;
+                }
+            break;
+            case isset($_GET['fecha_baja']):
+                $fec_ini = $_COOKIE["fec_ini_filtro2"];
+                $fec_fin = $_COOKIE["fec_fin_filtro2"];
+                $condicion = " AND emp.[fec_fin_rel_laboral] between '$fec_ini' and '$fec_fin'";
+            break;
             default:
             $condicion = "";
             break;
@@ -3410,7 +4129,7 @@ class ConsultaInfoADR{
      INNER JOIN Procesos procs ON emp.id_proc = procs.id_proc
      INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
      INNER JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump
-      WHERE emp.estatus = 'A' and (emp.id_proc = 9 or emp.id_proc = 12 ) $condicion";
+      WHERE emp.estatus = 'A' and emp.id_proc  IN ( 7 , 11, 32)  $condicion";
         //SE VALIDA EL QUERY CON FORME A LA CONEXI?N
         $prepare = sqlsrv_query($con, $query);
         if ($prepare) {
@@ -3523,59 +4242,84 @@ class ConsultaInfoADR{
         switch ($_GET) {
             case isset($_GET['pagina']):
                     $condicion = "";
+                    $int ="";
+            break;
+            case isset($_GET['nivel']):
+                $niv = $_COOKIE["nivels"];
+                $condicion = "AND subc.nivel = '$niv'";
+                $int ="AND pos.nivel = '$niv'";
             break;
             case isset($_GET['Estructura']):
                 $sub = $_COOKIE["sub"];
                 $dep = $_COOKIE["dep"];
                 if ($dep == 0) {
                     $condicion = " AND subc.id_sub_admin = $sub" ;
+                    $int = " AND emp.id_sub_admin = $sub" ;
                 }
                 else {
                     $condicion = " AND subc.id_sub_admin = $sub AND subc.id_depto = $dep ";
+                    $int = " AND emp.id_sub_admin = $sub AND emp.id_depto = $dep ";
                 }
                
             break;
             case isset($_GET['Nombre']):
             $nom = $_COOKIE["nombre"];
             $condicion = "AND subc.nombre_empleado LIKE '%$nom%'";
+            $int = "" ;
             break;
             case isset($_GET['no_empleado']):
                 $no = $_COOKIE["no_empleado_cokie"];
                 $condicion = "AND subc.no_empleado = $no";
+                $int = "AND emp.no_empleado = $no";
                 break;
             case isset($_GET['RFC']):
                 $rfc = $_COOKIE["rfc_corto_cokie"];
                 $condicion = " AND subc.rfc_corto = '$rfc' ";
+                $int = " AND emp.rfc_corto = '$rfc' ";
             break;
             case isset($_GET['Puestos']):
                 $puest = $_COOKIE["puest_adr"];
                 $condicion = " AND subc.id_puesto = $puest ";
+                $int = " AND emp.id_puesto = $puest ";
             break;
             case isset($_GET['Stock']):
                 $opcion = $_COOKIE["extra_option"];
                 switch ($opcion) {
                 case 1://Cumpleaños del mes
                 $condicion = "AND MONTH(Fecha_nacimiento) = MONTH(GETDATE()) ORDER BY DAY(Fecha_nacimiento) ASC ";
+                $int = "";
                 break;
                 case 2://Personal de Base con seccion V
                 $condicion = "AND  subc.id_nivel_jer = 6 AND subc.id_sindicato = 2";
+                $int = "AND  emp.id_nivel_jer = 6 AND emp.id_sindicato = 2";
                 break;
                 case 3://Personal de Base con seccion XVI
                     $condicion = "AND  subc.id_nivel_jer = 6 AND subc.id_sindicato = 1";
+                    $int = "AND  emp.id_nivel_jer = 6 AND emp.id_sindicato = 1";
                 break;
                 case 4://Personal de Base UNIFICADOS
                 $condicion = "AND  subc.id_nivel_jer = 6";
+                $int = "AND  emp.id_nivel_jer = 6";
                 break;
                 case 5://Personal de Confianza
                 $condicion = "AND MONTH(Fecha_nacimiento) = MONTH(GETDATE()) ORDER BY DAY(Fecha_nacimiento) ASC ";
+                $int = " ";
+                
                 break;
                 default:
                 $condicion = "AND MONTH(Fecha_nacimiento) = MONTH(GETDATE()) ORDER BY DAY(Fecha_nacimiento) ASC ";
+                $int = "";
                 break;
                 }
    
             break;
-        
+            case isset($_GET['fecha_ingreso']):
+                $fec_ini = $_COOKIE["fec_ini_filtro"];
+                $fec_fin = $_COOKIE["fec_fin_filtro"];
+                $condicion = "  AND subc.[fec_ingreso] between '$fec_ini' and '$fec_fin' ORDER BY subc.[fec_ingreso] ASC  ";
+                $int = "  AND emp.[fec_ingreso] between '$fec_ini' and '$fec_fin' ";
+
+            break;
             default:
                 $condicion = "";
              break;
@@ -3592,6 +4336,7 @@ class ConsultaInfoADR{
          ,subc.nombre_depto
          ,subc.[jefe_directo]
          ,subc.id_num_posision
+         ,subc.nivel
          ,subc.[tipo_nombramiento]
          ,subc.nombre_puesto
          ,subc.[id_perfil]
@@ -3635,6 +4380,7 @@ class ConsultaInfoADR{
          ,dep.id_depto
          ,emp.[jefe_directo]
          ,pos.id_num_posision
+         ,pos.nivel
          ,emp.[tipo_nombramiento]
          ,puest_adr.id_puesto
          ,puest_adr.nombre_puesto
@@ -3673,7 +4419,7 @@ class ConsultaInfoADR{
        INNER JOIN Procesos procs ON emp.id_proc = procs.id_proc
        INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
        INNER JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump
-        WHERE emp.estatus = 'A' and (emp.id_proc = 9 or emp.id_proc = 12) ) subc
+        WHERE emp.estatus = 'A' and emp.id_proc IN (9,6,25,28,12) $int ) subc
         WHERE seq >= $num $condicion";
         //SE VALIDA EL QUERY CON FORME A LA CONEXI?N
         $prepare = sqlsrv_query($con, $query);
@@ -3759,7 +4505,7 @@ class ConsultaInfoADR{
         //         $condicion = "";
         //      break;
         //   }
-        $query = " SELECT
+        $query = "   SELECT TOP 25
         subc.seq
         ,subc.[id_system]
         ,subc.[nombre_sistema]
@@ -3770,6 +4516,7 @@ class ConsultaInfoADR{
         ,subc.funcion
 		,subc.total_acces
 		,subc.roles_totales
+        ,subc.tipo_sistema
         from(
         SELECT  
                ROW_NUMBER() OVER(ORDER BY [Administraciion_sistema] asc) AS seq
@@ -3781,6 +4528,7 @@ class ConsultaInfoADR{
               ,sis.[Num_cuentas_Siistema]
               ,sis.[Aprobador_Sistemas]
               ,sis.funcion
+              ,sis.tipo_sistema
               ,sis.[estatus]
               ,sis.[user_alta]
               ,sis.[fecha_alta]
@@ -3789,7 +4537,6 @@ class ConsultaInfoADR{
 			  ,(select COUNT(*) total from Regstro_accesos where id_system = sis.id_system ) total_acces
 			  ,(select COUNT(*) total from [Roles_sistemas] where [id_sistema] = sis.id_system ) roles_totales
           FROM [Systems] sis 
-		  full JOIN Regstro_accesos reg_ac ON reg_ac.id_system = sis.id_system 
 		  ) subc
         WHERE seq >= $num";
         //SE VALIDA EL QUERY CON FORME A LA CONEXI?N
@@ -3814,32 +4561,45 @@ class ConsultaInfoADR{
         include_once 'conexion.php';
         $conexion = new ConexionSQL();
         $con = $conexion->ObtenerConexionBD();
-        $query = "SELECT
-         subc.seq
-        ,subc.[id_system]
-        ,subc.[nombre_sistema]
-        ,subc.[url/acceso]
-        ,subc.[Administraciion_sistema]
-        ,subc.[Descripcion_sistema]
-        ,subc.[Num_cuentas_Siistema]
-        ,subc.funcion
-        from(
-        SELECT  
-        ROW_NUMBER() OVER(ORDER BY [Administraciion_sistema] asc) AS seq
-        ,[id_system]
-        ,[nombre_sistema]
-        ,[url/acceso]
-        ,[Administraciion_sistema]
-        ,[Descripcion_sistema]
-        ,[Num_cuentas_Siistema]
-        ,[Aprobador_Sistemas]
-        ,funcion
-        ,[estatus]
-        ,[user_alta]
-        ,[fecha_alta]
-        ,[user_mod]
-        ,[fecha_mod]
-        FROM [Systems] ) subc
+        $query = " 		SELECT
+        subc.seq
+       ,subc.[id_system]
+       ,subc.[nombre_sistema]
+       ,subc.[url/acceso]
+       ,subc.[Administraciion_sistema]
+       ,subc.Administraciion_sistema_traducido
+       ,subc.[Descripcion_sistema]
+       ,subc.[Num_cuentas_Siistema]
+       ,subc.[tipo_sistema]
+       ,subc.tipo_sistema_traducido
+       ,subc.funcion
+       ,subc.Aprobador_Sistemas
+       from(
+       SELECT  
+       ROW_NUMBER() OVER(ORDER BY [Administraciion_sistema] asc) AS seq
+       ,[id_system]
+       ,[nombre_sistema]
+       ,[url/acceso]
+	   ,[Administraciion_sistema]
+       ,CASE WHEN  [Administraciion_sistema] = 1 THEN 'ADR DF4'
+	   WHEN  [Administraciion_sistema] = 2 THEN 'CENTRALES'
+	   WHEN  [Administraciion_sistema] = 3 THEN 'DESCONCENTRADAS'
+	   WHEN  [Administraciion_sistema] = 4 THEN 'EXTERNOS' END AS Administraciion_sistema_traducido
+       ,[Descripcion_sistema]
+       ,[Num_cuentas_Siistema]
+       ,[Aprobador_Sistemas]
+       ,funcion
+       ,tipo_sistema
+       ,CASE WHEN  tipo_sistema = 1 THEN 'PAGINA WEB'
+        WHEN tipo_sistema = 2 THEN 'CARPETA DE RED'
+        WHEN tipo_sistema = 3 THEN 'APLICACION DE ESCRITORIO' 
+        WHEN tipo_sistema = 4 THEN 'APLICACION DE ESCRITORIO EXTERNA' end AS tipo_sistema_traducido
+       ,[estatus]
+       ,[user_alta]
+       ,[fecha_alta]
+       ,[user_mod]
+       ,[fecha_mod]
+       FROM [Systems] ) subc
         WHERE subc.id_system = $id_app";
             $prepare = sqlsrv_query($con, $query);
             if ($prepare) {
@@ -3857,51 +4617,251 @@ class ConsultaInfoADR{
                 print_r(sqlsrv_errors(), true);
             }
     }
-    public function Consulta_usuarios_baja_comision_suspenndidos_laudos()
+     public function asdada($id_app){
+     
+        include_once 'conexion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $query = " 		SELECT
+        subc.seq
+       ,subc.[id_system]
+       ,subc.[nombre_sistema]
+       ,subc.[url/acceso]
+       ,subc.[Administraciion_sistema]
+       ,subc.Administraciion_sistema_traducido
+       ,subc.[Descripcion_sistema]
+       ,subc.[Num_cuentas_Siistema]
+       ,subc.[tipo_sistema]
+       ,subc.tipo_sistema_traducido
+       ,subc.funcion
+       ,subc.Aprobador_Sistemas
+       from(
+       SELECT  
+       ROW_NUMBER() OVER(ORDER BY [Administraciion_sistema] asc) AS seq
+       ,[id_system]
+       ,[nombre_sistema]
+       ,[url/acceso]
+	   ,[Administraciion_sistema]
+       ,CASE WHEN  [Administraciion_sistema] = 1 THEN 'ADR DF4'
+	   WHEN  [Administraciion_sistema] = 2 THEN 'CENTRALES'
+	   WHEN  [Administraciion_sistema] = 3 THEN 'DESCONCENTRADAS'
+	   WHEN  [Administraciion_sistema] = 4 THEN 'EXTERNOS' END AS Administraciion_sistema_traducido
+       ,[Descripcion_sistema]
+       ,[Num_cuentas_Siistema]
+       ,[Aprobador_Sistemas]
+       ,funcion
+       ,tipo_sistema
+       ,CASE WHEN  tipo_sistema = 1 THEN 'PAGINA WEB'
+        WHEN tipo_sistema = 2 THEN 'CARPETA DE RED'
+        WHEN tipo_sistema = 3 THEN 'APLICACION DE ESCRITORIO' 
+        WHEN tipo_sistema = 4 THEN 'APLICACION DE ESCRITORIO EXTERNA' end AS tipo_sistema_traducido
+       ,[estatus]
+       ,[user_alta]
+       ,[fecha_alta]
+       ,[user_mod]
+       ,[fecha_mod]
+       FROM [Systems] ) subc
+        WHERE subc.id_system = $id_app";
+            $prepare = sqlsrv_query($con, $query);
+            if ($prepare) {
+                while ($rows = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)) {
+                    $filas = $rows;
+                }
+                sqlsrv_close($con);
+    
+                if (isset($filas)) {
+                    return $filas;
+                } else {
+                    return null;
+                }
+            } else {
+                print_r(sqlsrv_errors(), true);
+            }
+    }
+    public function Consulta_usuarios_baja_comision_suspenndidos_laudos($num)
     {
         include_once "conexion.php";
         $conexion = new ConexionSQL(); // SE INSTANCIA LA CLASE CONEXI?N
         //SE MANDA A LLAMAR LA CONEXI?N Y SE ABRE
         $con = $conexion->ObtenerConexionBD();
         //SE CREA UN QUERY
-        $query = "  SELECT [id_empleado_plant]
-        ,emp.[no_empleado]
-        ,ad.nombre_admin
-        ,sub.nombre_sub_admin
-        ,dep.nombre_depto
-        ,emp.[jefe_directo]
-        ,pos.id_num_posision
-        ,emp.[tipo_nombramiento]
-        ,puest_adr.nombre_puesto
-        ,emp.[id_perfil]
-        ,emp.[RFC]
-        ,emp.[CURP]
-        ,emp.[rfc_corto]
-        ,Concat([nombre_s],' ',[apellido_p],' ' ,[apellido_m]) as nombre_empleado
-        ,emp.[correo_inst]
-        ,emp.[correo_personal]
-        ,emp.[numero_contacto_1]
-        ,emp.[numero_contacto_2]
-        ,emp.[ext_tel]
-        ,emp.[estatus]
-        ,emp.[user_alta]
-        ,emp.[fecha_alta]
-        ,emp.[user_mod]
-        ,emp.[fecha_mod]
-        ,emp.[user_baja]
-        ,emp.[fecha_baja]
-        ,emp.[id_proc]
-        ,procs.nombre_proc
-        ,emp.[fec_ingreso]
-         FROM [Control_Ingresos].[dbo].[Empleado_insumo] emp
-        INNER JOIN Administracion ad ON emp.id_admin = ad.id_admin
-      INNER JOIN SubAdmin sub ON emp.id_sub_admin = sub.id_sub_admin
-      INNER JOIN Departamento dep ON emp.id_depto = dep.id_depto
-      INNER JOIN Posisiones pos ON emp.id_posision = pos.id_posision
-      INNER JOIN Procesos procs ON emp.id_proc = procs.id_proc
-      INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
-      INNER JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump
-       WHERE emp.estatus = 'A' and (emp.id_proc = 7 or emp.id_proc = 6 or emp.id_proc = 11 or emp.id_proc = 25 or emp.id_proc = 28 or emp.id_proc = 32) ORDER BY sub.nombre_sub_admin asc,dep.nombre_depto desc";
+        switch ($_GET) {
+            case isset($_GET['pagina']):
+                    $condicion = "";
+                    $int ="";
+            break;
+            case isset($_GET['Estructura']):
+                $sub = $_COOKIE["sub"];
+                $dep = $_COOKIE["dep"];
+                if ($dep == 0) {
+                    $condicion = " AND subc.id_sub_admin = $sub" ;
+                    $int = " AND emp.id_sub_admin = $sub" ;
+                }
+                else {
+                    $condicion = " AND subc.id_sub_admin = $sub AND subc.id_depto = $dep ";
+                    $int = " AND emp.id_sub_admin = $sub AND emp.id_depto = $dep ";
+                }
+               
+            break;
+            case isset($_GET['Nombre']):
+            $nom = $_COOKIE["nombre"];
+            $condicion = "AND subc.nombre_empleado LIKE '%$nom%'";
+            $int = " AND (emp.nombre_s LIKE '%$nom%' or emp.apellido_p LIKE '%$nom%' or emp.apellido_m LIKE '%$nom%')" ;
+            break;
+            case isset($_GET['no_empleado']):
+                $no = $_COOKIE["no_empleado_cokie"];
+                $condicion = "AND subc.no_empleado = $no";
+                $int = "AND emp.no_empleado = $no";
+                break;
+            case isset($_GET['RFC']):
+                $rfc = $_COOKIE["rfc_corto_cokie"];
+                $condicion = " AND subc.rfc_corto = '$rfc' ";
+                $int = " AND emp.rfc_corto = '$rfc' ";
+            break;
+            case isset($_GET['Puestos']):
+                $puest = $_COOKIE["puest_adr"];
+                $condicion = " AND subc.id_puesto = $puest ";
+                $int = " AND emp.id_puesto = $puest ";
+            break;
+            case isset($_GET['Stock']):
+                $opcion = $_COOKIE["extra_option"];
+                switch ($opcion) {
+                case 1://Cumpleaños del mes
+                $condicion = "AND MONTH(Fecha_nacimiento) = MONTH(GETDATE()) ORDER BY DAY(Fecha_nacimiento) ASC ";
+                $int = "";
+                break;
+                case 2://Personal de Base con seccion V
+                $condicion = "AND  subc.id_nivel_jer = 6 AND subc.id_sindicato = 2";
+                $int = "AND  emp.id_nivel_jer = 6 AND emp.id_sindicato = 2";
+                break;
+                case 3://Personal de Base con seccion XVI
+                    $condicion = "AND  subc.id_nivel_jer = 6 AND subc.id_sindicato = 1";
+                    $int = "AND  emp.id_nivel_jer = 6 AND emp.id_sindicato = 1";
+                break;
+                case 4://Personal de Base UNIFICADOS
+                $condicion = "AND  subc.id_nivel_jer = 6";
+                $int = "AND  emp.id_nivel_jer = 6";
+                break;
+                case 5://Personal de Confianza
+                $condicion = "AND MONTH(Fecha_nacimiento) = MONTH(GETDATE()) ORDER BY DAY(Fecha_nacimiento) ASC ";
+                $int = " ";
+                
+                break;
+                default:
+                $condicion = "AND MONTH(Fecha_nacimiento) = MONTH(GETDATE()) ORDER BY DAY(Fecha_nacimiento) ASC ";
+                $int = "";
+                break;
+                }
+   
+            break;
+            case isset($_GET['fecha_baja']):
+                $fec_ini = $_COOKIE["fec_ini_filtro2"];
+                $fec_fin = $_COOKIE["fec_fin_filtro2"];
+                $condicion = "  AND subc.[fec_fin_rel_laboral] between '$fec_ini' and '$fec_fin' ORDER BY subc.[fec_fin_rel_laboral] ASC  ";
+                $int = "  AND emp.[fec_fin_rel_laboral] between '$fec_ini' and '$fec_fin' ";
+
+            break;
+            default:
+                $condicion = "";
+             break;
+          }
+        $query = "SELECT TOP(50)
+        subc.seq,
+        subc.id_empleado_plant 
+         ,subc.[no_empleado]
+         ,subc.id_admin
+         ,subc.id_sub_admin
+         ,subc.id_depto
+         ,subc.nombre_admin
+         ,subc.nombre_sub_admin
+         ,subc.nombre_depto
+         ,subc.[jefe_directo]
+         ,subc.id_num_posision
+         ,subc.[tipo_nombramiento]
+         ,subc.nombre_puesto
+         ,subc.[id_perfil]
+         ,subc.[RFC]
+         ,subc.[CURP]
+         ,subc.[rfc_corto]
+        ,subc.nombre_empleado
+		--,subc.Fecha_nacimiento
+		--,subc.years_nacimiento
+        ,subc.years
+        ,subc.meses
+        ,subc.dias
+         ,subc.[correo_inst]
+         ,subc.[correo_personal]
+         ,subc.[numero_contacto_1]
+         ,subc.[numero_contacto_2]
+         ,subc.[ext_tel]
+         ,subc.[estatus]
+         ,subc.[user_alta]
+         ,subc.[fecha_alta]
+         ,subc.[user_mod]
+         ,subc.[fecha_mod]
+         ,subc.[user_baja]
+         ,subc.[fecha_baja]
+         ,subc.[id_proc]
+         ,subc.nombre_proc
+         ,subc.[fec_ingreso]
+         ,subc.fec_fin_rel_laboral
+         ,subc.id_puesto
+         ,subc.id_sindicato
+         ,subc.id_nivel_jer
+        from
+       ( SELECT  
+         ROW_NUMBER() OVER(ORDER BY emp.fec_fin_rel_laboral desc,sub.nombre_sub_admin asc,dep.nombre_depto desc) AS seq,
+         [id_empleado_plant]
+         ,emp.[no_empleado]
+         ,ad.nombre_admin
+         ,ad.id_admin
+         ,sub.id_sub_admin
+         ,sub.nombre_sub_admin
+         ,dep.nombre_depto
+         ,dep.id_depto
+         ,emp.[jefe_directo]
+         ,pos.id_num_posision
+         ,emp.[tipo_nombramiento]
+         ,puest_adr.id_puesto
+         ,puest_adr.nombre_puesto
+         ,emp.[id_perfil]
+         ,emp.[RFC]
+         ,emp.[CURP]
+         ,emp.[rfc_corto]
+         ,Concat([nombre_s],' ',[apellido_p],' ' ,[apellido_m]) as nombre_empleado
+         ,floor(cast(datediff(day, fec_fin_rel_laboral, getdate()) as float)/365) AS years
+         ,floor((cast(datediff(day, fec_fin_rel_laboral, getdate()) as float)/365-(floor(cast(datediff(day, fec_fin_rel_laboral, getdate()) as float)/365)))*12) AS meses
+         ,floor((((cast(datediff(day, fec_fin_rel_laboral, getdate()) as float)/365-(floor(cast(datediff(day, fec_fin_rel_laboral, getdate()) as float)/365)))*12)-floor((cast(datediff(day, fec_fin_rel_laboral, getdate()) as float)/365-(floor(cast(datediff(day, fec_fin_rel_laboral, getdate()) as float)/365)))*12))*(365/12)) AS dias
+
+ 		 ,emp.[correo_inst]
+         ,emp.[correo_personal]
+         ,emp.[numero_contacto_1]
+         ,emp.[numero_contacto_2]
+         ,emp.[ext_tel]
+         ,emp.[estatus]
+         ,emp.[user_alta]
+         ,emp.[fecha_alta]
+         ,emp.[user_mod]
+         ,emp.[fecha_mod]
+         ,emp.[user_baja]
+         ,emp.[fecha_baja]
+         ,emp.[id_proc]
+         ,emp.[id_sindicato]
+         ,procs.nombre_proc
+         ,emp.id_nivel_jer
+         ,emp.[fec_ingreso]
+         ,emp.fec_fin_rel_laboral
+          FROM [Control_Ingresos].[dbo].[Empleado_insumo] emp
+         INNER JOIN Administracion ad ON emp.id_admin = ad.id_admin
+       INNER JOIN SubAdmin sub ON emp.id_sub_admin = sub.id_sub_admin
+       INNER JOIN Departamento dep ON emp.id_depto = dep.id_depto
+       FULL JOIN Posisiones pos ON emp.id_posision = pos.id_posision
+       INNER JOIN Procesos procs ON emp.id_proc = procs.id_proc
+       INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
+       FULL JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump
+        WHERE emp.estatus = 'A'  
+        AND emp.id_proc  IN ( 7, 11, 32)   $int) subc
+        WHERE seq >= $num $condicion";
         //SE VALIDA EL QUERY CON FORME A LA CONEXI?N
         $prepare = sqlsrv_query($con, $query);
         if ($prepare) {
@@ -3952,6 +4912,7 @@ class ConsultaInfoADR{
                     [rfc_corto] = '".$datos->rfc_c."',
                     [tipo_nombramiento] = '".$datos->tipo_nom."',
                     [id_sindicato] = ".$datos->sindicato.",
+                    [id_nivel_jer] = ".$datos->id_nivel_jerar.",
                     fecha_mod = GETDATE(),
                     user_mod = '".$user_ej."',
                     id_motivo_esp = CASE '".$datos->Motivo_especial_por_est."' WHEN '' THEN NULL  WHEN '0' THEN NULL ELSE ".$datos->Motivo_especial_por_est." END
@@ -3969,7 +4930,7 @@ class ConsultaInfoADR{
                 }
             } else {
                 if ($filtro3 = self::Consulta_usu_exist($datos->no_empleado)) {
-                    return "el numero de empleado no existe en el sistema (".$datos->no_empleado.")";
+                    return "el numero de empleado ya existe en el sistema (".$datos->no_empleado.")";
                 } else {
                     $query = "  UPDATE [Empleado_insumo] SET
                     [no_empleado] = ".$datos->no_empleado.",
@@ -4007,7 +4968,7 @@ class ConsultaInfoADR{
                 }
             }
         } else {
-            if ($filtro2 = self::Consulta_rfc_Exist($datos->rfc_c)) {
+            $filtro2 = self::Consulta_rfc_Exist($datos->rfc_c);
                 $rfc1 = $filtro2['rfc_corto'];
                 //     $no_emppleado1 = $filtro2['no_empleado'];
                 if ($rfc1 == $datos->rfc_c) {
@@ -4050,7 +5011,7 @@ class ConsultaInfoADR{
                             //return $datos_res;
                     }
                 }
-            }
+            
         }
     }
 
@@ -4411,12 +5372,48 @@ class ConsultaInfoADR{
                 ,(SELECT [nivel] FROM Posisiones Where  id_num_posision = '$num_plaza' ) AS [nivel]
                 ,(SELECT [Codigo_pres] FROM Posisiones Where  id_num_posision = '$num_plaza' ) AS [Codigo_pres]
                 ,CASE '$sal_net' WHEN '' THEN NULL else '$sal_net'END AS [sueldo_neto]
-                ,28 AS [id_proc]
+                ,24 AS [id_proc]
                 ,'$user_ej' AS [user_alta]
                 ,GETDATE() AS [fecha_alta]
                 ,'A' AS [estatus]
 
                 $complemento
+        ";
+        $prepare = sqlsrv_query($con,$query);
+        if($prepare){
+            return "Se actualizaron los datos basicos del empleado satisfactoriamente." ;
+        }
+        else {
+            return print_r(sqlsrv_errors(),false);
+            
+        }
+    }
+    public function registra_nuevo_rol($data){
+        include_once 'sesion.php';
+        include_once 'conexion.php';
+        $BD = new ConexionSQL();
+        $con = $BD->ObtenerConexionBD();
+        $nombre_roles = $data->nombre_rol;
+        $clave_roles = $data->clave_rol;
+        $id_sistema = $data->id_system_;
+        $user_ej = $_SESSION['ses_rfc_corto_ing'];        
+        $query = "  IF NOT EXISTS(SELECT * FROM [Roles_sistemas] WHERE [nombre_rol] = '$nombre_roles' AND  [id_sistema] = $id_sistema  ) BEGIN
+        INSERT INTO [Roles_sistemas] (
+          [id_sistema]
+          ,[nombre_rol]
+          ,[clave_rol]
+          ,[estatus]
+          ,[user_alta]
+          ,[fecha_alta]
+        )
+        SELECT 
+          $id_sistema AS [id_sistema]
+          ,'$nombre_roles' AS [nombre_rol]
+          ,CASE '$clave_roles' WHEN '' THEN NULL ELSE '$clave_roles' END AS [clave_rol]
+          ,'A' AS [estatus]
+          ,'$user_ej' AS [user_alta]
+          ,GETDATE() AS [fecha_alta]
+          END
         ";
         $prepare = sqlsrv_query($con,$query);
         if($prepare){
@@ -4439,12 +5436,19 @@ class ConsultaInfoADR{
         $jefe_directo = $datos->id_jefe;
         $puesto_adr = $datos->id_puesto;
         $id_user_insumo = $datos->id_empleado;
+        $estructura = $datos->estructura;
         $datos_us_faltantes = self::info_datos_us_2($id_user_insumo);
         $admin_act = $datos_us_faltantes['id_admin'];
         $sub_act = $datos_us_faltantes['id_sub_admin'];
         $dep_act = $datos_us_faltantes['id_depto'];
         $puesto_adr_act = $datos_us_faltantes['id_puesto'];    
         $jefe_directo_act = $datos_us_faltantes['jefe_directo'];
+
+        if ($estructura == 1) {
+            self::actualiza_encargado_dep($id_user_insumo,$dep);
+        }else{
+
+        }
 
         if ($admin != $admin_act || $sub != $sub_act || $dep != $dep_act ) {
             $proc = 2;
@@ -4455,9 +5459,11 @@ class ConsultaInfoADR{
         elseif($jefe_directo != $jefe_directo_act){
             $proc = 22;
         }
+
         else {
             $proc = 23;
         }
+    
 
         $query = "UPDATE Empleado_insumo set 
         id_admin = ".$datos->id_admin." ,
@@ -4478,6 +5484,27 @@ class ConsultaInfoADR{
             $procesos= self::Registra_historial_cambios_deps($datos,$proc);
             return  $procesos;
             //$conexion->CerrarConexion($con);
+        }
+    }
+    public function actualiza_encargado_dep($id_user_insumo,$dep){
+        include_once 'sesion.php';
+        include_once 'conexion.php';
+        $BD = new ConexionSQL();
+        $con = $BD->ObtenerConexionBD();
+        $user_ej = $_SESSION['ses_rfc_corto_ing'];
+        $query = "	  UPDATE Departamento set 
+        jefe_dep = '$id_user_insumo' ,
+        user_mod = '$user_ej',
+        fecha_mod = GETDATE()
+        WHERE id_depto = $dep
+        ";
+        $prepare = sqlsrv_query($con, $query);
+        if ($prepare == false) {
+            return print_r(sqlsrv_errors(),false);
+            $conexion->CerrarConexion($con);
+        }
+        else{
+            return true;
         }
     }
     public function Actualiza_datos_adicionales($datos){
@@ -4715,8 +5742,8 @@ if ($filtro_despeje == true) {
         ,[jefe_directo]
         ,fecha_mov_funcional
     )
-            SELECT 
-            $id_user_insumo AS [id_empleado_plant]
+        SELECT 
+        $id_user_insumo AS [id_empleado_plant]
         ,$No_Empleado AS [no_empleado]
         ,(SELECT nombre_admin FROM Administracion WHERE id_admin = $admin) AS [admin]
         ,(SELECT nombre_sub_admin FROM SubAdmin WHERE id_sub_admin = $sub) AS [sub_admin]
@@ -4751,7 +5778,7 @@ if ($filtro_despeje == true) {
         ,(SELECT nombre_nombramiento from cat_nivel_jerarquico where id_nivel_jer = $nivel_jer ) AS [nivel_jer]
         ,'$sal_net' AS salario_neto
         ,(select concat(nombre_s,' ',apellido_p,' ',apellido_m ) from Empleado_insumo where id_empleado_plant= $jefe_directo) as jefe_directo
-        ,GETDATE AS fecha_mov_funcional
+        ,GETDATE() AS fecha_mov_funcional
     
     UPDATE Empleado_insumo SET id_posision = ".$datos->posision_ten." ,
     [user_mod] ='$user_ej',
@@ -4855,6 +5882,10 @@ if ($filtro_despeje == true) {
             $nom = $_COOKIE["nombre"];
             $condicion = "WHERE subc.nombre_empleado LIKE '%$nom%'";
             break;
+            case isset($_GET['nivel']):
+            $nom = $_COOKIE["nivels"];
+            $condicion = "WHERE subc.nivel = '$nom'";
+            break;
             case isset($_GET['no_empleado']):
                 $no = $_COOKIE["no_empleado_cokie"];
                 $condicion = "WHERE subc.no_empleado = $no";
@@ -4891,7 +5922,12 @@ if ($filtro_despeje == true) {
                 }
    
             break;
-        
+            
+            case isset($_GET['fecha_ingreso']):
+                $fec_ini = $_COOKIE["fec_ini_filtro"];
+                $fec_fin = $_COOKIE["fec_fin_filtro"];
+                $condicion = "WHERE subc.[fec_ingreso] between '$fec_ini' and '$fec_fin' ORDER BY subc.[fec_ingreso] ASC  ";
+            break;
             default:
                 $condicion = "";
              break;
@@ -5019,9 +6055,223 @@ if ($filtro_despeje == true) {
         full JOIN cat_estado_civil cat_est_civ ON cat_est_civ.id_estado_civil = emp.estado_civil
         INNER JOIN Procesos procc ON procc.id_proc = emp.id_proc
         left JOIN Motivos_especiales mot ON mot.id_motivo_esp = emp.id_motivo_esp 
-        WHERE emp.id_proc=9 or emp.id_proc=12 ) subc
+        WHERE  emp.id_proc IN (9,6,25,28,12) ) subc
         $condicion";
         $con = $conexion->ObtenerConexionBD();
+        $prepare = sqlsrv_query($con, $query);
+        if ($prepare) {
+            while ($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)) {
+                $filas[]  = $row;
+            }
+            if (isset($filas)) {
+                return $filas;
+                $conexion->CerrarConexion($con);
+            } else {
+                return null;
+                $conexion->CerrarConexion($con);
+            }
+         
+        } else {
+            return sqlsrv_errors();
+            $conexion->CerrarConexion($con);
+        }
+    }
+    public function Reporte_Plantilla_filtrada_bajas()
+    {
+        include_once 'conexion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        switch ($_GET) {
+            case isset($_GET['pagina']):
+                    $condicion = "";
+            break;
+            case isset($_GET['Estructura']):
+                $sub = $_COOKIE["sub"];
+                $dep = $_COOKIE["dep"];
+                if ($dep == 0) {
+                    $condicion = " WHERE subc.id_sub_admin = $sub" ;
+                }
+                else {
+                    $condicion = " WHERE subc.id_sub_admin = $sub AND subc.id_depto = $dep ";
+                }
+               
+            break;
+            case isset($_GET['Nombre']):
+            $nom = $_COOKIE["nombre"];
+            $condicion = "WHERE subc.nombre_empleado LIKE '%$nom%'";
+            break;
+            case isset($_GET['no_empleado']):
+                $no = $_COOKIE["no_empleado_cokie"];
+                $condicion = "WHERE subc.no_empleado = $no";
+                break;
+            case isset($_GET['RFC']):
+                $rfc = $_COOKIE["rfc_corto_cokie"];
+                $condicion = " WHERE subc.rfc_corto = '$rfc' ";
+            break;
+            case isset($_GET['Puestos']):
+                $puest = $_COOKIE["puest_adr"];
+                $condicion = " WHERE subc.id_puesto = $puest ";
+            break;
+            case isset($_GET['Stock']):
+                $opcion = $_COOKIE["extra_option"];
+                switch ($opcion) {
+                case 1://Cumpleaños del mes
+                $condicion = "WHERE MONTH(Fecha_nacimiento) = MONTH(GETDATE()) ORDER BY DAY(Fecha_nacimiento) ASC ";
+                break;
+                case 2://Personal de Base con seccion V
+                $condicion = "WHERE  subc.id_nivel_jer = 6 AND subc.id_sindicato = 2";
+                break;
+                case 3://Personal de Base con seccion XVI
+                    $condicion = "WHERE  subc.id_nivel_jer = 6 AND subc.id_sindicato = 1";
+                break;
+                case 4://Personal de Base UNIFICADOS
+                $condicion = "WHERE  subc.id_nivel_jer = 6";
+                break;
+                case 5://Personal de Confianza
+                $condicion = "WHERE MONTH(Fecha_nacimiento) = MONTH(GETDATE()) ORDER BY DAY(Fecha_nacimiento) ASC ";
+                break;
+                default:
+                $condicion = "WHERE MONTH(Fecha_nacimiento) = MONTH(GETDATE()) ORDER BY DAY(Fecha_nacimiento) ASC ";
+                break;
+                }
+   
+            break;
+            
+            case isset($_GET['fecha_baja']):
+                $fec_ini = $_COOKIE["fec_ini_filtro2"];
+                $fec_fin = $_COOKIE["fec_fin_filtro2"];
+                $condicion = "WHERE subc.[fec_fin_rel_laboral] between '$fec_ini' and '$fec_fin' ORDER BY subc.[fec_fin_rel_laboral] ASC  ";
+            break;
+            default:
+                $condicion = "";
+             break;
+          }
+        $query = "		SELECT 
+        subc.[id_empleado_plant]
+       ,subc.[no_empleado]
+       ,subc.nombre_admin
+       ,subc.nombre_sub_admin
+       ,subc.nombre_depto
+       ,subc.[jefe_directo]
+       ,subc.id_num_posision
+	   ,subc.nivel
+	   ,subc.nombre_empleado
+       ,subc.sueldo_neto
+       ,subc.Codigo_pres
+	   ,subc.clave_puesto
+       ,subc.posision_jefe
+       ,subc.[tipo_nombramiento]
+       ,subc.nombre_puesto
+	   ,subc.nombre_puesto_fun
+       ,subc.rfc_comp
+       ,subc.curp_comp
+       ,subc.[rfc_corto]
+       ,subc.[nombre_s]
+       ,subc.[apellido_p]
+       ,[apellido_m]
+       ,subc.[correo_inst]
+       ,subc.[correo_personal]
+       ,subc.[numero_contacto_1]
+       ,subc.[numero_contacto_2]
+       ,subc.[ext_tel]
+       ,subc.nombre_sindical
+       ,subc.tipo_nombramiento
+       ,subc.[Genero]
+       ,subc.[Hijos]
+	   ,subc.nombre_estado_civil
+       ,subc.nombre_escolaridad
+	   ,subc.nombre_estatus_escolaridad
+       ,subc.nombre_honor
+       ,subc.nombre_proc
+       ,subc.Motivo_especial
+       ,subc.[fec_ingreso]
+       ,subc.fec_fin_rel_laboral
+       ,subc.id_sub_admin
+       ,subc.id_admin
+       ,subc.id_depto
+       ,subc.id_puesto
+       ,subc.id_sindicato
+       ,subc.id_nivel_jer
+       ,CONCAT( subc.years,' años, ',subc.meses,' meses y ',subc.dias,' dias' ) as Antiguedad
+    --    ,subc.years_nacimiento
+    --    ,subc.Fecha_nacimiento
+       ,subc.nivel_jerarq_nom
+       ,subc.carrera
+	FROM (select
+	   emp.[id_empleado_plant]
+       ,emp.[no_empleado]
+       ,ad.nombre_admin
+       ,ad.id_admin
+       ,sub.nombre_sub_admin
+       ,sub.id_sub_admin
+       ,dep.nombre_depto
+       ,dep.id_depto
+       ,(select concat (nombre_s,' ',apellido_p,' ',apellido_m)FROM Empleado_insumo where id_empleado_plant =  emp.[jefe_directo]) as jefe_directo
+       ,pos.id_num_posision
+       ,pos.posision_jefe
+       ,pos.nivel
+       ,pos.sueldo_neto
+       ,pos.Codigo_pres
+       ,cat_nom.nombre_nombramiento as [tipo_nombramiento]
+       ,puest_adr.nombre_puesto
+       ,puest_adr.id_puesto
+       ,emp.[RFC] as rfc_comp
+       ,emp.[CURP] as curp_comp
+       ,emp.[rfc_corto]
+	   ,CONCAT([nombre_s],' ',[apellido_p],' ',[apellido_m]) as nombre_empleado
+       ,[nombre_s]
+       ,[apellido_p]
+       ,[apellido_m]
+        ,floor(cast(datediff(day, fec_fin_rel_laboral, getdate()) as float)/365) AS years
+        ,floor((cast(datediff(day, fec_fin_rel_laboral, getdate()) as float)/365-(floor(cast(datediff(day, fec_fin_rel_laboral, getdate()) as float)/365)))*12) AS meses
+        ,floor((((cast(datediff(day, fec_fin_rel_laboral, getdate()) as float)/365-(floor(cast(datediff(day, fec_fin_rel_laboral, getdate()) as float)/365)))*12)-floor((cast(datediff(day, fec_fin_rel_laboral, getdate()) as float)/365-(floor(cast(datediff(day, fec_fin_rel_laboral, getdate()) as float)/365)))*12))*(365/12)) AS dias
+        -- ,floor(cast(datediff(day,cast (SUBSTRING(RFC, 5, 6) as date), getdate()) as float)/365) AS years_nacimiento
+        -- ,cast (SUBSTRING(RFC, 5, 6) as date) as Fecha_nacimiento
+       ,emp.[correo_inst]
+       ,emp.[correo_personal]
+       ,emp.[numero_contacto_1]
+       ,emp.[numero_contacto_2]
+       ,emp.[ext_tel]
+       ,cat_SIND.nombre_sindical
+       ,cat_SIND.id_sindicato
+       ,cat_nivel.nombre_nombramiento AS nivel_jerarq_nom
+       ,cat_nivel.id_nivel_jer
+       ,emp.[Genero]
+       ,emp.[Hijos]
+       ,emp.[fecha_alta]
+       ,emp.[user_mod]
+       ,emp.[fecha_mod]
+       ,emp.[user_baja]
+       ,emp.[fecha_baja]
+       ,emp.[carrera]
+       ,procc.nombre_proc
+       ,mot.Motivo_especial
+       ,emp.[fec_ingreso]
+       ,emp.fec_fin_rel_laboral
+       ,puest_fun.nombre_puesto as nombre_puesto_fun
+       ,puest_fun.clave_puesto
+	   ,cat_est_civ.nombre_estado_civil
+       ,cat_esc.nombre_escolaridad
+	   ,cat_est_esc.nombre_estatus_escolaridad
+       ,cat_esc.nombre_honor
+        FROM [Control_Ingresos].[dbo].[Empleado_insumo] emp
+        INNER JOIN Administracion ad ON emp.id_admin = ad.id_admin
+        INNER JOIN cat_escolaridad cat_esc ON emp.Escolaridad = cat_esc.id_escolaridad
+        INNER JOIN SubAdmin sub ON emp.id_sub_admin = sub.id_sub_admin
+        INNER JOIN Departamento dep ON emp.id_depto = dep.id_depto
+        INNER JOIN Posisiones pos ON emp.id_posision = pos.id_posision
+        INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
+        INNER JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump
+        INNER JOIN cat_nombramiento cat_nom ON cat_nom.id_tipo_nombramiento = emp.tipo_nombramiento
+        INNER JOIN cat_sindical cat_SIND ON cat_SIND.id_sindicato = emp.id_sindicato
+        INNER JOIN cat_nivel_jerarquico cat_nivel ON cat_nivel.id_nivel_jer = emp.id_nivel_jer
+        INNER JOIN cat_estatus_escolar cat_est_esc ON cat_est_esc.id_estatus_escolaridad = emp.estatus_escolaridad
+        FULL JOIN cat_estado_civil cat_est_civ ON cat_est_civ.id_estado_civil = emp.estado_civil
+        INNER JOIN Procesos procc ON procc.id_proc = emp.id_proc
+        LEFT JOIN Motivos_especiales mot ON mot.id_motivo_esp = emp.id_motivo_esp 
+        WHERE emp.id_proc IN (7 ,  11 , 32) ) subc
+        $condicion";
+
         $prepare = sqlsrv_query($con, $query);
         if ($prepare) {
             while ($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)) {
@@ -5066,8 +6316,6 @@ if ($filtro_despeje == true) {
             'Apellido P',
             'Apellido M',
             'Nombre Completo',
-            'Edad',
-            'Fecha_nacimiento',
             'Correo',
             'Ext',
             'Nivel Jerarquico',
@@ -5080,7 +6328,8 @@ if ($filtro_despeje == true) {
             'Estatus de estudios',
             'Carrera',
             'Fecha_ingreso',
-            'Antiguedad',
+            'Fecha_fin',
+            'Inactividad',
             'Administración_Actual',
             'Subadministración_Actual',
             'Departamento_Actual',
@@ -5093,11 +6342,6 @@ if ($filtro_despeje == true) {
             'Clave Puesto',
             'Sueldo Puesto',
             'Posicion_Gerente',
-
-
-           
-    
-  
 
         ];
         // se definen los estilos de las celdas
@@ -5186,57 +6430,55 @@ if ($filtro_despeje == true) {
             ->setCellValue('AG1', $encabezados[32])
             ->setCellValue('AH1', $encabezados[33])
             ->setCellValue('AI1', $encabezados[34])
-            ->setCellValue('AJ1', $encabezados[35])
             ;
-        $objPHPExcel->setActiveSheetIndex(0)->getStyle('A1:AJ1')->applyFromArray($estilo_titulos);
+        $objPHPExcel->setActiveSheetIndex(0)->getStyle('A1:AI1')->applyFromArray($estilo_titulos);
         if ($reporte != null) {
             $h = 2;
             for ($i = 0; $i < count($reporte); ++$i) {
                 $objPHPExcel->setActiveSheetIndex(0)
-                    ->setCellValue('A'.$h, $reporte[$i]['nombre_proc'])
-                    ->setCellValue('B'.$h, $reporte[$i]['no_empleado'])
-                    ->setCellValue('C'.$h, $reporte[$i]['rfc_comp'])
-                    ->setCellValue('D'.$h, $reporte[$i]['curp_comp'])
-                    ->setCellValue('E'.$h, $reporte[$i]['rfc_corto'])
-                    ->setCellValue('F'.$h, $reporte[$i]['nombre_s'])
-                    ->setCellValue('G'.$h, $reporte[$i]['apellido_p'])
-                    ->setCellValue('H'.$h, $reporte[$i]['apellido_m'])
-                    ->setCellValue('I'.$h, $reporte[$i]['nombre_empleado'])
-                    ->setCellValue('J'.$h, $reporte[$i]['years_nacimiento'])
-                    ->setCellValue('K'.$h, $reporte[$i]['Fecha_nacimiento']->format('d-m-Y'))
-                    ->setCellValue('L'.$h, $reporte[$i]['correo_inst'])
-                    ->setCellValue('M'.$h, $reporte[$i]['ext_tel'])
-                    ->setCellValue('N'.$h, $reporte[$i]['nivel_jerarq_nom'])
-                    ->setCellValue('O'.$h, $reporte[$i]['tipo_nombramiento'])
-                    ->setCellValue('P'.$h, $reporte[$i]['nombre_sindical'])
-                    ->setCellValue('Q'.$h, $reporte[$i]['Genero'])
-                    ->setCellValue('R'.$h, $reporte[$i]['Hijos'])
-                    ->setCellValue('S'.$h, $reporte[$i]['nombre_estado_civil'])
-                    ->setCellValue('T'.$h, $reporte[$i]['nombre_escolaridad'])
-                    ->setCellValue('U'.$h, $reporte[$i]['nombre_estatus_escolaridad'])
-                    ->setCellValue('V'.$h, $reporte[$i]['carrera'])
-                    ->setCellValue('W'.$h, $reporte[$i]['fec_ingreso']->format('d-m-Y'))
-                    ->setCellValue('X'.$h, $reporte[$i]['Antiguedad'])
-                    ->setCellValue('Y'.$h, $reporte[$i]['nombre_admin'])
-                    ->setCellValue('Z'.$h, $reporte[$i]['nombre_sub_admin'])
-                    ->setCellValue('AA'.$h, $reporte[$i]['nombre_depto'])
-                    ->setCellValue('AB'.$h, $reporte[$i]['jefe_directo'])
-                    ->setCellValue('AC'.$h, $reporte[$i]['nombre_puesto'])
-                    ->setCellValue('AD'.$h, $reporte[$i]['id_num_posision'])
-                    ->setCellValue('AE'.$h, $reporte[$i]['nivel'])
-                    ->setCellValue('AF'.$h, $reporte[$i]['Codigo_pres'])
-                    ->setCellValue('AG'.$h, $reporte[$i]['nombre_puesto_fun'])
-                    ->setCellValue('AH'.$h, $reporte[$i]['clave_puesto'])
-                    ->setCellValue('AI'.$h, $reporte[$i]['sueldo_neto'])
-                    ->setCellValue('AJ'.$h, $reporte[$i]['posision_jefe'])
-                    ;
+                ->setCellValue('A'.$h, $reporte[$i]['nombre_proc'])
+                ->setCellValue('B'.$h, $reporte[$i]['no_empleado'])
+                ->setCellValue('C'.$h, $reporte[$i]['rfc_comp'])
+                ->setCellValue('D'.$h, $reporte[$i]['curp_comp'])
+                ->setCellValue('E'.$h, $reporte[$i]['rfc_corto'])
+                ->setCellValue('F'.$h, $reporte[$i]['nombre_s'])
+                ->setCellValue('G'.$h, $reporte[$i]['apellido_p'])
+                ->setCellValue('H'.$h, $reporte[$i]['apellido_m'])
+                ->setCellValue('I'.$h, $reporte[$i]['nombre_empleado'])
+                ->setCellValue('J'.$h, $reporte[$i]['correo_inst'])
+                ->setCellValue('K'.$h, $reporte[$i]['ext_tel'])
+                ->setCellValue('L'.$h, $reporte[$i]['nivel_jerarq_nom'])
+                ->setCellValue('M'.$h, $reporte[$i]['tipo_nombramiento'])
+                ->setCellValue('N'.$h, $reporte[$i]['nombre_sindical'])
+                ->setCellValue('O'.$h, $reporte[$i]['Genero'])
+                ->setCellValue('P'.$h, $reporte[$i]['Hijos'])
+                ->setCellValue('Q'.$h, $reporte[$i]['nombre_estado_civil'])
+                ->setCellValue('R'.$h, $reporte[$i]['nombre_escolaridad'])
+                ->setCellValue('S'.$h, $reporte[$i]['nombre_estatus_escolaridad'])
+                ->setCellValue('T'.$h, $reporte[$i]['carrera'])
+                ->setCellValue('U'.$h, $reporte[$i]['fec_ingreso']->format('d-m-Y'))
+                ->setCellValue('V'.$h, $reporte[$i]['fec_fin_rel_laboral'] != NULL ? $reporte[$i]['fec_fin_rel_laboral']->format('d-m-Y') : "")
+                ->setCellValue('W'.$h, $reporte[$i]['Antiguedad'])
+                ->setCellValue('X'.$h, $reporte[$i]['nombre_admin'])
+                ->setCellValue('Y'.$h, $reporte[$i]['nombre_sub_admin'])
+                ->setCellValue('Z'.$h, $reporte[$i]['nombre_depto'])
+                ->setCellValue('AA'.$h, $reporte[$i]['jefe_directo'])
+                ->setCellValue('AB'.$h, $reporte[$i]['nombre_puesto'])
+                ->setCellValue('AC'.$h, $reporte[$i]['id_num_posision'])
+                ->setCellValue('AD'.$h, $reporte[$i]['nivel'])
+                ->setCellValue('AE'.$h, $reporte[$i]['Codigo_pres'])
+                ->setCellValue('AF'.$h, $reporte[$i]['nombre_puesto_fun'])
+                ->setCellValue('AG'.$h, $reporte[$i]['clave_puesto'])
+                ->setCellValue('AH'.$h, $reporte[$i]['sueldo_neto'])
+                ->setCellValue('AI'.$h, $reporte[$i]['posision_jefe'])
+                ;
 
-                $objPHPExcel->setActiveSheetIndex(0)->getStyle('A'.$h.':AJ'.$h)->applyFromArray($estilos_registros);
+                $objPHPExcel->setActiveSheetIndex(0)->getStyle('A'.$h.':AI'.$h)->applyFromArray($estilos_registros);
                 ++$h;
             }
             $objPHPExcel->setActiveSheetIndex(0);
 
-            foreach (range('A', 'AJ') as $columnID) {
+            foreach (range('A', 'AI') as $columnID) {
                 $objPHPExcel->getActiveSheet()->getColumnDimension($columnID)
                     ->setAutoSize(true);
             }
@@ -5269,7 +6511,7 @@ if ($filtro_despeje == true) {
         ,[unidad]
         ,[telefono]
         ,[direccion]
-    FROM [Control_Ingresos].[dbo].[Administracion] WHERE estatus = 'A'";
+        FROM [Control_Ingresos].[dbo].[Administracion] WHERE estatus = 'A'";
         $con = $conexion->ObtenerConexionBD();
         $prepare = sqlsrv_query($con, $query);
         if ($prepare) {
@@ -5283,7 +6525,7 @@ if ($filtro_despeje == true) {
                 return null;
                 //$conexion->CerrarConexion($con);
             }
-           
+        
         } else {
             return sqlsrv_errors();
             $conexion->CerrarConexion($con);
@@ -5641,7 +6883,667 @@ if ($filtro_despeje == true) {
         //     echo"No hay datos que se detecten de la consulta por eso no se ha generado el documento";
         // }
     }
-    
+    public function Para_responsiva($id_empleado)
+    {
+        include_once 'conexion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $query = "SELECT TOP 1
+        [id_empleado_plant]
+       ,emp.[no_empleado]
+       ,ad.nombre_admin
+       ,ad.direccion
+       ,emp.id_admin
+       ,emp.id_sub_admin
+       ,emp.id_depto
+       ,sub.nombre_sub_admin
+       ,dep.nombre_depto
+       ,puest_adr.id_puesto
+       ,emp.[jefe_directo]
+       ,pos.id_posision
+       ,pos.id_num_posision
+       ,pos.posision_jefe
+       ,pos.nivel
+       ,pos.sueldo_neto
+       ,pos.Codigo_pres
+       ,(select clave_puesto from Puesto_FUMP where id_puesto_fump = (select top 1 id_puesto_fump  from Posisiones where id_num_posision =(SELECT posision_jefe from Posisiones where id_empleado = $id_empleado))) as clave_jefe
+       ,(select concat(nombre_s,' ',apellido_p,' ',apellido_m ) from Empleado_insumo where id_posision = (select top 1 id_posision from Posisiones where id_num_posision =(SELECT posision_jefe from Posisiones where id_empleado = $id_empleado))) as nombre_jefe
+       ,CASE WHEN(  emp.[tipo_nombramiento] = 1) THEN 'Base'
+       WHEN(  emp.[tipo_nombramiento] = 2) THEN 'Confianza'
+       WHEN(  emp.[tipo_nombramiento] = 3) THEN 'Eventual'
+       WHEN(  emp.[tipo_nombramiento] = 4) THEN 'Honorarios'
+       end as [tipo_nombramiento],
+       emp.tipo_nombramiento as num_nombramiento
+       ,puest_adr.nombre_puesto
+       ,emp.[id_perfil]
+       ,emp.[RFC] as rfc_comp
+       ,emp.[CURP] as curp_comp
+       ,emp.[rfc_corto]
+       ,CONCAT([nombre_s],' ',[apellido_p],' ',[apellido_m]) AS nombre_empleado
+       ,emp.[correo_inst]
+       ,emp.[correo_personal]
+       ,emp.[numero_contacto_1]
+       ,emp.[numero_contacto_2]
+       ,emp.[ext_tel]
+       ,emp.[estatus]
+       ,emp.[user_alta]
+       ,emp.[Escolaridad]
+       ,emp.[estatus_escolaridad]
+       ,emp.[Carrera]
+       ,emp.[id_sindicato]
+       ,emp.[id_nivel_jer]
+       ,emp.[Genero]
+       ,emp.[Hijos]
+       ,emp.[fecha_alta]
+       ,emp.[user_mod]
+       ,emp.[fecha_mod]
+       ,emp.[user_baja]
+       ,emp.[fecha_baja]
+       ,emp.[id_proc]
+       ,emp.id_motivo_esp
+       ,emp.[fec_ingreso]
+       ,emp.fec_fin_rel_laboral
+       ,emp.estado_civil
+       ,puest_fun.nombre_puesto as nombre_puesto_fun
+       ,puest_fun.clave_puesto
+       ,cat_esc.nombre_escolaridad
+       ,cat_esc.nombre_honor
+        FROM [Control_Ingresos].[dbo].[Empleado_insumo] emp
+       INNER JOIN Administracion ad ON emp.id_admin = ad.id_admin
+       INNER JOIN cat_escolaridad cat_esc ON emp.Escolaridad = cat_esc.id_escolaridad
+     INNER JOIN SubAdmin sub ON emp.id_sub_admin = sub.id_sub_admin
+     INNER JOIN Departamento dep ON emp.id_depto = dep.id_depto
+     INNER JOIN Posisiones pos ON emp.id_posision = pos.id_posision
+     INNER JOIN Puesto_ADR puest_adr ON puest_adr.id_puesto = emp.id_puesto
+     INNER JOIN Puesto_FUMP puest_fun ON puest_fun.id_puesto_fump = pos.id_puesto_fump
+      WHERE  id_empleado_plant = $id_empleado and emp.estatus = 'A'";
+        $prepare = sqlsrv_query($con,$query);
+        if($prepare){
+            while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+                $fila = $row;
+            }
+            if (isset($fila)) {
+                return $fila;
+                $conexion->CerrarConexion($con);
+            }else{
+                return null;
+                $conexion->CerrarConexion($con);
+            }
+        }else{
+            return print_r(sqlsrv_errors(),true);
+            $conexion->CerrarConexion($con); 
+        }        
+    }
+    public function saca_roles_sistemas($id_acceso){
+        include_once 'conexion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $query = "SELECT  
+        reg_acc.id_reg_acceso
+        ,emp.id_empleado_plant
+        ,CONCAT(emp.nombre_s,' ',emp.apellido_p,' ',emp.apellido_m ) as nombre_empleado
+        ,syst.id_system
+       ,syst.nombre_sistema
+       ,procc.nombre_proc
+    --    ,rol_nom.nombre_rol
+        FROM Regstro_accesos reg_acc
+        INNER JOIN Empleado_insumo emp ON emp.id_empleado_plant = reg_acc.id_empleado
+        INNER JOIN Systems syst ON syst.id_system = reg_acc.id_system 
+        INNER JOIN Procesos procc ON procc.id_proc = reg_acc.id_proc 
+        -- INNER JOIN reg_roles_accesos rol_hist_sis ON rol_hist_sis.id_reg_acceso = reg_acc.id_reg_acceso
+        -- INNER JOIN Roles_sistemas rol_nom ON rol_nom.id_rol = rol_hist_sis.id_rol
+        where  reg_acc.id_reg_acceso = $id_acceso";
+        $prepare = sqlsrv_query($con,$query);
+        if($prepare){
+            while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+                $fila = $row;
+            }
+            if (isset($fila)) {
+                return $fila;
+                $conexion->CerrarConexion($con);
+            }else{
+                return null;
+                $conexion->CerrarConexion($con);
+            }
+        }else{
+            return print_r(sqlsrv_errors(),true);
+            $conexion->CerrarConexion($con); 
+        }        
+
+    }
+    public function saca_roles_sistemas_acceso($id_acceso){
+        include_once 'conexion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $query = "	SELECT  
+        rol_nom.nombre_rol
+        ,rol_nom.clave_rol
+        FROM Regstro_accesos reg_acc
+        INNER JOIN reg_roles_accesos rol_hist_sis ON rol_hist_sis.id_reg_acceso = reg_acc.id_reg_acceso
+        INNER JOIN Roles_sistemas rol_nom ON rol_nom.id_rol = rol_hist_sis.id_rol
+        WHERE  reg_acc.id_reg_acceso = $id_acceso";
+        $prepare = sqlsrv_query($con,$query);
+        if($prepare){
+            while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+                $fila[] = $row;
+            }
+            if (isset($fila)) {
+                return $fila;
+                $conexion->CerrarConexion($con);
+            }else{
+                return null;
+                $conexion->CerrarConexion($con);
+            }
+        }else{
+            return print_r(sqlsrv_errors(),true);
+            $conexion->CerrarConexion($con); 
+        }        
+
+    }
+    public function Consulta_sistema_responsiva($id_sistema){
+        include_once 'conexion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD();
+        $query = "SELECT [id_system]
+        ,[nombre_sistema]
+        ,[url/acceso]
+        ,[Administraciion_sistema]
+        ,[Descripcion_sistema]
+        ,[Num_cuentas_Siistema]
+        ,[Aprobador_Sistemas]
+        ,[estatus]
+        ,[user_alta]
+        ,[fecha_alta]
+        ,[user_mod]
+        ,[fecha_mod]
+        ,[funcion]
+        ,[tipo_sistema]
+    FROM [Control_Ingresos].[dbo].[Systems] where id_system = $id_sistema";
+        $prepare = sqlsrv_query($con,$query);
+        if($prepare){
+            while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+                $fila = $row;
+            }
+            if (isset($fila)) {
+                return $fila;
+                $conexion->CerrarConexion($con);
+            }else{
+                return null;
+                $conexion->CerrarConexion($con);
+            }
+        }else{
+            return print_r(sqlsrv_errors(),true);
+            $conexion->CerrarConexion($con); 
+        }        
+    }
+    public function Para_responsiva1($id_empleado,$admin)
+    {
+      include_once 'conexion.php';
+      $conexion = new ConexionSQL();
+      $con = $conexion->ObtenerConexionBD();
+      $query = "  SELECT 
+      CONCAT( Emp.nombre_s,' ',Emp.apellido_p,' ',Emp.apellido_m) AS nombre_empleado,
+      Emp.no_empleado,
+      Emp.fecha_alta,
+      Emp.rfc_corto,
+      adminx.direccion,
+      Emp.correo_inst,
+      Emp.user_alta,
+      dep.nombre_depto,
+      (select CONCAT( nombre_s,' ',apellido_p,' ',apellido_m) AS nombre_empleado from Empleado_insumo where id_empleado_plant = (select jefe_directo From Empleado_insumo where id_empleado_plant = $id_empleado)) As jefe,
+      (select correo_inst from Empleado_insumo where  id_empleado_plant = (select jefe_directo From Empleado_insumo where id_empleado_plant = $id_empleado)) As correo_jefe,
+      (select rfc_corto from Empleado_insumo where  id_empleado_plant = (select jefe_directo From Empleado_insumo where id_empleado_plant = $id_empleado)) As rfc_jefe,
+      (select CONCAT( nombre_s,' ',apellido_p,' ',apellido_m) AS nombre_empleado  from Empleado_insumo where id_empleado_plant = (select jefe_directo  From Empleado_insumo where id_empleado_plant =  (select jefe_directo From Empleado_insumo where id_empleado_plant = $id_empleado))) As jefe_sub,
+      (select correo_inst from Empleado_insumo where id_empleado_plant = (select jefe_directo  From Empleado_insumo where id_empleado_plant =  (select jefe_directo From Empleado_insumo where id_empleado_plant = $id_empleado))) As correo_jefe_sub,
+      (select rfc_corto from Empleado_insumo where id_empleado_plant = (select jefe_directo  From Empleado_insumo where id_empleado_plant =  (select jefe_directo From Empleado_insumo where id_empleado_plant = $id_empleado))) As rfc_jefe_sub
+      FROM Empleado_insumo Emp
+      INNER JOIN Administracion adminx ON Emp.id_admin = adminx.id_admin
+	  INNER JOIN Posisiones pos ON Emp.id_posision = pos.id_posision
+      INNER JOIN Puesto_FUMP Pues ON pos.id_puesto_fump = Pues.id_puesto_fump
+      inner join Departamento dep on Emp.id_depto = dep.id_depto
+      Where Emp.id_empleado_plant = $id_empleado  And Emp.id_admin = $admin";
+      $prepare = sqlsrv_query($con, $query);
+      if ($prepare) {
+        while ($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)) {
+          $fila = $row;
+        }
+        if (isset($fila)) {
+          return $fila;
+          $conexion->CerrarConexion($con);
+        } else {
+          return null;
+          $conexion->CerrarConexion($con);
+        }
+      } else {
+        return print_r(sqlsrv_errors(), true);
+        $conexion->CerrarConexion($con);
+      }
+    }
+    public function Saca_puesto_oficial($rfc){
+        include_once 'sesion.php';
+        include_once 'conexion.php';
+        $BD = new ConexionSQL();
+        $con = $BD->ObtenerConexionBD();
+        $query = "SELECT puest.nombre_puesto 
+        ,puest_adr.nombre_puesto as puesto_funcional 
+        from Empleado_insumo emp
+              INNER JOIN Posisiones pos ON pos.id_posision = emp.id_posision 
+              INNER JOIN Puesto_FUMP puest ON pos.id_puesto_fump = puest.id_puesto_fump 
+              INNER JOIN Puesto_ADR puest_adr ON emp.id_puesto = puest_adr.id_puesto 
+              where emp.rfc_corto = '$rfc'";
+         $prepare = sqlsrv_query($con,$query);
+         if($prepare){
+             while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+                 $fila = $row;
+             }
+             if (isset($fila)) {
+                 return $fila;
+                 $conexion->CerrarConexion($con);
+             }else{
+                 return null;
+                 $conexion->CerrarConexion($con);
+             }
+         }else{
+             return print_r(sqlsrv_errors(),true);
+             $conexion->CerrarConexion($con); 
+         }        
+      }
+      public function Sistemas_acceso_por_usuario($id_emp){
+        include_once 'sesion.php';
+        include_once 'conexion.php';
+        $BD = new ConexionSQL();
+        $con = $BD->ObtenerConexionBD();
+        $query = "  SELECT  [id_reg_acceso]
+        ,[id_empleado]
+        ,emp.rfc_corto
+        ,emp.no_empleado
+        ,emp.nombre_s
+        ,emp.apellido_p
+        ,emp.apellido_m
+        ,CONCAT(emp.nombre_s,' ',emp.apellido_p,' ',emp.apellido_m)  AS nombre_empleado
+        ,reg.[id_system]
+        ,[fecha_alta_resp]
+	  ,[fecha_alta_acceso_real]
+	  ,[fecha_baja_acceso_real]
+        ,syst.nombre_sistema
+        ,reg.[id_proc]
+        ,procc.nombre_proc
+        ,reg.[user_alta]
+        ,reg.[fecha_alta]
+        ,reg.[user_mod]
+        ,reg.[fecha_mod]
+        ,reg.[user_baja]
+        ,reg.[fecha_baja]
+        ,reg.[estatus]
+        FROM [Control_Ingresos].[dbo].[Regstro_accesos] reg
+        INNER JOIN Systems syst ON syst.id_system = reg.id_system
+        INNER JOIN Procesos procc ON procc.id_proc = reg.id_proc
+        INNER JOIN Empleado_insumo emp ON emp.id_empleado_plant = reg.id_empleado
+        WHERE emp.id_empleado_plant = $id_emp";
+         $prepare = sqlsrv_query($con,$query);
+         if($prepare){
+             while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+                 $fila[] = $row;
+             }
+             if (isset($fila)) {
+                 return $fila;
+                 $conexion->CerrarConexion($con);
+             }else{
+                 return null;
+                 $conexion->CerrarConexion($con);
+             }
+         }else{
+             return print_r(sqlsrv_errors(),true);
+             $conexion->CerrarConexion($con); 
+         }  
+      }
+      public function Roles_cat_acceso_por_sistema($id_sis){
+        include_once 'sesion.php';
+        include_once 'conexion.php';
+        $BD = new ConexionSQL();
+        $con = $BD->ObtenerConexionBD();
+        $query = " SELECT 
+        rol_sis.nombre_rol
+        ,rol_sis.id_rol
+        FROM Roles_sistemas rol_sis
+        INNER JOIN Regstro_accesos acc ON acc.id_system = rol_sis.id_sistema
+        where id_reg_acceso =  $id_sis
+        ";
+         $prepare = sqlsrv_query($con,$query);
+         if($prepare){
+             while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+                 $fila[] = $row;
+             }
+             if (isset($fila)) {
+                 return $fila;
+                 $conexion->CerrarConexion($con);
+             }else{
+                 return null;
+                 $conexion->CerrarConexion($con);
+             }
+         }else{
+             return print_r(sqlsrv_errors(),true);
+             $conexion->CerrarConexion($con); 
+         }  
+      }
+      public function Roles_cat_acceso_por_sistema_se($id_sis){
+        include_once 'sesion.php';
+        include_once 'conexion.php';
+        $BD = new ConexionSQL();
+        $con = $BD->ObtenerConexionBD();
+        $query = " SELECT 
+		reg_rol_acc.id_rol
+		,roles.nombre_rol
+        ,acc.id_empleado
+		From reg_roles_accesos reg_rol_acc
+		INNER JOIN Regstro_accesos acc on reg_rol_acc.id_reg_acceso = acc.id_reg_acceso
+        INNER JOIN Roles_sistemas roles on roles.id_rol = reg_rol_acc.id_rol
+		where reg_rol_acc.id_reg_acceso = $id_sis
+        ";
+         $prepare = sqlsrv_query($con,$query);
+         if($prepare){
+             while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+                 $fila[] = $row;
+             }
+             if (isset($fila)) {
+                 return $fila;
+                 $conexion->CerrarConexion($con);
+             }else{
+                 return null;
+                 $conexion->CerrarConexion($con);
+             }
+         }else{
+             return print_r(sqlsrv_errors(),true);
+             $conexion->CerrarConexion($con); 
+         }  
+      }
+      public function Roles_cat_roles_acceso($id_sis){
+        include_once 'sesion.php';
+        include_once 'conexion.php';
+        $BD = new ConexionSQL();
+        $con = $BD->ObtenerConexionBD();
+        $query = "SELECT  [id_rol]
+        ,[nombre_rol]
+        ,[clave_rol]
+        ,[descripcion]
+        ,[estatus]
+        ,[user_alta]
+        ,[fecha_alta]
+        ,[user_mod]
+        ,[fecha_mod]
+        ,[id_sistema]
+        FROM [Control_Ingresos].[dbo].[Roles_sistemas] where id_sistema = $id_sis
+        ";
+         $prepare = sqlsrv_query($con,$query);
+         if($prepare){
+             while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+                 $fila[] = $row;
+             }
+             if (isset($fila)) {
+                 return $fila;
+                 $conexion->CerrarConexion($con);
+             }else{
+                 return null;
+                 $conexion->CerrarConexion($con);
+             }
+         }else{
+             return print_r(sqlsrv_errors(),true);
+             $conexion->CerrarConexion($con); 
+         }  
+      }
+      public function Lista_sistemas_reg(){
+        include_once 'sesion.php';
+        include_once 'conexion.php';
+        $BD = new ConexionSQL();
+        $con = $BD->ObtenerConexionBD();
+        $query = " SELECT [id_system]
+        ,[nombre_sistema]
+        ,[url/acceso]
+        ,[Administraciion_sistema]
+        ,[Descripcion_sistema]
+        ,[Num_cuentas_Siistema]
+        ,[Aprobador_Sistemas]
+        ,[estatus]
+        ,[user_alta]
+        ,[fecha_alta]
+        ,[user_mod]
+        ,[fecha_mod]
+        ,[funcion]
+        ,[tipo_sistema]
+    FROM [Control_Ingresos].[dbo].[Systems]
+        ";
+         $prepare = sqlsrv_query($con,$query);
+         if($prepare){
+             while($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)){
+                 $fila[] = $row;
+             }
+             if (isset($fila)) {
+                 return $fila;
+                 $conexion->CerrarConexion($con);
+             }else{
+                 return null;
+                 $conexion->CerrarConexion($con);
+             }
+         }else{
+             return print_r(sqlsrv_errors(),true);
+             $conexion->CerrarConexion($con); 
+         }  
+      }
+      public function Crear_Excel_Reporte_gestor($reporte,$nombre_reporte)
+    {
+        include_once 'Classes/PHPExcel.php';
+        include_once 'Classes/PHPExcel/Writer/Excel2007.php';
+        $objPHPExcel = new PHPExcel();
+
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        // Se asignan las propiedades del libro
+        $objPHPExcel->getProperties()->setCreator('Andres Mares Sanchez') // Nombre del autor
+            ->setLastModifiedBy('Andres Mares Sanchez') //Ultimo usuario que lo modific�
+            ->setTitle($nombre_reporte) // Titulo
+            ->setSubject('Reporte Excel con PHP y SQL SERVER') //Asunto
+            ->setDescription($nombre_reporte); //Descripci�n
+
+        $encabezados = [
+            'cFolio',
+            'nFolio',
+            'dFolioExt',
+            'Tipo_Docto',
+            'dAsunto',
+            'dReferencia',
+            'Grupo_Procedencia',
+            'Procedencia',
+            'dRemitente',
+            'dPuestoRem',
+            'dRFC',
+            'Subadministración',
+            'cUsuarioTur',
+            'NombreTurnado',
+            'dPuesto',
+            'Puesto_Departamento',
+            'Estado',
+            'nPrioridad',
+            'fDocumento',
+            'fRecepcion',
+            'fCaptura',
+            'Clasificacion',
+            'Tiempo'
+
+        ];
+        // se definen los estilos de las celdas
+        $estilo_titulos = [
+            'font' => [
+                'name' => 'Montserrat',
+                'bold' => true,
+                'size' => 12,
+                'italic' => true,
+            /*'underline' => PHPExcel_Style_Font::UNDERLINE_DOUBLE,*/
+                'strike' => false, /* hace un efecto fixed en excel*/
+                'color' => [
+                    'rgb' => 'ffffff',
+                ],
+            ],
+            'borders' => [
+                'allborders' => [
+                    'style' => PHPExcel_Style_Border::BORDER_MEDIUM,
+                    'color' => [
+                        'rgb' => 'ffffff',
+                    ],
+                ],
+            ],
+            'fill' => [
+                'type' => PHPExcel_Style_Fill::FILL_SOLID,
+                'color' => ['rgb' => 'a12142'],
+            ],
+        ];
+        $estilos_registros = [
+            'font' => [
+                'name' => 'Montserrat',
+                'bold' => false,
+                'size' => 9,
+                'italic' => false,
+            /*'underline' => PHPExcel_Style_Font::UNDERLINE_DOUBLE,*/
+                'strike' => false, /* hace un efecto fixed en excel*/
+                'color' => [
+                    'rgb' => '000109',
+                ],
+            ],
+            'borders' => [
+                'allborders' => [
+                    'style' => PHPExcel_Style_Border::BORDER_MEDIUM,
+                    'color' => [
+                        'rgb' => '808080',
+                    ],
+                ],
+            ],
+        ];
+
+        //se terminan de definir los estilos
+
+        $objPHPExcel->setActiveSheetIndex(0)
+            ->setCellValue('A1', $encabezados[0])
+            ->setCellValue('B1', $encabezados[1])
+            ->setCellValue('C1', $encabezados[2])
+            ->setCellValue('D1', $encabezados[3])
+            ->setCellValue('E1', $encabezados[4])
+            ->setCellValue('F1', $encabezados[5])
+            ->setCellValue('G1', $encabezados[6])
+            ->setCellValue('H1', $encabezados[7])
+            ->setCellValue('I1', $encabezados[8])
+            ->setCellValue('J1', $encabezados[9])
+            ->setCellValue('K1', $encabezados[10])
+            ->setCellValue('L1', $encabezados[11])
+            ->setCellValue('M1', $encabezados[12])
+            ->setCellValue('N1', $encabezados[13])
+            ->setCellValue('O1', $encabezados[14])
+            ->setCellValue('P1', $encabezados[15])
+            ->setCellValue('Q1', $encabezados[16])
+            ->setCellValue('R1', $encabezados[17])
+            ->setCellValue('S1', $encabezados[18])
+            ->setCellValue('T1', $encabezados[19])
+            ->setCellValue('U1', $encabezados[20])
+            ->setCellValue('V1', $encabezados[21])
+            ->setCellValue('W1', $encabezados[22])
+            
+            
+            ;
+        $objPHPExcel->setActiveSheetIndex(0)->getStyle('A1:W1')->applyFromArray($estilo_titulos);
+        if ($reporte != null) {
+            $h = 2;
+            for ($i = 0; $i < count($reporte); ++$i) {
+                $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue('A'.$h, $reporte[$i]['cFolio'])
+                ->setCellValue('B'.$h, $reporte[$i]['nFolio'])
+                ->setCellValue('C'.$h, $reporte[$i]['dFolioExt'])
+                ->setCellValue('D'.$h, $reporte[$i]['Tipo_Docto'])
+                ->setCellValue('E'.$h, $reporte[$i]['dAsunto'])
+                ->setCellValue('F'.$h, $reporte[$i]['dReferencia'])
+                ->setCellValue('G'.$h, $reporte[$i]['Grupo_Procedencia'])
+                ->setCellValue('H'.$h, $reporte[$i]['Procedencia'])
+                ->setCellValue('I'.$h, $reporte[$i]['dRemitente'])
+                ->setCellValue('J'.$h, $reporte[$i]['dPuestoRem'])
+                ->setCellValue('K'.$h, $reporte[$i]['dRFC'])
+                ->setCellValue('L'.$h, $reporte[$i]['Subadministración'])
+                ->setCellValue('M'.$h, $reporte[$i]['cUsuarioTur'])
+                ->setCellValue('N'.$h, $reporte[$i]['NombreTurnado'])
+                ->setCellValue('O'.$h, $reporte[$i]['dPuesto'])
+                ->setCellValue('P'.$h, $reporte[$i]['Puesto_Departamento'])
+                ->setCellValue('Q'.$h, $reporte[$i]['Estado'])
+                ->setCellValue('R'.$h, $reporte[$i]['nPrioridad'])
+                ->setCellValue('S'.$h, $reporte[$i]['fDocumento']->format('d/m/Y'))
+                ->setCellValue('T'.$h, $reporte[$i]['fRecepcion']->format('d/m/Y'))
+                ->setCellValue('U'.$h, $reporte[$i]['fCaptura']->format('d/m/Y'))
+                ->setCellValue('V'.$h, $reporte[$i]['Clasificacion'])
+                ->setCellValue('W'.$h, $reporte[$i]['Tiempo'])
+                ;
+
+                $objPHPExcel->setActiveSheetIndex(0)->getStyle('A'.$h.':W'.$h)->applyFromArray($estilos_registros);
+                ++$h;
+            }
+            $objPHPExcel->setActiveSheetIndex(0);
+
+            foreach (range('A', 'W') as $columnID) {
+                $objPHPExcel->getActiveSheet()->getColumnDimension($columnID)
+                    ->setAutoSize(true);
+            }
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename=" '.$nombre_reporte.'.xlsx"');
+            header('Cache-Control: max-age=0');
+            $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+            $objWriter->save('php://output');
+        } else {
+            header('../prueba.php?caso=2');
+            echo"<No hay datos que se detecten de la consulta por eso no se ha generado el documento";
+        }
+    }
+    public function Reporte_busca_reporte_gestor()
+    {
+        include_once 'conexion.php';
+        $conexion = new ConexionSQL();
+        $con = $conexion->ObtenerConexionBD3();
+        $query = "SELECT [cFolio]
+        ,[nFolio]
+        ,[dFolioExt]
+        ,[Tipo_Docto]
+        ,[dAsunto]
+        ,[dReferencia]
+        ,[Grupo_Procedencia]
+        ,[Procedencia]
+        ,[dRemitente]
+        ,[dPuestoRem]
+        ,[dRFC]
+        ,[Subadministración]
+        ,[cUsuarioTur]
+        ,[NombreTurnado]
+        ,[dPuesto]
+        ,[Puesto_Departamento]
+        ,[Estado]
+        ,[nPrioridad]
+        ,[fDocumento]
+        ,[fRecepcion]
+        ,[fCaptura]
+        ,[Clasificacion]
+        ,[Tiempo]
+    FROM [GestorSat].[dbo].[vw_seguimiento_Cecilia] ORDER BY fCaptura DESC";
+        $prepare = sqlsrv_query($con, $query);
+        if ($prepare) {
+            while ($row = sqlsrv_fetch_array($prepare, SQLSRV_FETCH_ASSOC)) {
+                $filas[]  = $row;
+            }
+            if (isset($filas)) {
+                return $filas;
+                $conexion->CerrarConexion($con);
+            } else {
+                return null;
+                $conexion->CerrarConexion($con);
+            }
+           
+        } else {
+            return sqlsrv_errors();
+            $conexion->CerrarConexion($con);
+        }
+    }
 }
 
 

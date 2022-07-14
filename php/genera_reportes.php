@@ -26,6 +26,12 @@
         case isset($_GET['Stock']):
             $nombre_reporte = "Reporte_por_filtros_especiales";
         break;
+        case isset($_GET['fecha_ingreso']):
+        $nombre_reporte = "Reporte_por_filtros_fecha_ingreso";
+        break;
+        case isset($_GET['nivel']):
+        $nombre_reporte = "Reporte_por_filtros_nivel";
+        break;
         default:
         $nombre_reporte = "Reporte_general_activos";
         break;

@@ -1,5 +1,5 @@
 <?php
-
+    include_once 'php/sesion.php';
     require_once 'php/menu_dinamico.php';
     $perfil= $_SESSION['ses_id_perfil_ing'];
     if ($perfil != 1) {
@@ -122,7 +122,7 @@ if (isset($_GET["resultado"])) {
 
 <?php
 
-   // se imprime footer
+// se imprime footer
 $menu->Footer();
 
 ?>

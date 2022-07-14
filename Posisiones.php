@@ -29,8 +29,8 @@
 
 </div>
 <div class="container-fluid mt-4 my-4 container" >
-<button type="button" id="Monstrar" class="btn btn-info">Mostrar Filtros</button>
-<button type="button" id="Ocultar" style="display: none;" class="btn btn-primary">Ocultar Filtros</button>
+<button type="button" id="Monstrar" class="btn btn-info">Mostrar Filtros <i class='fas fa-bars' ></i> </button>
+
 <?php
     switch ($_GET) {
     case isset($_GET['pagina']):
@@ -157,12 +157,12 @@
   </div>
 
 </div>
-<div class="container-fluid">
+<div class="container">
 
     <button class="btn btn-success" id="posision_more"> Agregar Posisión <i class="fas fa-plus"></i>
     </button>
 </div>
-<div class="container-fluid mt-4 my-4 justify-content-center" id="vista_posisiones">
+<div class="container mt-4 my-4 justify-content-center" id="vista_posisiones">
     <?php
 include_once 'php/Vistas_generales.php';
 $vista_gen = new vistas();

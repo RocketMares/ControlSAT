@@ -135,6 +135,7 @@ class vistas{
                           ,source: 'img/fotos_empleados/".$num_empleado.".jpg'},";
                              $recibe_sub = $cons->filtra_deps_por_sub($pin['id_sub_admin']);
                              for ($i=0; $i < count($recibe_sub) ; $i++) { 
+                          
                                $num_empleado =$recibe_sub[$i]['no_empleado'] == NULL ? "LOGO11": $recibe_sub[$i]['no_empleado'];
   
                                echo "{ key: '".$recibe_sub[$i]['nombre_depto']."'
@@ -201,16 +202,22 @@ class vistas{
              
                     myDiagram".$data['id_depto'].".model = new go.TreeModel(
                       [
-                      { key: '".$data['id_empleado_plant']."'
+                      { key: '".$data['jefe_dep']."'
                         , Estructura: '".$data['nombre_depto']."' 
                         , Nombre_encargado:'".$data['nombre_empleado']."'
                         , Nombre_puesto: '".$data['nombre_puesto']."'  
                         ,source: 'img/fotos_empleados/".$data['no_empleado'].".jpg'},";
                            
-                           if ($recibe_jefes = $cons->Datos_empleados_por_jefes($data['id_empleado_plant'])) {
+                           if ($recibe_jefes = $cons->Datos_empleados_por_jefes($data['id_depto'])) {
+
+                         
                             for ($i=0; $i < count($recibe_jefes) ; $i++) { 
+
+                              if ($recibe_jefes[$i]['id_empleado_plant'] == $recibe_jefes[$i]['jefe_dep']) {
+                                continue;
+                              }
                               $num_empleado =$recibe_jefes[$i]['no_empleado'] == NULL ? "LOGO11": $recibe_jefes[$i]['no_empleado'];
-                              echo "{ key: '".$recibe_jefes[$i]['jefe_directo']."'
+                              echo "{ key: '".$recibe_jefes[$i]['id_empleado_plant']."'
                               , parent: '".$recibe_jefes[$i]['jefe_directo']."'
                               , Estructura: '".$recibe_jefes[$i]['nombre_depto']."' 
                               , Nombre_encargado:'".$recibe_jefes[$i]['nombre_empleado']."'
@@ -222,11 +229,12 @@ class vistas{
   
                       echo" ]
                     );
-                
+                  
+                    
                     ";
             }
               
-
+        
           }
 
           public function Tabla_posisiones(){
@@ -234,7 +242,7 @@ class vistas{
             include_once 'ConsultaADR.php';
             $cons = new ConsultaInfoADR();
             $universo_de_datos = $cons->Consulta_datos_Posisines_General();
-            $resultado = $universo_de_datos[0]['TOTAL'] / 50;
+            $resultado = $universo_de_datos['TOTAL'] / 50;
             $Posision_por_pagina = 50;
             $paginas_por_vista = ceil($resultado);
             switch ($_GET) {
@@ -270,8 +278,8 @@ class vistas{
               $datos_vista = $cons->datos_por_vissta_Consulta_datos_Posisines_General($inicio);
               }
               self::Paginacion_responsiva_posisiones($paginas_por_vista);
-            echo "<span class='badge badge-secondary'>Contador de Posiciones (".$universo_de_datos[0]['TOTAL'].")</span>
-            <table class='table  table-sm text-center table-bordered shadow-sm bg-white rounded table-hover '>
+            echo "<span class='badge badge-secondary'>Contador de Posiciones (".$universo_de_datos['TOTAL'].")</span>
+            <table class='table   table-responsive  text-center  table-striped table-bordered shadow-sm bg-white rounded table-hover ' style='height: 520px;'>
                 <thead class='thead-dark sticky-top'>
                   <tr>
                     <th scope='col'>#</th>

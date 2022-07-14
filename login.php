@@ -117,7 +117,7 @@ $menu->cabecera_principal_log();
                    <a href="olvido_pass.php" class="text-dark" >¿Olvidaste tu contraseña? Da click aquí.</a>
                 </div>
                 <div class="text-center">
-                <button type="submit" class="btn btn-lg btn-default">Entrar</button>
+                <button type="submit" class="btn btn-outline-dark btn-block">Entrar</button>
                 </div>
             </form>
         </div>

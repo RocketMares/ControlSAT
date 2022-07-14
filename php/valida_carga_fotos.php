@@ -214,6 +214,101 @@ if (isset($_FILES['documento_nuevo_oficio'])) {
 
 
 //FIN ACCIONES PARA CARGAR OFICIOS NUEVOS--------------------------------------------------------
+//INICIO ACCIONES PARA CARGAR SISTEMAS NUEVOS--------------------------------------------------------
 
 
+if (isset($_FILES['archivo_sistema_app'])) {
+    //ECHO"hola";
+    include_once "sesion.php";
+    include_once 'ConsultaADR.php';
+    $metodos = new ConsultaInfoADR();
+    $zip = new ZipArchive();
+    $id_sistem = $_SESSION['nombre_archivo_ses'];
+    if ($id_sistem != 0) {
+        $datos = $metodos->consulta_info_sistema($id_sistem);
+        
+        $NOMBRE_BUSCADO = $datos['id_system'];
+    
+        $nombre_archivo = $_FILES['archivo_sistema_app']['name'];
+        $tipo_archivo = $_FILES['archivo_sistema_app']['type'];
+        $nombre_temp_archivo = $_FILES['archivo_sistema_app']['tmp_name'];
+        $tamano_archivo = $_FILES['archivo_sistema_app']['size'];
+        $micarpeta = '../Sistemas_almacenados/';
+        $carpteta_temporal = "../temp_files/";
+        
+        $ext_archivo = substr($nombre_archivo, strrpos($nombre_archivo, '.'));
+        $nombre_archivo_emp = $NOMBRE_BUSCADO.$ext_archivo;
+        
+            if (move_uploaded_file($nombre_temp_archivo, $carpteta_temporal.$nombre_archivo_emp)) {
+                if ($zip->open($micarpeta.$NOMBRE_BUSCADO.'.zip', ZIPARCHIVE::CREATE)===true) {
+                    $zip->addFile($carpteta_temporal.$nombre_archivo_emp,$nombre_archivo_emp);
+                    if ($zip->close()) {
+                        echo "Se ha cargado el sistema exitosxamente";
+                        unlink($carpteta_temporal.$nombre_archivo_emp);
+                    }
+                } else {
+                    echo 'Error al crear el documento zip ';
+                }
+            }
+        
+    }
+}
+if (isset($_FILES['miArchvio_firmado_resp'])) {
+    include_once 'sesion.php';
+    include_once 'ConsultaADR.php';
+    $metodos = new ConsultaInfoADR();
+    $zip = new ZipArchive();
+    $id_acceso = $_SESSION['nombre_archivo_ses'];
+    if ($id_oficio != 0) {
+        $datos = $metodos->Consulta_datos_de_la_responsiva_para_nombrar($id_acceso);
+        $nombre_carpeta_interna = $datos['rfc_corto'];
+        $NOMBRE_BUSCADO = $datos['no_empleado'].'_'.$datos['id_reg_acceso'].'_RESP_'.str_replace(" ", "_",$datos['nombre_sistema']);
+    
+        $nombre_archivo = $_FILES['miArchvio_firmado_resp']['name'];
+        $tipo_archivo = $_FILES['miArchvio_firmado_resp']['type'];
+        $nombre_temp_archivo = $_FILES['miArchvio_firmado_resp']['tmp_name'];
+        $tamano_archivo = $_FILES['miArchvio_firmado_resp']['size'];
+        $micarpeta = '../Formatos/'.$nombre_carpeta_interna.'/';
+        $carpteta_temporal = "../temp_files/";
+        
+        $ext_archivo = substr($nombre_archivo, strrpos($nombre_archivo, '.'));
+        $nombre_archivo_emp = $NOMBRE_BUSCADO.$ext_archivo;
+        if (!file_exists($micarpeta)) {
+            mkdir($micarpeta, 0777, true);
+            if (move_uploaded_file($nombre_temp_archivo, $carpteta_temporal.$nombre_archivo_emp)) {
+                if ($zip->open($micarpeta.$NOMBRE_BUSCADO.'.zip', ZIPARCHIVE::CREATE)===true) {
+                    $zip->addFile($carpteta_temporal.$nombre_archivo_emp,$nombre_archivo_emp);
+                    if ($zip->close()) {
+                        echo "Se ha cargado el documento exitosxamente";
+                        unlink($carpteta_temporal.$nombre_archivo_emp);
+                    }
+                } else {
+                    echo 'Error al crear el documento zip ';
+                }
+            }
+        } else {
+            $micarpeta = '../Formatos/'.$nombre_carpeta_interna.'/';
+       
+            if (move_uploaded_file($nombre_temp_archivo, $carpteta_temporal.$nombre_archivo_emp)) {
+                // if ($zip->open($path_temp.$nombre_doc, ZIPARCHIVE::CREATE) === true) {
+                
+                if ($zip->open($micarpeta.$NOMBRE_BUSCADO.'.zip', ZIPARCHIVE::CREATE)===true) {
+                    $zip->addFile($carpteta_temporal.$nombre_archivo_emp,$nombre_archivo_emp);
+                    if ($zip->close()) {
+                        echo "Se ha cargado el documento exitosxamente";
+                        unlink($carpteta_temporal.$nombre_archivo_emp);
+                    }
+                } else {
+                    echo 'Error creando '.$NOMBRE_BUSCADO;
+                }
+            }
+        }
+    }
+    else{
+        echo "no hay datos $id_acceso";
+    }
+}
+
+
+//FIN ACCIONES PARA CARGAR OFICIOS NUEVOS--------------------------------------------------------
 ?>

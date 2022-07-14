@@ -1071,6 +1071,7 @@ FROM [Control_Ingresos].[dbo].[Administracion]";
           20,
           21,
           22,
+          41,
           25,
           30,
           31,

@@ -2,6 +2,9 @@ $("#ver").click(function (e) {
   openNav();
 });
 $(document).ready(function () {
+  $('#Modal_detalle_usuario_insumo').on('click', function () {
+    $('#body_cer').addClass('modal-open');
+  })
   $('#RFC_COMP_add').on('keyup', function () {
     var datos = $('#RFC_COMP_add').val();
 
@@ -22,9 +25,112 @@ $(document).ready(function () {
     }
 
   });
+  $('#Muestra_from_access_sistem').on('click', function () {
+    $('#form_agrega_acceso_sis_a_user').toggle(200, function () {});
+  })
+  $('#agrega_acceso_al_sistema').on('click', function () {
+    $('#form_agrega_acceso_sis_a_user').toggle(200, function () {});
+  })
+  $('#Indice_edicion').on('click', function () {
+    $('#formulario_edicion_sistema').toggle(200, function () {});
+  })
+  $('#muestra_agrega_roles_forms').on('click', function () {
+    $('#casilla_para_agregar_roles').toggle(200, function () {});
+  })
+  $('#selec_sistem_access').change(function () {
+    $('#selec_sistem_access option:selected').each(function () {
+      var sis = $(this).val();
+      $.post("php/consulta_dat.php", {
+        rolores_por_sistema: sis
+      }, function (data) {
+        $('#muestra_roles').html(data);
+      })
+    })
+  })
+ 
+
+
 });
 
+function Agrega_sistema_al_empleado(id_empleado) {
+  var sistema = $('#selec_sistem_access').val();
+  var fecha = $('#fecha_responsiva').val();
+  var selected = '';
+  var roles = '';
+  $('input:checkbox[name=Roles_asign]:checked').each(function () {
+    if (this.checked) {
+      roles += $(this).val() + ', ';
+    }
 
+  });
+
+  if (roles != '') {
+    if (fecha == '') {
+      alert('Tienes quue sleeccionar la fecha que asigna a la cuenta')
+    } else {
+      var json = {
+        id_empleado: id_empleado,
+        roles: roles,
+        fecha: fecha,
+        sistema: sistema
+      }
+      var datos = JSON.stringify(json)
+      $.ajax({
+        type: "POST",
+        url: "php/consulta_dat.php",
+        data: {
+          datos_para_reg: datos
+        },
+        dataType: "HTML",
+        success: function (response) {
+          toastr.success(response, 'Notificacion')
+          // Revisa_info_det_us(id_empleado)
+          Historial_registro_sistemas(id_empleado)
+        }
+      });
+    }
+  } else {
+    alert('Tienes quue sleeccionar los roles que asigna a la cuenta')
+  }
+}
+
+
+function Modifica_roles_resp_empleado2(id_acceso,id_empleado) {
+  var selected = '';
+  var roles = '';
+  $('input:checkbox[name=Roles_asign]:checked').each(function () {
+    if (this.checked) {
+      roles += $(this).val() + ', ';
+    }
+
+  });
+
+  if (roles != '') {
+   
+      var json = {
+        id_acceso: id_acceso,
+        roles: roles
+      }
+      var datos = JSON.stringify(json)
+      $.ajax({
+        type: 'POST',
+        url: 'php/consulta_dat.php',
+        data: {
+          datos_para_reg2: datos
+        },
+        dataType: 'HTML',
+        success: function (response) {
+          toastr.success(response, 'Notificacion')
+          // Revisa_info_det_us(id_empleado)
+          Retro_responsivas(id_acceso,id_empleado)
+          //Historial_registro_sistemas(id_empleado)
+        }
+      });
+    
+  } else {
+    alert('Tienes quue sleeccionar los roles que asigna a la cuenta')
+  }
+}
 
 function Actualiza_area_asign_y_jefe(id_user_in) {
   var id_empleado = id_user_in;
@@ -38,16 +144,17 @@ function Actualiza_area_asign_y_jefe(id_user_in) {
   var num_oficio = $('#no_oficio').val();
   var tipo_oficio = $('#tipo_ofifcio').val();
   var fecha_oficio = $('#fecha_de_oficio').val();
-
+  var estructura = $('#estructura_2').val();
 
   var datos = {
     id_empleado: id_empleado,
     id_admin: id_admin,
     id_sub_admin: id_sub_admin,
     id_depto: id_depto,
-    fecha_mov_funcional:fecha_mov_funcional,
+    fecha_mov_funcional: fecha_mov_funcional,
     id_jefe: id_jefe,
     id_puesto: id_puesto,
+    estructura: estructura,
   }
   var datos_oficios = {
     id_empleado: id_empleado,
@@ -58,61 +165,19 @@ function Actualiza_area_asign_y_jefe(id_user_in) {
   if (fecha_mov_funcional == '') {
     toastr.error("Tienes que seleccionar la fecha en la que aplicara el movimiento.", "Notificación")
   } else {
-          if (opcion_oficio == 1) {
-            if (num_oficio == '') {
-              toastr.error("No puedes dejar en bllanco el núumero de oficio.", "Notificación")
-            } else {
-              if (tipo_oficio == 0) {
-                toastr.error("Tienes que seleccionar el tipo de oficio.", "Notificación")
+    if (opcion_oficio == 1) {
+      if (num_oficio == '') {
+        toastr.error("No puedes dejar en bllanco el núumero de oficio.", "Notificación")
+      } else {
+        if (tipo_oficio == 0) {
+          toastr.error("Tienes que seleccionar el tipo de oficio.", "Notificación")
 
-              } else {
-                if (fecha_oficio == '') {
-                  toastr.error("Tienes que seleccionar la fecha del oficio.", "Notificación")
+        } else {
+          if (fecha_oficio == '') {
+            toastr.error("Tienes que seleccionar la fecha del oficio.", "Notificación")
 
-                } else {
-                  
-                    var json = JSON.stringify(datos)
-                    $.ajax({
-                        url: 'php/consulta_dat.php',
-                        type: 'POST',
-                        dataType: 'html',
-                        data: {
-                          act_area_asignada: json
-                        },
-                      })
-                      .done(function (respuesta) {
-                        toastr.info(respuesta, "Notificacion", {
-                          "progressBar": true
-                        })
-                        Revisa_info_det_us(id_user_in)
-                        var json1 = JSON.stringify(datos_oficios)
-                        $.ajax({
-                            url: 'php/consulta_dat.php',
-                            type: 'POST',
-                            dataType: 'html',
-                            data: {
-                              Genera_oficio_Asignacion: json1
-                            },
-                          })
-                          .done(function (respuesta) {
-                            toastr.success(respuesta, "Notificacion", {
-                              "progressBar": true
-                            })
-                            Revisa_info_det_us(id_user_in)
-                          })
-                          .fail(function () {
-                            console.log("error");
-                          });
-                      })
-                      .fail(function () {
-                        console.log("error");
-                      });
-                  
-
-                }
-              }
-            }
           } else {
+
             var json = JSON.stringify(datos)
             $.ajax({
                 url: 'php/consulta_dat.php',
@@ -127,12 +192,54 @@ function Actualiza_area_asign_y_jefe(id_user_in) {
                   "progressBar": true
                 })
                 Revisa_info_det_us(id_user_in)
+                var json1 = JSON.stringify(datos_oficios)
+                $.ajax({
+                    url: 'php/consulta_dat.php',
+                    type: 'POST',
+                    dataType: 'html',
+                    data: {
+                      Genera_oficio_Asignacion: json1
+                    },
+                  })
+                  .done(function (respuesta) {
+                    toastr.success(respuesta, "Notificacion", {
+                      "progressBar": true
+                    })
+                    Revisa_info_det_us(id_user_in)
+                  })
+                  .fail(function () {
+                    console.log("error");
+                  });
               })
-              .fail(function (error) {
-                console.log(error);
+              .fail(function () {
+                console.log("error");
               });
+
+
           }
+        }
+      }
+    } else {
+      var json = JSON.stringify(datos)
+      $.ajax({
+          url: 'php/consulta_dat.php',
+          type: 'POST',
+          dataType: 'html',
+          data: {
+            act_area_asignada: json
+          },
+        })
+        .done(function (respuesta) {
+          toastr.info(respuesta, "Notificacion", {
+            "progressBar": true
+          })
+          Revisa_info_det_us(id_user_in)
+        })
+        .fail(function (error) {
+          console.log(error);
+        });
     }
+  }
 
 
 
@@ -357,6 +464,7 @@ function Actualiza_posision_info_mante(id_posision) {
 }
 
 function Actualiza_dat_basic(id_user_in) {
+
   var rfc = $("#RFC_COMP").val();
   var rfc_c = $("#RFC_CORTO").val();
   var curp = $("#CURP2").val();
@@ -372,6 +480,7 @@ function Actualiza_dat_basic(id_user_in) {
   var fec_baja = $("#fecha_baja").val();
   var estatus = $("#estatus").val();
   var no_empleado = $("#NO_EMPLEADO").val();
+  var id_nivel_jerar = $("#nivel_jerar_detalle").val();
   var tipo_nom = $("#tipo_nombramiento12").val();
   var sindicato = $("#sindicato").val();
   var Motivo_especial_por_est = $("#Motivo_baja_option").val();
@@ -393,6 +502,7 @@ function Actualiza_dat_basic(id_user_in) {
     no_empleado: no_empleado,
     id_emp: id_user_in,
     tipo_nom: tipo_nom,
+    id_nivel_jerar:id_nivel_jerar,
     sindicato: sindicato,
     Motivo_especial_por_est: Motivo_especial_por_est
   }
@@ -652,10 +762,430 @@ function trae_Oficios_historial(id_insumo) {
   })
 }
 
+
+
+
+function detalle_sistema_muestra(id_sistema) {
+  var id_system = id_sistema
+  $('#Rockers').modal()
+  Vista_general_sistema_indiv(id_system)
+
+  $.post("php/consulta_dat.php", {
+    detalle_sistema: id_system
+  }, function () {}).done(function (resp) {
+    // alert('hola')
+
+    // STAR UP DE SISTEMA, PRESENTACIÓN
+    $('#nombre_sistema_titulo').html(resp['nombre_sistema'])
+    $('#nombre_sistema_titulo_').html(resp['nombre_sistema'])
+    $('#tarjeta_presentacion_sistema').html(resp['Descripcion_sistema'])
+    $('#tipo_sistema').html(resp['tipo_sistema_traducido'])
+    $('#adminin_sis').html(resp['Administraciion_sistema_traducido'])
+    $('#aprob_sis').html(resp['Aprobador_Sistemas'])
+    $('#Indice_empleados_actiovos_baja').attr('onclick', 'Muestra_roles(' + id_system + ')')
+    $('#agrega_rol_al_sistema').attr('onclick', 'Agrega_rol_al_sistema(' + id_system + ')')
+    $('#indice_otros').attr('onclick', 'Reg_usuarios_x_sistema(' + id_system + ')')
+    $('#modifica_sistema_matriz').attr('onclick', 'mod_matriz(' + id_system + ')')
+    //EDICION DE DATOS
+    $('#name_sistema2').val(resp['nombre_sistema'])
+    $('#Autorizador_sistema2').val(resp['Aprobador_Sistemas'])
+    $('#num_cuentas_sistema2').val(resp['Num_cuentas_Siistema'])
+    $('#desc_sistema2').html(resp['Descripcion_sistema'])
+    $("#admin_sistema2 option[value='" + resp['Administraciion_sistema'] + "']").attr("selected", true);
+    $("#Tipo_acceso2 option[value='" + resp['tipo_sistema'] + "']").attr("selected", true);
+
+    if (resp['tipo_sistema'] == 3 || resp['tipo_sistema'] == 4) {
+      $('#input_liga2').hide(200);
+      $('#Liga_acces_sistema2').val("");
+      if (resp['tipo_sistema'] == '' || resp['tipo_sistema'] == null) {
+        $('#div_option_archivo2').show(200);
+        $('#Selecciona_Opicion_sis2').prop('checked', false)
+      } else {
+        $('#div_option_archivo2').hide();
+        $('#Selecciona_Opicion_sis2').prop('checked', true)
+      }
+
+      $('#input_carga_sis2').prop('checked', true)
+      $('#Selecciona_Opicion_sis2').prop('checked', false)
+    } else {
+      $('#input_liga2').show(200);
+      $('#Liga_acces_sistema2').val(resp['url/acceso']);
+      $('#div_option_archivo2').hide(200);
+      $("#input_carga_sis2").hide(200);
+      $('#Selecciona_Opicion_sis2').prop('checked', false)
+      $('#input_carga_sis2').prop('checked', false)
+    }
+    if (resp['Num_cuentas_Siistema'] == null) {
+      $('#cuentas_ilimitadas_sis2').prop('checked', true)
+      $("#num_cuentas_sistema2").val("");
+      $("#num_cuentas_sistema2").prop("disabled", true);
+
+    } else {
+      $("#num_cuentas_sistema2").prop("disabled", false);
+      $('#num_cuentas_sistema2').val(resp['Num_cuentas_Siistema'])
+      $("#num_cuentas_sistema2").prop("disabled", false);
+      $('#cuentas_ilimitadas_sis2').prop('checked', false)
+    }
+
+  }).fail(function (error) {
+    console.log(error)
+  })
+  $.post("php/consulta_dat.php", {
+    detalle_sistema1: id_system
+  }, function () {}).done(function (resp) {
+    // alert('hola')
+    $('#aqui_van_links').html(resp)
+
+
+
+  }).fail(function (error) {
+    console.log(error)
+  })
+  $.post("php/consulta_dat.php", {
+    detalle_sistema2: id_system
+  }, function () {}).done(function (resp) {
+    // alert('hola')
+
+    $('#descarg').html(resp)
+
+
+  }).fail(function (error) {
+    console.log(error)
+  })
+
+
+}
+
+function mod_matriz(id_system) {
+  var nombre_sistema = $('#name_sistema2').val();
+  var administra_sistem = $('#admin_sistema2').val();
+  var num_cuentas = $('#num_cuentas_sistema2').val();
+  var quien_autoriza = $('#Autorizador_sistema2').val();
+  var tipo_sistema = $('#Tipo_acceso2').val();
+  var liga_acceso = $('#Liga_acces_sistema2').val();
+  var descripcion_sistema = $('#desc_sistema2').val();
+  var miArchvio = $("#archivo_sistema_app2").prop('files')[0];
+  var formData_example = new FormData($(".Carga_sistemas_nuevos_con_app2")[0]);
+  formData_example.append('archivo_sistema_app', miArchvio);
+  var ext = $('#archivo_sistema_app2').val().split('.').pop().toLowerCase();
+  console.log(miArchvio)
+  var data = {
+    id_system: id_system,
+    nombre_sistema: nombre_sistema,
+    administra_sistem: administra_sistem,
+    num_cuentas: num_cuentas,
+    quien_autoriza: quien_autoriza,
+    tipo_sistema: tipo_sistema,
+    liga_acceso: liga_acceso,
+    descripcion_sistema: descripcion_sistema,
+    opcion_carga: ''
+  }
+  console.log(data)
+  var datos = JSON.stringify(data);
+  if (nombre_sistema == '') {
+    toastr.error('No puedes dejar el nombre del sistema o carpeta en blanco', 'Notificacion', {
+      "progressBar": true
+    });
+  } else {
+    if (administra_sistem == 0) {
+      toastr.error('Debes seleccionar el area que administra el sistema o carpeta.', 'Notificacion', {
+        "progressBar": true
+      });
+    } else {
+      if ($('#cuentas_ilimitadas_sis2').prop("checked") == true) {
+        if (tipo_sistema == 3 || tipo_sistema == 4) {
+
+          if ($('#Selecciona_Opicion_sis2').prop("checked") == true) {
+            var data = {
+              nombre_sistema: nombre_sistema,
+              administra_sistem: administra_sistem,
+              num_cuentas: num_cuentas,
+              quien_autoriza: quien_autoriza,
+              tipo_sistema: tipo_sistema,
+              liga_acceso: liga_acceso,
+              descripcion_sistema: descripcion_sistema,
+              opcion_carga: 'si',
+              id_system: id_system,
+            }
+            console.log(data)
+            if ($.inArray(ext, ['zip']) == -1) {
+              toastr.error('Extencion invalida, solo se pueden aceptar archivos con extencion .zip', 'Notificacion', {
+                "progressBar": true
+              });
+            } else {
+              $.post("php/consulta_dat.php", {
+                Actualiza_sistema: datos
+              }, function () {}).done(function (respuesta) {
+                if (respuesta == false) {
+                  toastr.error(respuesta, 'Notificacion', {
+                    "progressBar": true
+                  });
+                } else {
+                  $.ajax({
+                    url: "./php/valida_carga_fotos.php",
+                    type: "POST",
+                    contentType: false,
+                    processData: false,
+                    data: formData_example,
+                  }).done(function (respuesta) {
+                    toastr.success(respuesta + ' 1  con sistema', 'Notificación:', {
+                      "progressBar": true
+                    })
+
+                  }).fail(function () {
+                    toastr.error(error, 'Notificacion', {
+                      "progressBar": true
+                    });
+                  })
+                }
+
+              }).fail(function () {
+                toastr.error(error, 'Notificacion', {
+                  "progressBar": true
+                });
+              })
+            }
+          } else {
+            var data = {
+              nombre_sistema: nombre_sistema,
+              administra_sistem: administra_sistem,
+              num_cuentas: num_cuentas,
+              quien_autoriza: quien_autoriza,
+              tipo_sistema: tipo_sistema,
+              liga_acceso: liga_acceso,
+              descripcion_sistema: descripcion_sistema,
+              opcion_carga: '',
+              id_system: id_system,
+            }
+            console.log(data)
+            $.post("./php/consulta_dat.php", {
+              Actualiza_sistema: datos
+            }, function () {}).done(function (respuesta) {
+              toastr.success(respuesta, 'Notificacion', {
+                "progressBar": true
+              });
+            }).fail(function (error) {
+              toastr.error(error, 'Notificacion', {
+                "progressBar": true
+              });
+            })
+          }
+        } else if (tipo_sistema == 0) {
+          toastr.error('Debes seleccionar el tipo de acceso que tiene el sistema o carpeta', 'Notificacion', {
+            "progressBar": true
+          });
+        } else {
+          if (liga_acceso == '') {
+            toastr.error('No puedes dejar la liga del sistema o carpeta en blanco', 'Notificacion', {
+              "progressBar": true
+            });
+          } else {
+            $.post("php/consulta_dat.php", {
+              Actualiza_sistema: datos
+            }, function () {}).done(function (respuesta) {
+              toastr.success(respuesta, 'Notificacion', {
+                "progressBar": true
+              });
+            }).fail(function (error) {
+              toastr.error(error, 'Notificacion', {
+                "progressBar": true
+              });
+            })
+          }
+        }
+
+      } else {
+        if (num_cuentas == '') {
+          toastr.error('Debes indicar el numero de cuentas que puede tener el sistema o carpeta.', 'Notificacion', {
+            "progressBar": true
+          });
+        } else {
+          if (tipo_sistema == 3 || tipo_sistema == 4) {
+
+            if ($('#Selecciona_Opicion_sis2').prop("checked") == true) {
+              var data = {
+                nombre_sistema: nombre_sistema,
+                administra_sistem: administra_sistem,
+                num_cuentas: num_cuentas,
+                quien_autoriza: quien_autoriza,
+                tipo_sistema: tipo_sistema,
+                liga_acceso: liga_acceso,
+                descripcion_sistema: descripcion_sistema,
+                opcion_carga: 'si',
+                id_system: id_system,
+              }
+              console.log(data)
+              if ($.inArray(ext, ['zip']) == -1) {
+                toastr.error('Extencion invalida, solo se pueden aceptar archivos con extencion .zip', 'Notificacion', {
+                  "progressBar": true
+                });
+              } else {
+                $.post("php/consulta_dat.php", {
+                  Actualiza_sistema: datos
+                }, function () {}).done(function (respuesta) {
+                  if (respuesta == false) {
+                    toastr.error(respuesta, 'Notificacion', {
+                      "progressBar": true
+                    });
+                  } else {
+                    $.ajax({
+                      url: "./php/valida_carga_fotos.php",
+                      type: "POST",
+                      contentType: false,
+                      processData: false,
+                      data: formData_example,
+                    }).done(function (respuesta) {
+                      toastr.success(respuesta + ' 2 sin sistema', 'Notificación:', {
+                        "progressBar": true
+                      })
+
+                    }).fail(function () {
+                      toastr.error(error, 'Notificacion', {
+                        "progressBar": true
+                      });
+                    })
+                  }
+
+                }).fail(function () {
+                  toastr.error(error, 'Notificacion', {
+                    "progressBar": true
+                  });
+                })
+              }
+            } else {
+              $.post("php/consulta_dat.php", {
+                Actualiza_sistema: datos
+              }, function () {}).done(function (respuesta) {
+                toastr.success(respuesta, 'Notificacion', {
+                  "progressBar": true
+                });
+              }).fail(function (error) {
+                toastr.error(error, 'Notificacion', {
+                  "progressBar": true
+                });
+              })
+            }
+          } else if (tipo_sistema == 0) {
+            toastr.error('Debes seleccionar el tipo de acceso que tiene el sistema o carpeta', 'Notificacion', {
+              "progressBar": true
+            });
+          } else {
+            if (liga_acceso == '') {
+              toastr.error('No puedes dejar la liga del sistema o carpeta en blanco', 'Notificacion', {
+                "progressBar": true
+              });
+            } else {
+              $.post("php/consulta_dat.php", {
+                Actualiza_sistema: datos
+              }, function () {
+
+              }).done(function (respuesta) {
+                toastr.success(respuesta, 'Notificacion', {
+                  "progressBar": true
+                });
+              }).fail(function (error) {
+                toastr.error(error, 'Notificacion', {
+                  "progressBar": true
+                });
+              })
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+function Reg_usuarios_x_sistema(id_system) {
+  var id_system = id_system
+  $.post("php/consulta_dat.php", {
+    vista_users_x_sistem: id_system
+  }, function () {}).done(function (resp) {
+    $('#ussers_x_sistems').html(resp);
+  })
+}
+
+function Agrega_rol_al_sistema(id_system) {
+  var nombre_rol = $('#nombre_rol').val();
+  var clave_rol = $('#clave_rol').val();
+  var id_system_ = id_system;
+  var datos = {
+    nombre_rol: nombre_rol,
+    clave_rol: clave_rol,
+    id_system_: id_system_
+  }
+  var json = JSON.stringify(datos);
+  if (nombre_rol == '') {
+    toastr.error('No puedes agregar un Rol nuevo sin nombre', 'Notificación')
+  } else {
+    $.post("php/consulta_dat.php", {
+      agre_rol_sis: json
+    }, function () {}).done(function (resp) {
+      toastr.success(resp, 'Notificación')
+      Muestra_roles(id_system_)
+    }).fail(function () {
+      toastr.error(error, 'Notificación')
+    })
+  }
+
+}
+
+function Muestra_roles(id_system) {
+  $.post("php/consulta_dat.php", {
+    tabla_roles: id_system
+  }, function () {}).done(function (resp) {
+    // alert('hola')
+    $('#Tabla_roles').html(resp)
+
+
+  }).fail(function (error) {
+    console.log(error)
+  })
+}
+
+function Vista_general_sistema_indiv(id_system) {
+
+  $.post("php/consulta_dat.php", {
+    detalle_sistema_tarjeta: id_system
+  }, function () {}).done(function (resp) {
+    // alert('hola')
+    $('#tarjeta_presentacion_sistema').html(resp)
+
+  }).fail(function (error) {
+    console.log(error)
+  })
+}
+
 function Revisa_info_det_us(id_user_in) {
   // createCookie('users',id_user_in);
   var id_us = id_user_in;
   $("#Modal_detalle_usuario_insumo").modal();
+  $('#dat_basc_ac').addClass('active');
+  $('#nav-home-tab').attr('aria-selected', true);
+  $('#datos_basc').addClass('active show');
+  $('#DATOS_GEN').addClass('active show');
+  $('#nav-profile-tab').removeClass('active');
+  $('#nav-sistemas-tab').removeClass('active');
+  $('#nav-Oficios_his-tab').removeClass('active');
+  $('#MOVIMIENTOS').removeClass(' active show');
+  $('#SISTEMAS').removeClass(' active show');
+  $('#RESPONSIVAS').removeClass(' active show');
+  $('#datos_basc_adic').removeClass(' active show');
+  $('#dat_est_cent_ac').removeClass(' active show');
+  $('#datos_op').removeClass(' active show');
+  $('#dat_est_fun_ac').removeClass('active');
+  $('#dat_est_cent_ac').removeClass('active');
+  $.post("php/consulta_dat.php", {
+    consulta_jefe_dep: id_user_in
+  }, function (data) {
+    //console.log(data)
+    if (data == 1) {
+      $("#estructura_2 option[value='1']").attr("selected", true);
+    } else {
+      $("#estructura_2 option[value='2']").attr("selected", true);
+    }
+  })
+
   $.post("php/consulta_dat.php", {
     datos: id_us
   }, function (data) {
@@ -795,10 +1325,12 @@ function Revisa_info_det_us(id_user_in) {
       $("#act_us_in_datos_basicos").attr("onclick", 'Actualiza_dat_basic(' + id_user_in[0] + ')');
       $("#actualiza_dat_adicionales_bot").attr("onclick", 'Actualiza_datos_adicionales(' + id_user_in[0] + ')');
       $("#actualiza_plazas").attr("onclick", 'Actualiza_datos_posision(' + id_user_in[0] + ')');
+      $("#nav-sistemas-tab").attr("onclick", 'Historial_registro_sistemas(' + id_user_in[0] + ')');
       $("#actualiza_area_asig").attr("onclick", 'Actualiza_area_asign_y_jefe(' + id_user_in[0] + ')');
       $('#nav-profile-tab').attr('onclick', 'trae_movimientos_x_personal(' + id_user_in[0] + ')');
       $('#nav-Oficios_his-tab').attr('onclick', 'trae_Oficios_historial(' + id_user_in[0] + ')');
       $('#Agregar_oficio_nuevo').attr('onclick', 'Abre_modal_oficio_nuevo(' + id_user_in[0] + ')');
+      $('#agrega_acceso_al_sistema').attr('onclick', 'Agrega_sistema_al_empleado(' + id_user_in[0] + ')');
       if (estatus[0] == 11 || estatus[0] == 28 || estatus[0] == 7 || estatus[0] == 6 || estatus[0] == 32 || estatus[0] == 25) {
         var fec_baja = fecha_fin_relacion[0]['date'];
         var date_string2 = moment(fec_baja).format("YYYY/MM/DD");
@@ -829,6 +1361,20 @@ function Revisa_info_det_us(id_user_in) {
 
 }
 
+function Historial_registro_sistemas(id_user) {
+  $.ajax({
+    type: "POST",
+    url: "php/consulta_dat.php",
+    data: {
+      Matriz_empleado: id_user
+    },
+    dataType: "HTML",
+    success: function (response) {
+      $('#historial_matriz_por_empleados').html(response)
+    }
+  });
+}
+
 function Abre_modal_oficio_nuevo(id_user_insumo) {
   $('#oficio_nuevo_modal').modal();
   $('#revisa_datos_oficio').attr('onclick', 'Registra_nuevo_oficio(' + id_user_insumo + ')');
@@ -837,44 +1383,50 @@ function Abre_modal_oficio_nuevo(id_user_insumo) {
 
 function Registra_nuevo_oficio(id_user) {
 
- 
 
-    var tipo_doc =$('#Tipo_de_oficio').val();
-    var no_oficio = $('#No_oficio_nuevo').val();
-    var fecha_oficio = $('#fecha_oficio_doc').val();
 
-    
-    var miArchvio = $("#documento_nuevo_oficio").prop('files')[0];
-    var formData_example = new FormData($(".Formato_oficios_nuevos")[0]);
-    formData_example.append('documento_nuevo_oficio', miArchvio);
-    var ext = $('#documento_nuevo_oficio').val().split('.').pop().toLowerCase();
-    var datos = {id_user:id_user,tipo_doc:tipo_doc,no_oficio:no_oficio,fecha_oficio:fecha_oficio}
+  var tipo_doc = $('#Tipo_de_oficio').val();
+  var no_oficio = $('#No_oficio_nuevo').val();
+  var fecha_oficio = $('#fecha_oficio_doc').val();
 
-    if ($.inArray(ext, ['pdf','docs','zip']) == -1) {
-        toastr.error('Extencion invalida, solo se pueden aceptar documentos con extencion .pdf, .docs, .zip', 'Notificacion', {
-            "progressBar": true
-        });
-    }
-    else{
-        $.post("php/valida_carga_fotos.php",{nombre_doc:datos},function(){
-          
-        }).done(function(respuesta){
-            //toastr.info(respuesta,'Notificacion')
-            $.ajax({
-                url: "./php/valida_carga_fotos.php",
-                type: "POST",
-                contentType: false,
-                processData: false,
-                data: formData_example,
-            }).done(function (respuesta) {
-                toastr.success(respuesta, 'Notificación:', {
-                    "progressBar": true
-                })
-                Revisa_info_det_us(id_user)
-            })
+
+  var miArchvio = $("#documento_nuevo_oficio").prop('files')[0];
+  var formData_example = new FormData($(".Formato_oficios_nuevos")[0]);
+  formData_example.append('documento_nuevo_oficio', miArchvio);
+  var ext = $('#documento_nuevo_oficio').val().split('.').pop().toLowerCase();
+  var datos = {
+    id_user: id_user,
+    tipo_doc: tipo_doc,
+    no_oficio: no_oficio,
+    fecha_oficio: fecha_oficio
+  }
+
+  if ($.inArray(ext, ['pdf', 'docs', 'zip']) == -1) {
+    toastr.error('Extencion invalida, solo se pueden aceptar documentos con extencion .pdf, .docs, .zip', 'Notificacion', {
+      "progressBar": true
+    });
+  } else {
+    $.post("php/valida_carga_fotos.php", {
+      nombre_doc: datos
+    }, function () {
+
+    }).done(function (respuesta) {
+      //toastr.info(respuesta,'Notificacion')
+      $.ajax({
+        url: "./php/valida_carga_fotos.php",
+        type: "POST",
+        contentType: false,
+        processData: false,
+        data: formData_example,
+      }).done(function (respuesta) {
+        toastr.success(respuesta, 'Notificación:', {
+          "progressBar": true
         })
-       
-    }
+        Revisa_info_det_us(id_user)
+      })
+    })
+
+  }
 
 }
 
@@ -907,12 +1459,11 @@ $(document).ready(function () {
       }
     })
   })
-  $('#forma').on('click',function () {
-    var estado =  $('#Sin_no_oficio').prop('indeterminate', true)
+  $('#forma').on('click', function () {
+    var estado = $('#Sin_no_oficio').prop('indeterminate', true)
     if (estado == true) {
       console.log('hola')
-    }
-    else{
+    } else {
       console.log('no detecta')
     }
   })
@@ -1473,6 +2024,15 @@ $(document).ready(function () {
     toggleActive: true,
     language: 'es'
   });
+  $('#fecha_cambio_est_resp').datepicker({
+    endDate: "today",
+    autoclose: true,
+    //daysOfWeekDisabled: [0, 6],
+    todayHighlight: true,
+    format: "yyyy/mm/dd",
+    toggleActive: true,
+    language: 'es'
+  });
 
   $('#fecha_de_oficio').datepicker({
     //endDate: "today",
@@ -1484,6 +2044,15 @@ $(document).ready(function () {
     language: 'es'
   });
   $('#fecha_baja').datepicker({
+    //endDate: "today",
+    autoclose: true,
+    todayHighlight: true,
+    //daysOfWeekDisabled: [0, 6],
+    format: "yyyy/mm/dd",
+    toggleActive: true,
+    language: "es"
+  });
+  $('#fecha_responsiva').datepicker({
     //endDate: "today",
     autoclose: true,
     todayHighlight: true,
@@ -1515,64 +2084,356 @@ $(document).ready(function () {
       }
     })
   })
-  $('#Selecciona_Opicion').on('click',function(){
+  $('#Selecciona_Opicion').on('click', function () {
 
-      if ($('#Selecciona_Opicion').prop('checked') == true ) {
+    if ($('#Selecciona_Opicion').prop('checked') == true) {
+      $("#No_oficio_nuevo").val("");
+      $("#No_oficio_nuevo").prop('disabled', true);
+
+    } else {
+      $("#No_oficio_nuevo").prop('disabled', false);
+    }
+
+  })
+  $('#Tipo_de_oficio').change(function () {
+    $('#Tipo_de_oficio option:selected').each(function () {
+      var opcion = $(this).val();
+
+      if (opcion == 3) {
+        $('#Selecciona_Opicion').prop('checked', true)
         $("#No_oficio_nuevo").val("");
         $("#No_oficio_nuevo").prop('disabled', true);
-    
+        $("#Selecciona_Opicion").prop('disabled', true);
       } else {
+        $('#Selecciona_Opicion').prop('checked', false)
+        $("#No_oficio_nuevo").val("");
         $("#No_oficio_nuevo").prop('disabled', false);
+        $("#Selecciona_Opicion").prop('disabled', false);
       }
-
+    })
   })
-   $('#Abre_modal_agre_sistema').on('click',function(){
-        $('#mod_agree_sistema').modal();
-    })
-    $('#Tipo_acceso').change(function(){
-      $('#Tipo_acceso option:selected').each(function(){
-       var option = $(this).val();
-        if (option == 3 || option == 4) {
-          $('#input_liga').hide(200);
-        } else {
-          $('#input_liga').show(200);
-        }
-      })
-    })
-    $('#Selecciona_Opicion_sis').on('click',function(){
-
-      if ($('#Selecciona_Opicion_sis').prop('checked') == true ) {
-        $("#Liga_acces_sistema").val("");
-        $("#input_carga_sis").show(200);
-    
+  $('#Abre_modal_agre_sistema').on('click', function () {
+    $('#mod_agree_sistema').modal();
+  })
+  $('#Tipo_acceso').change(function () {
+    $('#Tipo_acceso option:selected').each(function () {
+      var option = $(this).val();
+      if (option == 3 || option == 4) {
+        $('#input_liga').hide(200);
+        $('#div_option_archivo').show(200);
       } else {
+        $('#input_liga').show(200);
+        $('#div_option_archivo').hide(200);
         $("#input_carga_sis").hide(200);
-
+        $('#Selecciona_Opicion_sis').prop('checked', false)
       }
+    })
+  })
+  $('#Selecciona_Opicion_sis').on('click', function () {
+
+    if ($('#Selecciona_Opicion_sis').prop('checked') == true) {
+      $("#Liga_acces_sistema").val("");
+      $("#input_carga_sis").show(200);
+
+    } else {
+      $("#input_carga_sis").hide(200);
+
+    }
 
   })
+  $('#cuentas_ilimitadas_sis').on('click', function () {
 
+    if ($('#cuentas_ilimitadas_sis').prop('checked') == true) {
+      $("#num_cuentas_sistema").val("");
+      $("#num_cuentas_sistema").prop("disabled", true);
+
+    } else {
+      $("#num_cuentas_sistema").prop("disabled", false);
+
+    }
+  })
+  $('#Tipo_acceso2').change(function () {
+    $('#Tipo_acceso2 option:selected').each(function () {
+      var option = $(this).val();
+      if (option == 3 || option == 4) {
+        $('#input_liga2').hide(200);
+
+        $('#div_option_archivo2').show(200);
+        $('#input_carga_sis2').prop('checked', true)
+        $('#Selecciona_Opicion_sis2').prop('checked', false)
+      } else {
+        $('#input_liga2').show(200);
+
+        $('#div_option_archivo2').hide(200);
+        $("#input_carga_sis2").hide(200);
+        $('#Selecciona_Opicion_sis2').prop('checked', false)
+        $('#input_carga_sis2').prop('checked', false)
+      }
+    })
+  })
+  $('#Selecciona_Opicion_sis2').on('click', function () {
+
+    if ($('#Selecciona_Opicion_sis2').prop('checked') == true) {
+      $("#Liga_acces_sistema2").val("");
+      $("#input_carga_sis2").show(200);
+
+    } else {
+      $("#input_carga_sis2").hide(200);
+
+    }
+
+  })
+  $('#cuentas_ilimitadas_sis2').on('click', function () {
+    if ($('#cuentas_ilimitadas_sis2').prop('checked') == true) {
+      $("#num_cuentas_sistema2").val("");
+      $("#num_cuentas_sistema2").prop("disabled", true);
+
+    } else {
+      $("#num_cuentas_sistema2").prop("disabled", false);
+
+    }
+  })
 });
 
-function Agrega_sistema_nuevo(){
-  var nombre_sistema =  $('#name_sistema').val();
-  var administra_sistem =  $('#admin_sistema').val();
-  var num_cuentas =  $('#num_cuentas_sistema').val();
-  var quien_autoriza =  $('#Autorizador_sistema').val();
-  var tipo_sistema =  $('#Tipo_acceso').val();
-  var liga_acceso =  $('#Liga_acces_sistema').val();
-  var Opcion_carga_sistema =  $('#Selecciona_Opicion_sis').val();
-  var archivo_carga =  $('#archivo_sistema_app').val();
-  var descripcion_sistema =  $('#desc_sistema').val();
+function Agrega_sistema_nuevo() {
+  
+  var nombre_sistema = $('#name_sistema').val();
+  var administra_sistem = $('#admin_sistema').val();
+  var num_cuentas = $('#num_cuentas_sistema').val();
+  var quien_autoriza = $('#Autorizador_sistema').val();
+  var tipo_sistema = $('#Tipo_acceso').val();
+  var liga_acceso = $('#Liga_acces_sistema').val();
+  var descripcion_sistema = $('#desc_sistema').val();
+  var miArchvio = $("#archivo_sistema_app").prop('files')[0];
+  var formData_example = new FormData($(".Carga_sistemas_nuevos_con_app")[0]);
+  formData_example.append('archivo_sistema_app', miArchvio);
+  var ext = $('#archivo_sistema_app').val().split('.').pop().toLowerCase();
+  console.log(miArchvio)
+  var data = {
+    nombre_sistema: nombre_sistema,
+    administra_sistem: administra_sistem,
+    num_cuentas: num_cuentas,
+    quien_autoriza: quien_autoriza,
+    tipo_sistema: tipo_sistema,
+    liga_acceso: liga_acceso,
+    descripcion_sistema: descripcion_sistema,
+    opcion_carga: ''
+  }
+  var datos = JSON.stringify(data);
+  if (nombre_sistema == '') {
+    toastr.error('No puedes dejar el nombre del sistema o carpeta en blanco', 'Notificacion', {
+      "progressBar": true
+    });
+  } else {
+    if (administra_sistem == 0) {
+      toastr.error('Debes seleccionar el area que administra el sistema o carpeta.', 'Notificacion', {
+        "progressBar": true
+      });
+    } else {
+      if ($('#cuentas_ilimitadas_sis').prop("checked") == true) {
+        if (tipo_sistema == 3 || tipo_sistema == 4) {
+
+          if ($('#Selecciona_Opicion_sis').prop("checked") == true) {
+            var data = {
+              nombre_sistema: nombre_sistema,
+              administra_sistem: administra_sistem,
+              num_cuentas: num_cuentas,
+              quien_autoriza: quien_autoriza,
+              tipo_sistema: tipo_sistema,
+              liga_acceso: liga_acceso,
+              descripcion_sistema: descripcion_sistema,
+              opcion_carga: 'si'
+            }
+            if ($.inArray(ext, ['zip']) == -1) {
+              toastr.error('Extencion invalida, solo se pueden aceptar archivos con extencion .zip', 'Notificacion', {
+                "progressBar": true
+              });
+            } else {
+              $.post("php/consulta_dat.php", {
+                reg_sistema: datos
+              }, function () {}).done(function (respuesta) {
+                if (respuesta == false) {
+                  toastr.error(respuesta, 'Notificacion', {
+                    "progressBar": true
+                  });
+                } else {
+                  $.ajax({
+                    url: "./php/valida_carga_fotos.php",
+                    type: "POST",
+                    contentType: false,
+                    processData: false,
+                    data: formData_example,
+                  }).done(function (respuesta) {
+                    toastr.success(respuesta, 'Notificación:', {
+                      "progressBar": true
+                    })
+
+                  }).fail(function () {
+                    toastr.error(error, 'Notificacion', {
+                      "progressBar": true
+                    });
+                  })
+                }
+
+              }).fail(function () {
+                toastr.error(error, 'Notificacion', {
+                  "progressBar": true
+                });
+              })
+            }
+          } else {
+            var data = {
+              nombre_sistema: nombre_sistema,
+              administra_sistem: administra_sistem,
+              num_cuentas: num_cuentas,
+              quien_autoriza: quien_autoriza,
+              tipo_sistema: tipo_sistema,
+              liga_acceso: liga_acceso,
+              descripcion_sistema: descripcion_sistema,
+              opcion_carga: ''
+            }
+            $.post("./php/consulta_dat.php", {
+              reg_sistema: datos
+            }, function () {}).done(function (respuesta) {
+              toastr.success(respuesta, 'Notificacion', {
+                "progressBar": true
+              });
+            }).fail(function (error) {
+              toastr.error(error, 'Notificacion', {
+                "progressBar": true
+              });
+            })
+          }
+        } else if (tipo_sistema == 0) {
+          toastr.error('Debes seleccionar el tipo de acceso que tiene el sistema o carpeta', 'Notificacion', {
+            "progressBar": true
+          });
+        } else {
+          if (liga_acceso == '') {
+            toastr.error('No puedes dejar la liga del sistema o carpeta en blanco', 'Notificacion', {
+              "progressBar": true
+            });
+          } else {
+            $.post("php/consulta_dat.php", {
+              reg_sistema: datos
+            }, function () {}).done(function (respuesta) {
+              toastr.success(respuesta, 'Notificacion', {
+                "progressBar": true
+              });
+            }).fail(function (error) {
+              toastr.error(error, 'Notificacion', {
+                "progressBar": true
+              });
+            })
+          }
+        }
+
+      } else {
+        if (num_cuentas == '') {
+          toastr.error('Debes indicar el numero de cuentas que puede tener el sistema o carpeta.', 'Notificacion', {
+            "progressBar": true
+          });
+        } else {
+          if (tipo_sistema == 3 || tipo_sistema == 4) {
+
+            if ($('#Selecciona_Opicion_sis').prop("checked") == true) {
+              var data = {
+                nombre_sistema: nombre_sistema,
+                administra_sistem: administra_sistem,
+                num_cuentas: num_cuentas,
+                quien_autoriza: quien_autoriza,
+                tipo_sistema: tipo_sistema,
+                liga_acceso: liga_acceso,
+                descripcion_sistema: descripcion_sistema,
+                opcion_carga: 'si'
+              }
+              if ($.inArray(ext, ['zip']) == -1) {
+                toastr.error('Extencion invalida, solo se pueden aceptar archivos con extencion .zip', 'Notificacion', {
+                  "progressBar": true
+                });
+              } else {
+                $.post("php/consulta_dat.php", {
+                  reg_sistema: datos
+                }, function () {}).done(function (respuesta) {
+                  if (respuesta == false) {
+                    toastr.error(respuesta, 'Notificacion', {
+                      "progressBar": true
+                    });
+                  } else {
+                    $.ajax({
+                      url: "./php/valida_carga_fotos.php",
+                      type: "POST",
+                      contentType: false,
+                      processData: false,
+                      data: formData_example,
+                    }).done(function (respuesta) {
+                      toastr.success(respuesta, 'Notificación:', {
+                        "progressBar": true
+                      })
+
+                    }).fail(function () {
+                      toastr.error(error, 'Notificacion', {
+                        "progressBar": true
+                      });
+                    })
+                  }
+
+                }).fail(function () {
+                  toastr.error(error, 'Notificacion', {
+                    "progressBar": true
+                  });
+                })
+              }
+            } else {
+              $.post("php/consulta_dat.php", {
+                reg_sistema: datos
+              }, function () {}).done(function (respuesta) {
+                toastr.success(respuesta, 'Notificacion', {
+                  "progressBar": true
+                });
+              }).fail(function (error) {
+                toastr.error(error, 'Notificacion', {
+                  "progressBar": true
+                });
+              })
+            }
+          } else if (tipo_sistema == 0) {
+            toastr.error('Debes seleccionar el tipo de acceso que tiene el sistema o carpeta', 'Notificacion', {
+              "progressBar": true
+            });
+          } else {
+            if (liga_acceso == '') {
+              toastr.error('No puedes dejar la liga del sistema o carpeta en blanco', 'Notificacion', {
+                "progressBar": true
+              });
+            } else {
+              $.post("php/consulta_dat.php", {
+                reg_sistema: datos
+              }, function () {
+
+              }).done(function (respuesta) {
+                toastr.success(respuesta, 'Notificacion', {
+                  "progressBar": true
+                });
+              }).fail(function (error) {
+                toastr.error(error, 'Notificacion', {
+                  "progressBar": true
+                });
+              })
+            }
+          }
+        }
+      }
+    }
+  }
+
 
 }
 
 
 
-        //---------Oculta modal de la vita con solo un boton------------------//
-        // $('#mod_agree_sistema').modal('hide');//ocultamos el modal
-        // $('#body_cer').removeClass('modal-open');
-        // $('.modal-backdrop').remove();
-       //---------fin Oculta modal de la vita con solo un boton------------------//
-
-
+//---------Oculta modal de la vita con solo un boton------------------//
+// $('#mod_agree_sistema').modal('hide');//ocultamos el modal
+// $('#body_cer').removeClass('modal-open');
+// $('.modal-backdrop').remove();
+//---------fin Oculta modal de la vita con solo un boton------------------//

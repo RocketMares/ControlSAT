@@ -21,8 +21,7 @@
 
 
 <div class="container-fluid mt-4 my-4 container" >
-<button type="button" id="Monstrar" class="btn btn-info">Mostrar Filtros</button>
-<button type="button" id="Ocultar" style="display: none;" class="btn btn-primary">Ocultar Filtros</button>
+<button type="button" id="Monstrar" class="btn btn-info">Mostrar Filtros <i class='fas fa-bars' ></i> </button>
 <?php
     switch ($_GET) {
     case isset($_GET['pagina']):
@@ -44,6 +43,12 @@
     echo $boton_quita_filtros = "<button type='button' id='quitar_filtros' data-toggle='tooltip' data-placement='top' title='Regresar a pagina de inicio' class='btn btn-info'><I class='fa fa-house-damage' ></I></button>";
     break;
     case isset($_GET['Stock']):
+    echo $boton_quita_filtros = "<button type='button' id='quitar_filtros' data-toggle='tooltip' data-placement='top' title='Regresar a pagina de inicio' class='btn btn-info'><I class='fa fa-house-damage' ></I></button>";
+    break;
+    case isset($_GET['fecha_ingreso']):
+    echo $boton_quita_filtros = "<button type='button' id='quitar_filtros' data-toggle='tooltip' data-placement='top' title='Regresar a pagina de inicio' class='btn btn-info'><I class='fa fa-house-damage' ></I></button>";
+    break;
+    case isset($_GET['nivel']):
     echo $boton_quita_filtros = "<button type='button' id='quitar_filtros' data-toggle='tooltip' data-placement='top' title='Regresar a pagina de inicio' class='btn btn-info'><I class='fa fa-house-damage' ></I></button>";
     break;
     default:
@@ -81,7 +86,7 @@
 
     </select>
 
-    <button type="button" class="btn btn-outline-dark" id="filtro_POR_ESTRUCTURA">Ir</button>
+    <button type="button" class="btn btn-outline-dark" id="filtro_POR_ESTRUCTURA"><i class="fas fa-search-plus" ></i></button>
     </div>
 
     <div class="row">
@@ -91,7 +96,7 @@
         </div>
 
         <input type="text" class="form-control col-8" id="nombre_buscqueda" placeholder="Buscar por nombre Ejem: ANDRÉS MARES SÁNCHEZ" onkeyup="javascript:this.value=this.value.toUpperCase();">
-        <button type="button" class="btn btn-outline-dark" id="filtro_nombre">Ir </button>
+        <button type="button" class="btn btn-outline-dark" id="filtro_nombre"><i class="fas fa-search-plus" ></i> </button>
       </div>
     </div>
 
@@ -102,7 +107,7 @@
         </div>
 
         <input type="text" class="form-control col-8" id="FiltroRFC" maxlength="9" placeholder="Ejemplo: MASA955J1" required onkeyup="javascript:this.value=this.value.toUpperCase();">
-        <button type="button" class="btn btn-outline-dark" id="filtro_RFC_CORTO">Ir</button>
+        <button type="button" class="btn btn-outline-dark" id="filtro_RFC_CORTO"><i class="fas fa-search-plus" ></i></button>
       </div>
     </div>
     <div class="row">
@@ -112,7 +117,7 @@
         </div>
 
         <input type="text" class="form-control col-8" id="id_filtro_no_empleado" maxlength="11" placeholder="Ejemplo: 190772" required  onkeypress='return numero(event)'>
-        <button type="button" class="btn btn-outline-dark" id="filtro_no_empleado">Ir</button>
+        <button type="button" class="btn btn-outline-dark" id="filtro_no_empleado"><i class="fas fa-search-plus" ></i></button>
       </div>
     </div>
 
@@ -133,7 +138,26 @@
                 }
             ?>
         </select>
-        <button type="button" class="btn btn-outline-dark" id="filtro_POR_PUESTO">Ir</button>
+        <button type="button" class="btn btn-outline-dark" id="filtro_POR_PUESTO"><i class="fas fa-search-plus" ></i></button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-group col-md-12">
+        <div class="col-sm-3">
+          <label class="input-group-text" for="inputGroupSelect01"> Por nivel:</label>
+        </div>
+        <select class="custom-select col-8" id="nivel_sec" name="nivel_sec">
+          <option value='0'>Seleccionar Opción</option>
+            <?php
+              include_once "php/ConsultaADR.php";
+              $metodo = new ConsultaInfoADR();
+              $admin = $metodo->Consulta_Plazas_nivles();
+              for ($i=0; $i < count($admin) ; $i++) { 
+              echo" <option value='".$admin[$i]['nivel']."'>".$admin[$i]['nivel']."</option>";
+              }
+            ?>
+        </select>
+        <button type="button" class="btn btn-outline-dark" id="filtro_POR_nivel"><i class="fas fa-search-plus" ></i></button>
       </div>
     </div>
     <div class="row">
@@ -149,7 +173,18 @@
           <option value='4'>Personal de Base Unificado</option>
           <option value='5'>Personal de Confianza</option>
         </select>
-        <button type="button" class="btn btn-outline-dark" id="filtro_extra_activos">Ir</button>
+        <button type="button" class="btn btn-outline-dark" id="filtro_extra_activos"><i class="fas fa-search-plus" ></i></button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-group col-md-12">
+        <div class="col-sm-3">
+          <label class="input-group-text" for="inputGroupSelect01"> Filtros por fecha de ingreso:</label>
+        </div>
+        <input type="text" class="form-control col-3" id="fech_ingre_fil_part_1" maxlength="11" placeholder="Ejemplo: 2015/05/13" required  onkeypress='return numero(event)'>
+        <p> al </p>
+        <input type="text" class="form-control col-3" id="fech_ingre_fil_part_2" maxlength="11" placeholder="Ejemplo: 2015/05/9" required  onkeypress='return numero(event)'>
+        <button type="button" class="btn btn-outline-dark" id="filtro_fecha_ingreso_activi"><i class="fas fa-search-plus" ></i></button>
       </div>
     </div>
   </div>
@@ -209,6 +244,12 @@ function Genera_doc_excel()
         case isset($_GET['Stock']):
         echo"'Stock'";
         break;
+        case isset($_GET['fecha_ingreso']):
+        echo"'fecha_ingreso'";
+        break;
+        case isset($_GET['nivel']):
+        echo"'nivel'";
+        break;
         default:
         echo "'pagina'";
         break;
@@ -225,6 +266,7 @@ function Genera_doc_excel()
     });  
 }
   $(document).ready(function () {
+ 
     $('#user_more').on('click', function () {
       $('#agregar_user_insumo').modal();
     });
@@ -252,13 +294,19 @@ function Genera_doc_excel()
         case isset($_GET['Stock']):
         echo $num= $_GET['Stock'];
         break;
+        case isset($_GET['fecha_ingreso']):
+        echo $num= $_GET['fecha_ingreso'];
+        break;
+        case isset($_GET['nivel']):
+        echo $num= $_GET['nivel'];
+        break;
         default:
         echo $num = $_GET['pagina']; 
         break;
 
       }
       ?> ;
-     var pagina = <?php 
+       var pagina = <?php 
         switch ($_GET) {
         case isset($_GET['pagina']):
         echo "'pagina'";
@@ -280,6 +328,12 @@ function Genera_doc_excel()
         break;
         case isset($_GET['Stock']):
         echo"'Stock'";
+        break;
+        case isset($_GET['fecha_ingreso']):
+          echo"'fecha_ingreso'";
+          break;
+        case isset($_GET['nivel']):
+        echo"'nivel'";
         break;
         default:
         echo "'pagina'";
@@ -312,13 +366,19 @@ function Genera_doc_excel()
         case isset($_GET['Stock']):
         echo $num= $_GET['Stock'];
         break;
+        case isset($_GET['fecha_ingreso']):
+        echo $num= $_GET['fecha_ingreso'];
+        break;
+        case isset($_GET['nivel']):
+        echo $num= $_GET['nivel'];
+        break;
         default:
         echo $num = $_GET['pagina']; 
         break;
 
       }
       ?> ;
-     var pagina = <?php 
+       var pagina = <?php 
         switch ($_GET) {
         case isset($_GET['pagina']):
         echo "'pagina'";
@@ -340,6 +400,12 @@ function Genera_doc_excel()
         break;
         case isset($_GET['Stock']):
         echo"'Stock'";
+        break;
+        case isset($_GET['fecha_ingreso']):
+          echo"'fecha_ingreso'";
+          break;
+        case isset($_GET['nivel']):
+        echo"'nivel'";
         break;
         default:
         echo "'pagina'";
@@ -349,7 +415,7 @@ function Genera_doc_excel()
       $('#tabla_activa').load("php/tabla_actualizada.php?"+pagina+"=" + num);
     })
     $('#actualiza_area_asig').on('click', function () {
-      var num = <?php 
+          var num = <?php 
         switch ($_GET) {
         case isset($_GET['pagina']) :
         echo $num = $_GET['pagina']; 
@@ -372,13 +438,19 @@ function Genera_doc_excel()
         case isset($_GET['Stock']):
         echo $num= $_GET['Stock'];
         break;
+        case isset($_GET['fecha_ingreso']):
+        echo $num= $_GET['fecha_ingreso'];
+        break;
+        case isset($_GET['nivel']):
+        echo $num= $_GET['nivel'];
+        break;
         default:
         echo $num = $_GET['pagina']; 
         break;
 
       }
       ?> ;
-     var pagina = <?php 
+       var pagina = <?php 
         switch ($_GET) {
         case isset($_GET['pagina']):
         echo "'pagina'";
@@ -400,6 +472,12 @@ function Genera_doc_excel()
         break;
         case isset($_GET['Stock']):
         echo"'Stock'";
+        break;
+        case isset($_GET['fecha_ingreso']):
+          echo"'fecha_ingreso'";
+          break;
+        case isset($_GET['nivel']):
+        echo"'nivel'";
         break;
         default:
         echo "'pagina'";
@@ -409,67 +487,7 @@ function Genera_doc_excel()
       $('#tabla_activa').load("php/tabla_actualizada.php?"+pagina+"=" + num);
     })
     $('#cerrar_modal_dat_area').on('click', function () {
-      var num = <?php 
-        switch ($_GET) {
-        case isset($_GET['pagina']) :
-        echo $num = $_GET['pagina']; 
-        break;
-        case isset($_GET['Estructura']) :
-        echo $num = $_GET['Estructura']; 
-        break;
-        case isset($_GET['Nombre']) :
-        echo $num = $_GET['Nombre']; 
-        break;
-        case isset($_GET['RFC']) :
-        echo $num = $_GET['RFC']; 
-        break;
-        case isset($_GET['Puestos']) :
-        echo $num = $_GET['Puestos']; 
-        break;
-        case isset($_GET['no_empleado']):
-        echo $num= $_GET['no_empleado'];
-        break;
-      case isset($_GET['Stock']):
-        echo $num= $_GET['Stock'];
-        break;
-        default:
-        echo $num = $_GET['pagina']; 
-        break;
-
-      }
-      ?> ;
-     var pagina = <?php 
-        switch ($_GET) {
-        case isset($_GET['pagina']):
-        echo "'pagina'";
-        break;
-        case isset($_GET['Estructura']):
-        echo"'Estructura'";
-        break;
-        case isset($_GET['Nombre']):
-        echo"'Nombre'";
-        break;
-        case isset($_GET['RFC']):
-        echo"'RFC'";
-        break;
-        case isset($_GET['Puestos']):
-        echo"'Puestos'";
-        break;
-        case isset($_GET['no_empleado']):
-        echo"'no_empleado'";
-        break;
-        case isset($_GET['Stock']):
-          echo"'Stock'";
-          break;
-        default:
-        echo "'pagina'";
-        break;
-      }
-      ?>;
-      $('#tabla_activa').load("php/tabla_actualizada.php?"+pagina+"=" + num);
-    })
-    $('#cerrar_modal_dat_adicio').on('click', function () {
-      var num = <?php 
+     var num = <?php 
         switch ($_GET) {
         case isset($_GET['pagina']) :
         echo $num = $_GET['pagina']; 
@@ -492,13 +510,19 @@ function Genera_doc_excel()
         case isset($_GET['Stock']):
         echo $num= $_GET['Stock'];
         break;
+        case isset($_GET['fecha_ingreso']):
+        echo $num= $_GET['fecha_ingreso'];
+        break;
+        case isset($_GET['nivel']):
+        echo $num= $_GET['nivel'];
+        break;
         default:
         echo $num = $_GET['pagina']; 
         break;
 
       }
       ?> ;
-     var pagina = <?php 
+       var pagina = <?php 
         switch ($_GET) {
         case isset($_GET['pagina']):
         echo "'pagina'";
@@ -520,6 +544,84 @@ function Genera_doc_excel()
         break;
         case isset($_GET['Stock']):
         echo"'Stock'";
+        break;
+        case isset($_GET['fecha_ingreso']):
+          echo"'fecha_ingreso'";
+          break;
+        case isset($_GET['nivel']):
+        echo"'nivel'";
+        break;
+        default:
+        echo "'pagina'";
+        break;
+        }
+      ?>;
+      $('#tabla_activa').load("php/tabla_actualizada.php?"+pagina+"=" + num);
+    })
+    $('#cerrar_modal_dat_adicio').on('click', function () {
+          var num = <?php 
+        switch ($_GET) {
+        case isset($_GET['pagina']) :
+        echo $num = $_GET['pagina']; 
+        break;
+        case isset($_GET['Estructura']) :
+        echo $num = $_GET['Estructura']; 
+        break;
+        case isset($_GET['Nombre']) :
+        echo $num = $_GET['Nombre']; 
+        break;
+        case isset($_GET['RFC']) :
+        echo $num = $_GET['RFC']; 
+        break;
+        case isset($_GET['Puestos']) :
+        echo $num = $_GET['Puestos']; 
+        break;
+        case isset($_GET['no_empleado']):
+        echo $num= $_GET['no_empleado'];
+        break;
+        case isset($_GET['Stock']):
+        echo $num= $_GET['Stock'];
+        break;
+        case isset($_GET['fecha_ingreso']):
+        echo $num= $_GET['fecha_ingreso'];
+        break;
+        case isset($_GET['nivel']):
+        echo $num= $_GET['nivel'];
+        break;
+        default:
+        echo $num = $_GET['pagina']; 
+        break;
+
+      }
+      ?> ;
+       var pagina = <?php 
+        switch ($_GET) {
+        case isset($_GET['pagina']):
+        echo "'pagina'";
+        break;
+        case isset($_GET['Estructura']):
+        echo"'Estructura'";
+        break;
+        case isset($_GET['Nombre']):
+        echo"'Nombre'";
+        break;
+        case isset($_GET['RFC']):
+        echo"'RFC'";
+        break;
+        case isset($_GET['Puestos']):
+        echo"'Puestos'";
+        break;
+        case isset($_GET['no_empleado']):
+        echo"'no_empleado'";
+        break;
+        case isset($_GET['Stock']):
+        echo"'Stock'";
+        break;
+        case isset($_GET['fecha_ingreso']):
+          echo"'fecha_ingreso'";
+          break;
+        case isset($_GET['nivel']):
+        echo"'nivel'";
         break;
         default:
         echo "'pagina'";
@@ -552,6 +654,12 @@ function Genera_doc_excel()
       case isset($_GET['Stock']):
         echo $num= $_GET['Stock'];
         break;
+        case isset($_GET['fecha_ingreso']):
+          echo $num= $_GET['fecha_ingreso'];
+          break;
+          case isset($_GET['nivel']):
+            echo $num= $_GET['nivel'];
+            break;
       default:
       echo $num = $_GET['pagina']; 
       break;
@@ -559,7 +667,7 @@ function Genera_doc_excel()
       }
       ?> ;
   
-     var pagina = <?php 
+  var pagina = <?php 
         switch ($_GET) {
         case isset($_GET['pagina']):
         echo "'pagina'";
@@ -580,17 +688,23 @@ function Genera_doc_excel()
         echo"'no_empleado'";
         break;
         case isset($_GET['Stock']):
-          echo"'Stock'";
+        echo"'Stock'";
+        break;
+        case isset($_GET['fecha_ingreso']):
+          echo"'fecha_ingreso'";
           break;
+        case isset($_GET['nivel']):
+        echo"'nivel'";
+        break;
         default:
         echo "'pagina'";
         break;
-      }
+        }
       ?>;
       $('#tabla_activa').load("php/tabla_actualizada.php?"+pagina+"=" + num);
     })
     $('#actualiza_dat_adicionales_bot_baja').on('click', function () {
-      var num = <?php 
+          var num = <?php 
         switch ($_GET) {
         case isset($_GET['pagina']) :
         echo $num = $_GET['pagina']; 
@@ -613,13 +727,19 @@ function Genera_doc_excel()
         case isset($_GET['Stock']):
         echo $num= $_GET['Stock'];
         break;
+        case isset($_GET['fecha_ingreso']):
+        echo $num= $_GET['fecha_ingreso'];
+        break;
+        case isset($_GET['nivel']):
+        echo $num= $_GET['nivel'];
+        break;
         default:
         echo $num = $_GET['pagina']; 
         break;
 
       }
       ?> ;
-     var pagina = <?php 
+       var pagina = <?php 
         switch ($_GET) {
         case isset($_GET['pagina']):
         echo "'pagina'";
@@ -641,6 +761,12 @@ function Genera_doc_excel()
         break;
         case isset($_GET['Stock']):
         echo"'Stock'";
+        break;
+        case isset($_GET['fecha_ingreso']):
+          echo"'fecha_ingreso'";
+          break;
+        case isset($_GET['nivel']):
+        echo"'nivel'";
         break;
         default:
         echo "'pagina'";
@@ -650,7 +776,7 @@ function Genera_doc_excel()
       $('#tabla_activa').load("php/tabla_actualizada.php?"+pagina+"=" + num);
     })
     $('#cerrar_mod_actualiza_plazas').on('click', function () {
-      var num = <?php 
+          var num = <?php 
         switch ($_GET) {
         case isset($_GET['pagina']) :
         echo $num = $_GET['pagina']; 
@@ -673,13 +799,19 @@ function Genera_doc_excel()
         case isset($_GET['Stock']):
         echo $num= $_GET['Stock'];
         break;
+        case isset($_GET['fecha_ingreso']):
+        echo $num= $_GET['fecha_ingreso'];
+        break;
+        case isset($_GET['nivel']):
+        echo $num= $_GET['nivel'];
+        break;
         default:
         echo $num = $_GET['pagina']; 
         break;
 
       }
       ?> ;
-     var pagina = <?php 
+       var pagina = <?php 
         switch ($_GET) {
         case isset($_GET['pagina']):
         echo "'pagina'";
@@ -701,6 +833,12 @@ function Genera_doc_excel()
         break;
         case isset($_GET['Stock']):
         echo"'Stock'";
+        break;
+        case isset($_GET['fecha_ingreso']):
+        echo"'fecha_ingreso'";
+        break;
+        case isset($_GET['nivel']):
+        echo"'nivel'";
         break;
         default:
         echo "'pagina'";
@@ -732,15 +870,21 @@ function Genera_doc_excel()
       echo $num= $_GET['no_empleado'];
       break;
       case isset($_GET['Stock']):
-        echo $num= $_GET['Stock'];
-        break;
+      echo $num= $_GET['Stock'];
+      break;
+      case isset($_GET['fecha_ingreso']):
+      echo $num= $_GET['fecha_ingreso'];
+      break;
+      case isset($_GET['nivel']):
+      echo $num= $_GET['nivel'];
+      break;
       default:
       echo $num = $_GET['pagina']; 
       break;
 
       }
       ?> ;
-     var pagina = <?php
+    var pagina = <?php 
         switch ($_GET) {
         case isset($_GET['pagina']):
         echo "'pagina'";
@@ -761,18 +905,23 @@ function Genera_doc_excel()
         echo"'no_empleado'";
         break;
         case isset($_GET['Stock']):
-          echo"'Stock'";
+        echo"'Stock'";
+        break;
+        case isset($_GET['fecha_ingreso']):
+          echo"'fecha_ingreso'";
           break;
+        case isset($_GET['nivel']):
+        echo"'nivel'";
+        break;
         default:
         echo "'pagina'";
         break;
-     
         }
       ?>;
       $('#tabla_activa').load("php/tabla_actualizada.php?"+pagina+"=" + num);
     })
     $('#act_tabla_inicio_baja').on('click', function () {
-      var num = <?php 
+          var num = <?php 
         switch ($_GET) {
         case isset($_GET['pagina']) :
         echo $num = $_GET['pagina']; 
@@ -795,13 +944,19 @@ function Genera_doc_excel()
         case isset($_GET['Stock']):
         echo $num= $_GET['Stock'];
         break;
+        case isset($_GET['fecha_ingreso']):
+        echo $num= $_GET['fecha_ingreso'];
+        break;
+        case isset($_GET['nivel']):
+        echo $num= $_GET['nivel'];
+        break;
         default:
         echo $num = $_GET['pagina']; 
         break;
 
       }
       ?> ;
-     var pagina = <?php 
+       var pagina = <?php 
         switch ($_GET) {
         case isset($_GET['pagina']):
         echo "'pagina'";
@@ -823,6 +978,12 @@ function Genera_doc_excel()
         break;
         case isset($_GET['Stock']):
         echo"'Stock'";
+        break;
+        case isset($_GET['fecha_ingreso']):
+          echo"'fecha_ingreso'";
+          break;
+        case isset($_GET['nivel']):
+        echo"'nivel'";
         break;
         default:
         echo "'pagina'";

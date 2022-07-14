@@ -106,9 +106,7 @@
          ";
             }
                 
-        
-          
-         
+                
       }
           
           echo"<script>
@@ -117,11 +115,11 @@
           ";
 
          
+          $scrips->Funciones_canvas_deps();
+       
+          $scrips->Funciones_canvas_subs();
 
           $scrips->Funciones_canvas_admins();
-          $scrips->Funciones_canvas_subs();
-          $scrips->Funciones_canvas_deps();
-
 
          echo"";
           echo"</script>";

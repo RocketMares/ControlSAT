@@ -16,25 +16,85 @@ $(document).ready(function () {
         location.href = "Matriz_sistemas.php";
     });
 
-})
 
+})
+function Cancelar_responsiva2(id_acceso,id_empleado){
+    var id = id_acceso
+    $.ajax({
+        type: "POST",
+        url: "php/consulta_dat.php",
+        data: {
+            cancelar_acceso2: id
+        },
+        dataType: "html",
+        success: function (response) {
+            toastr.error(response, 'Notificacion');
+            Historial_registro_sistemas(id_empleado)
+        }
+    });
+}
 function Editar_oficio(id_oficio,id_empleado) {
     $('#Modal_editor_documento_oficios').modal();
     $('#carga_documento_oficio_firmado_asig').attr('onclick','Subir_archivo_firmado('+id_oficio+','+id_empleado+')');
     $('#cerrar_modal_editor_oficios').attr('onclick','trae_Oficios_historial('+id_empleado+')');
 }
+function Retro_responsivas(id_acceso,id_empleado) {
+    $('#Modal_retro_responsivas').modal();
+     $('#carga_modal_responsiva_retro').attr('onclick','Subir_responsiva_firmada('+id_acceso+','+id_empleado+')');
+     
+     $('#cerrar_modal_responsiva_retro').attr('onclick','Historial_registro_sistemas('+id_empleado+')');
 
-function BuscarDatosContrib(id_contrib) {
-    var con = id_contrib
-    createCookie('contribuyente', con, 1)
-    location.href = "detalle_contribuyente.php";
+     $.post("php/consulta_dat.php",{saca_roles_res:id_acceso},function(){
+     }).done(function(resp){
+         $('#Contenedor_principal').html(resp);
+     }).fail(function(){
+         console.log(error)
+     })
+     $.post("php/consulta_dat.php",{saca_roles_res_activos:id_acceso},function(){
+    }).done(function(resp){
+        $('#Contenedor_principal').html(resp);
+    })
+    
 }
-
+function cambiaroceso_resp(acceso){
+    $('#mod_edit_estado_proc').modal();
+    $('#Mares_obser').attr('onclick','Accion_cambio_est_resp('+acceso+')');
+    //console.log(acceso)
+}
 function vermas() {
     $('#vermasdiv').toggle();
     $('#link_ver').toggle();
 }
+function Accion_cambio_est_resp(acceso){
 
+    const estado =  $('#Cambia_estado_cuenta').val();
+    const fecha =  $('#fecha_cambio_est_resp').val();
+    const datos = {estado:estado,
+        fecha:fecha,
+        id_acc:acceso}
+    var json = JSON.stringify(datos)
+    if (estado == 0 || estado == 11 && fecha == '') {
+        toastr.error("Tienes que seleccionar un estado y una fecha para poder activar el cambio","Notificación")
+    } else {
+        $.ajax({
+            type: "POST",
+            url: "php/consulta_dat.php",
+            data: {cambia_est_resp: json},
+            dataType: "HTML",
+            success: function (response) {
+                if (response == true) {
+                    toastr.success("Cambio exitoso","Notificación")
+                    $('#Cambia_estado_cuenta').val(0)
+                    $('#fecha_cambio_est_resp').val("")
+                } else {
+                    toastr.error(response,"Notificación")
+                }
+              
+            }
+        });
+    }
+    //alert('hola')
+}
 function renovar() {
     location.reload();
 }
@@ -72,48 +132,8 @@ function ConfirmarCarga(valor) {
     });
 }
 
-function ConfirmarCarga_pagos(valor) {
-    $.post("php/validar_carga_masiva.php", {
-        pagos: valor
-    }, function (data) {
-        $("#texto_result").html(data);
-        $("#resultado_carga").modal({
-            backdrop: 'static',
-            keyboard: false
-        });
-    });
-}
-
-function BuscarContribuyentes(id_empleado) {
-    var id_operativo = id_empleado
-    createCookie('id_operativo', id_operativo, 1)
-    location.href = "Contribuyentes_asig.php?operativo=1";
-}
-
-function BuscarContribuyentesA(id_empleado) {
-    var id_analista = id_empleado
-    createCookie('id_analista', id_analista, 1)
-    location.href = "Contribuyentes_asig.php?analista=1";
-}
 
 
-function Buscar_analistas(id_empleado) {
-    var id_jefe = id_empleado
-    createCookie('id_jefe', id_jefe, 1)
-    location.href = "Contribuyentes_asig.php?jefedepto=1";
-}
-
-function Buscar_jefes(id_empleado) {
-    var id_sub = id_empleado
-    createCookie('id_sub', id_sub, 1)
-    location.href = "Contribuyentes_asig.php?id_sub=1";
-}
-
-function DetalleEntrevista(id_ent) {
-    var id_ent = id_ent
-    createCookie('id_ent', id_ent, 1)
-    location.href = "Detalle_entrevista.php";
-}
 
 function ocultar_detalles() {
     $("#detalles_ent").toggle();
@@ -140,16 +160,7 @@ function modal_retro() {
     })
 }
 
-function modal_detalle_calendario(fecha) {
 
-    $.post("php/valida_dia_pendientes.php", {
-        fechas: fecha
-    }, function (data) {
-        $("#contenido").html(data); //Carga los elementos al body/content del modal
-        $('#detalle').modal('toggle'); // eManada a llamar el modal
-    });
-
-}
 
 function numero(evt) {
     evt = (evt) ? evt : window.event;
@@ -170,64 +181,8 @@ $(document).ready(function () {
 });
 
 
-function myTimer() {
 
-    var hora = new Date();
-    var myhora = hora.toLocaleTimeString();
-    var dia_f = (hora.getDate() < 10) ? "0" + hora.getDate() : hora.getDate();
-    var mes = hora.getMonth() + 1
-    var mes_f = (mes < 10) ? "0" + mes : mes;
-    var dia = (dia_f + "/" + mes_f + "/" + hora.getFullYear());
-    var hora7 = hora.getHours();
-    var min = hora.getMinutes();
-    var sec = hora.getSeconds();
 
-    if ((hora7 >= 13 && hora7 <= 15) && min >= 00 && sec >= 00) {
-        $.post("php/valida_dia_pendientes.php", {
-            fechas_alertas: dia
-        }, function (data) {
-            var res = data;
-            if (res == 1) {
-
-            } else {
-                modal_detalle_calendario(dia);
-            }
-        });
-    }
-}
-
-function myTimer_delay() { //jefes
-
-    var hora = new Date();
-    var myhora = hora.toLocaleTimeString();
-    var dia_f = (hora.getDate() < 10) ? "0" + hora.getDate() : hora.getDate();
-    var mes = hora.getMonth() + 1;
-    var mes_f = (mes < 10) ? "0" + mes : mes;
-    var dia = (dia_f + "/" + mes_f + "/" + hora.getFullYear());
-    var hora7 = hora.getHours();
-    var min = hora.getMinutes();
-    var sec = hora.getSeconds();
-
-    if ((hora7 >= 13 && hora7 <= 15)) {
-        $.post("php/valida_dia_pendientes.php", {
-            fechas_alertas: dia
-        }, function (data) {
-            var res = data;
-            if (res == 1) {
-
-            } else {
-                modal_detalle_calendario(dia);
-            }
-        });
-    }
-}
-$(document).ready(function () {
-    $("#busquedas").keypress(function (event) {
-        if (event.keyCode === 13) {
-            Buscar_contribuyente();
-        }
-    });
-});
 
 
 
@@ -920,7 +875,7 @@ $(document).ready(function () {
         toggleActive: true,
         language: 'es'
     });
- 
+  
 
 
 })
@@ -980,6 +935,72 @@ function Subir_archivo_firmado(id_oficio,id_empleado) {
                         'progressBar': true
                     })
                     $('#cerrar_modal_editor_oficios').attr('onclick','trae_Oficios_historial('+id_empleado+')');
+                }
+    
+            })
+        }
+       
+    }
+
+}
+function Subir_responsiva_firmada(id_acceso,id_empleado) {
+    var miArchvio_firmado = $('#Carga_responsiva_firmada').prop('files')[0];
+    var fecha_resp_alta = $('#fec_firma_responsiva').val();
+    var id_acceso = id_acceso;
+    var ext = $('#Carga_responsiva_firmada').val().split('.').pop().toLowerCase();
+
+    if ($.inArray(ext, ['pdf','zip']) == -1) {
+        toastr.error('Extencion invalida, solo se pueden aceptar documentos con extencion .pdf o .zip', 'Notificacion', {
+            "progressBar": true
+        });
+    } else {
+        if (fecha_resp_alta == '') {
+            toastr.error('Debes agregar la fecha en la que se firmo el documento.', 'Notificacion', {
+                "progressBar": true
+            });
+        }else{
+            var json3 = {
+                fecha_resp_alta: fecha_resp_alta,
+                id_acceso: id_acceso
+            }
+            console.log(miArchvio_firmado)
+            console.log(json3)
+            var Json3 = JSON.stringify(json3)
+            var formData_example = new FormData($('.form_example_asigna')[0]);
+            formData_example.append('miArchvio_firmado_resp', miArchvio_firmado);
+            $.post('php/consulta_dat.php', {
+                Actualiza_resp: Json3
+            }, function (respuesta) {
+                // toastr.info(respuesta,"Noticias")
+                if (respuesta == true) {
+                    toastr.success('Se actualizo el estado de la responsiva!', 'Notificación:', {
+                        'progressBar': true
+                    })
+                } else {
+                    toastr.error(respuesta, 'Notificación:', {
+                        'progressBar': true
+                    })
+                    //console.log(respuesta)
+                }
+            }).done(function (data_in) {
+                if (data_in == true) {
+                    $.ajax({
+                        url: './php/valida_carga_fotos.php',
+                        type: 'POST',
+                        contentType: false,
+                        processData: false,
+                        data: formData_example,
+                    }).done(function (respuesta) {
+                        toastr.success(respuesta, 'Notificación:', {
+                            'progressBar': true
+                        })
+    
+                    })
+                } else {
+                    toastr.error('El documento no se pudo cargar correctamente', 'Notificación:', {
+                        'progressBar': true
+                    })
+                    //$('#carga_modal_responsiva_retro').attr('onclick','trae_Oficios_historial('+id_empleado+')');
                 }
     
             })
@@ -1048,5 +1069,28 @@ function descarga_aplicacion(id_sistema)
  createCookie('Num_sistema',id_sistema,1)
  createCookie('Carpeta',carpeta,1)
  location.href='php/descarga_aplicacion.php'
+}
+function descarga_responsiva_firmada(rfc,no_empleado,id_reg_acceso,nombre_sistema)
+{
+
+
+ var carpeta = rfc;
+ var no_empleado= no_empleado;
+ var id_reg_acceso = id_reg_acceso;
+ var nombre_sistema= nombre_sistema;
+
+ createCookie('no_empleado',no_empleado,1)
+ createCookie('Carpeta',carpeta,1)
+ createCookie('id_reg_acceso',id_reg_acceso,1)
+ createCookie('nombre_sistema',nombre_sistema,1)
+
+
+ location.href='php/descarga_responsiva.php'
+}
+function genera_reporte_gestor()
+{
+    var id_sistema = 1;
+ createCookie('hol',id_sistema,1)
+ location.href='php/genera_reporte_excel_gestor.php'
 }
 
