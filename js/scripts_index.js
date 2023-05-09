@@ -948,7 +948,7 @@ function Subir_responsiva_firmada(id_acceso,id_empleado) {
     var fecha_resp_alta = $('#fec_firma_responsiva').val();
     var id_acceso = id_acceso;
     var ext = $('#Carga_responsiva_firmada').val().split('.').pop().toLowerCase();
-
+    console.log(miArchvio_firmado);
     if ($.inArray(ext, ['pdf','zip']) == -1) {
         toastr.error('Extencion invalida, solo se pueden aceptar documentos con extencion .pdf o .zip', 'Notificacion', {
             "progressBar": true
